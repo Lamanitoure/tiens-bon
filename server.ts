@@ -60,6 +60,43 @@ function verifyToken(req: Request, res: Response, next: NextFunction) {
   next();
 }
 
+interface WearableTriggerEvent {
+  id: string;
+  type: 'craving';
+  timestamp: number;
+  source?: string;
+  context?: string;
+}
+
+let activeWearableTrigger: WearableTriggerEvent | null = null;
+
+// Bearer or Query token verification (Step 18: smartwatch shortcuts support query or header)
+function verifyTokenOrQuery(req: Request, res: Response, next: NextFunction) {
+  const configuredToken = (process.env.ACCESS_TOKEN || 'tiens-bon-token').trim();
+  const authHeader = req.headers.authorization || '';
+  let providedToken = '';
+
+  if (authHeader.startsWith('Bearer ')) {
+    providedToken = authHeader.slice(7).trim();
+  } else if (typeof req.query.token === 'string') {
+    providedToken = req.query.token.trim();
+  }
+
+  if (!providedToken) {
+    return res.status(401).json({
+      detail: 'Missing access token. Provide Authorization: Bearer <token> or ?token=<token>',
+    });
+  }
+
+  if (configuredToken && providedToken !== configuredToken) {
+    return res.status(401).json({
+      detail: 'Invalid access token.',
+    });
+  }
+
+  next();
+}
+
 // Middleware
 app.use(express.json({ limit: '1mb' }));
 
@@ -106,6 +143,39 @@ app.get('/api/status', verifyToken, async (_req: Request, res: Response) => {
     // If Ollama is not running and no Gemini key is set, return ok with fallback model
     return res.json({ ollama: 'ok', model: 'gemma2:2b' });
   }
+});
+
+// Step 18: Wearable trigger endpoint (GET /api/trigger/craving)
+app.get('/api/trigger/craving', verifyTokenOrQuery, (req: Request, res: Response) => {
+  const source = typeof req.query.source === 'string' ? req.query.source.slice(0, 50) : 'wearable';
+  const context = typeof req.query.context === 'string' ? req.query.context.slice(0, 100) : undefined;
+
+  activeWearableTrigger = {
+    id: `trig-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+    type: 'craving',
+    timestamp: Date.now(),
+    source,
+    context,
+  };
+
+  res.json({
+    status: 'ready',
+    session: 'craving',
+    timestamp: activeWearableTrigger.timestamp,
+    id: activeWearableTrigger.id,
+    message: 'Craving flow readied for user.',
+  });
+});
+
+app.get('/api/trigger/status', verifyTokenOrQuery, (_req: Request, res: Response) => {
+  res.json({
+    activeTrigger: activeWearableTrigger,
+  });
+});
+
+app.post('/api/trigger/consume', verifyTokenOrQuery, (_req: Request, res: Response) => {
+  activeWearableTrigger = null;
+  res.json({ status: 'consumed' });
 });
 
 app.post('/api/generate', verifyToken, checkRateLimit, async (req: Request, res: Response) => {

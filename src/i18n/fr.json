@@ -255,5 +255,19 @@
     "speedCalm": "0.8x Calme",
     "speedNormal": "1.0x Normale",
     "unsupported": "Synthèse vocale non disponible sur ce navigateur."
+  },
+  "wearable": {
+    "title": "Déclencheur montre connectée & raccourcis",
+    "subtitle": "Lance instantanément ta session d'envie depuis un bouton de montre (Apple Watch, Wear OS, Samsung Bixby) ou un tag NFC.",
+    "endpointUrlLabel": "URL du webhook personnel :",
+    "copyUrl": "Copier l'URL webhook",
+    "copied": "URL copiée !",
+    "testBtn": "⌚ Tester le déclencheur montre",
+    "testing": "Déclenchement en cours...",
+    "testSuccess": "✓ Signal reçu ! La session d'envie s'ouvre.",
+    "instructionsTitle": "Comment configurer :",
+    "instruction1": "Samsung Galaxy Watch : crée une Bixby Routine ou un bouton rapide qui envoie une requête GET sur cette URL.",
+    "instruction2": "Apple Watch : utilise l'app Raccourcis iOS avec l'action « Obtenir le contenu de l'URL » et ajoute le raccourci sur le cadran.",
+    "instruction3": "Android / Wear OS : configure Tasker ou un widget HTTP Shortcuts."
   }
 }

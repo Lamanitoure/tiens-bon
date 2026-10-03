@@ -255,5 +255,19 @@
     "speedCalm": "0.8x Calm",
     "speedNormal": "1.0x Normal",
     "unsupported": "Speech synthesis not supported on this browser."
+  },
+  "wearable": {
+    "title": "Smartwatch & wearable trigger",
+    "subtitle": "Instantly launch your craving session from a watch button (Apple Watch, Wear OS, Samsung Bixby) or an NFC tag.",
+    "endpointUrlLabel": "Personal webhook URL:",
+    "copyUrl": "Copy webhook URL",
+    "copied": "URL copied!",
+    "testBtn": "⌚ Test watch trigger",
+    "testing": "Triggering session...",
+    "testSuccess": "✓ Signal received! Craving session opens.",
+    "instructionsTitle": "How to set up:",
+    "instruction1": "Samsung Galaxy Watch: create a Bixby Routine sending a GET request to this URL.",
+    "instruction2": "Apple Watch: use iOS Shortcuts app with 'Get Contents of URL' and add to watch face complications.",
+    "instruction3": "Android / Wear OS: configure Tasker or HTTP Shortcuts widget."
   }
 }

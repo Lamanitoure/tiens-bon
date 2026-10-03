@@ -10,6 +10,7 @@ import { FutureSelfMessages } from './components/FutureSelfMessages.tsx';
 import { JournalView } from './components/JournalView.tsx';
 import { PersonalGallery } from './components/PersonalGallery.tsx';
 import { RemindersManager } from './components/RemindersManager.tsx';
+import { WearableManager } from './components/WearableManager.tsx';
 import { WeeklyRecap } from './components/WeeklyRecap.tsx';
 import {
   addEvent,
@@ -28,6 +29,7 @@ import { checkModelStatus, generateMotivation, getStoredToken, setStoredToken } 
 import { activeConfig } from './lib/config.ts';
 import { generateDailyBatch, shouldTriggerAutomaticBatch } from './lib/pregeneration.ts';
 import { computeUserStats, type UserStats } from './lib/stats.ts';
+import { checkActiveTrigger, consumeActiveTrigger, detectUrlTrigger } from './lib/wearable.ts';
 import type { EventRecord } from './schemas/events.ts';
 import type { CravingOutput } from './schemas/model.ts';
 import type { Plan } from './schemas/plans.ts';
@@ -151,8 +153,33 @@ export default function App() {
       }
     })();
 
+    // Step 18: Smartwatch & wearable trigger detection
+    if (detectUrlTrigger()) {
+      setIsCravingActive(true);
+    }
+
+    const checkWearable = async () => {
+      const res = await checkActiveTrigger();
+      if (res.active) {
+        await consumeActiveTrigger();
+        setIsCravingActive(true);
+      }
+    };
+
+    checkWearable();
+    const wearableInterval = setInterval(checkWearable, 2500);
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        checkWearable();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+
     return () => {
       unsubscribe();
+      clearInterval(wearableInterval);
+      document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, [refreshEventsAndStats]);
 
@@ -834,6 +861,9 @@ export default function App() {
               profile={profile}
               onProfileUpdated={(updated) => setProfile(updated)}
             />
+
+            {/* Smartwatch & Wearable Trigger Webhook (Step 18) */}
+            <WearableManager onTriggered={() => setIsCravingActive(true)} />
 
             {/* Emergency & Support Contacts */}
             <div className="card space-y-2.5 bg-stone-50 dark:bg-stone-800/60 border-stone-200 dark:border-stone-700">
