@@ -1,11 +1,14 @@
 import { useEffect, useId, useState } from 'react';
-import { getAllPlans } from '../db/index.ts';
+import { getAllImages, getAllPlans, getAllSelfTalk } from '../db/index.ts';
 import { t } from '../i18n/index.ts';
 import { activeConfig } from '../lib/config.ts';
 import { getAvailableContextChips, suggestContextFromTime } from '../lib/craving.ts';
+import { selectImageForCraving, selectSelfTalkForCraving } from '../lib/image-display.ts';
 import { buildPersonalizedFallback, getNextPregeneratedMessage } from '../lib/pregeneration.ts';
+import type { ImageRecord } from '../schemas/images.ts';
 import type { Plan } from '../schemas/plans.ts';
 import type { Profile } from '../schemas/profile.ts';
+import type { SelfTalk } from '../schemas/selftalk.ts';
 import { BreathingAnchor } from './BreathingAnchor.tsx';
 import { RelapseDebrief } from './RelapseDebrief.tsx';
 
@@ -28,10 +31,27 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
   const availableChips = getAvailableContextChips(profile);
   const [userPlans, setUserPlans] = useState<Plan[]>([]);
 
-  // Load existing If-Then plans to surface during craving (Step 11)
+  // Load existing If-Then plans, personal images, and self-talk (Step 11 & Step 13)
+  const [activeImage, setActiveImage] = useState<ImageRecord | null>(null);
+  const [activeSelfTalk, setActiveSelfTalk] = useState<SelfTalk | null>(null);
+
   useEffect(() => {
     getAllPlans()
       .then(setUserPlans)
+      .catch(() => {});
+
+    getAllImages()
+      .then((imgs) => {
+        const chosen = selectImageForCraving(imgs);
+        setActiveImage(chosen);
+      })
+      .catch(() => {});
+
+    getAllSelfTalk()
+      .then((talks) => {
+        const chosen = selectSelfTalkForCraving(talks);
+        setActiveSelfTalk(chosen);
+      })
       .catch(() => {});
   }, []);
 
@@ -342,6 +362,36 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
         </div>
         <p className="text-xs font-semibold leading-relaxed">{activeChallenge}</p>
       </div>
+
+      {/* Personal Resource Photo & Caption (Step 13) */}
+      {activeImage && !isDiscreet && (
+        <div className="rounded-xl overflow-hidden border border-emerald-200/80 bg-emerald-50/40 space-y-2 p-2.5">
+          <div className="relative rounded-lg overflow-hidden h-36 bg-stone-900">
+            <img
+              src={activeImage.dataUrl}
+              alt={activeImage.caption}
+              className="w-full h-full object-cover"
+            />
+            <span className="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-md bg-stone-900/80 text-white backdrop-blur-xs">
+              {t(`gallery.kinds.${activeImage.kind}`)}
+            </span>
+          </div>
+          <p className="text-xs font-medium text-emerald-950 italic px-1 leading-snug">
+            « {activeImage.caption} »
+          </p>
+        </div>
+      )}
+
+      {/* Message to future self (Step 13) */}
+      {activeSelfTalk && !isDiscreet && (
+        <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200/90 text-amber-950 space-y-1">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1">
+            <span>💌</span>
+            <span>Message de toi à toi-même</span>
+          </div>
+          <p className="text-xs italic leading-relaxed">« {activeSelfTalk.text} »</p>
+        </div>
+      )}
 
       {/* Her Own Voice Phrase */}
       {activePhrase && !isDiscreet && (

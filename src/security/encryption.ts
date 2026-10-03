@@ -1,4 +1,15 @@
-import { type EventRecord, EventSchema, type Profile, ProfileSchema } from '../schemas/index.ts';
+import {
+  type EventRecord,
+  EventSchema,
+  type ImageRecord,
+  ImageRecordSchema,
+  type Plan,
+  PlanSchema,
+  type Profile,
+  ProfileSchema,
+  type SelfTalk,
+  SelfTalkSchema,
+} from '../schemas/index.ts';
 
 export const BACKUP_VERSION = 'TIENS_BON_V1';
 const PBKDF2_ITERATIONS = 600_000;
@@ -14,6 +25,9 @@ export interface EncryptedBackupPackage {
 export interface BackupData {
   profile: Profile;
   events: EventRecord[];
+  images?: ImageRecord[];
+  selftalk?: SelfTalk[];
+  plans?: Plan[];
   exportedAt: number;
 }
 
@@ -97,6 +111,21 @@ export async function encryptBackup(
   ProfileSchema.parse(data.profile);
   for (const ev of data.events) {
     EventSchema.parse(ev);
+  }
+  if (data.images) {
+    for (const img of data.images) {
+      ImageRecordSchema.parse(img);
+    }
+  }
+  if (data.selftalk) {
+    for (const st of data.selftalk) {
+      SelfTalkSchema.parse(st);
+    }
+  }
+  if (data.plans) {
+    for (const p of data.plans) {
+      PlanSchema.parse(p);
+    }
   }
 
   const salt = crypto.getRandomValues(new Uint8Array(16));
@@ -202,9 +231,36 @@ export async function decryptBackup(
     }
   }
 
+  const validatedImages: ImageRecord[] = [];
+  if (Array.isArray(parsed.images)) {
+    for (const img of parsed.images) {
+      const p = ImageRecordSchema.safeParse(img);
+      if (p.success) validatedImages.push(p.data);
+    }
+  }
+
+  const validatedSelfTalk: SelfTalk[] = [];
+  if (Array.isArray(parsed.selftalk)) {
+    for (const st of parsed.selftalk) {
+      const p = SelfTalkSchema.safeParse(st);
+      if (p.success) validatedSelfTalk.push(p.data);
+    }
+  }
+
+  const validatedPlans: Plan[] = [];
+  if (Array.isArray(parsed.plans)) {
+    for (const pl of parsed.plans) {
+      const p = PlanSchema.safeParse(pl);
+      if (p.success) validatedPlans.push(p.data);
+    }
+  }
+
   return {
     profile: validatedProfile,
     events: validatedEvents,
+    images: validatedImages,
+    selftalk: validatedSelfTalk,
+    plans: validatedPlans,
     exportedAt: parsed.exportedAt || Date.now(),
   };
 }

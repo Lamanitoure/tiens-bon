@@ -1,6 +1,9 @@
+import { activeConfig } from '../lib/config.ts';
 import {
   type EventRecord,
   EventSchema,
+  type ImageRecord,
+  ImageRecordSchema,
   type Plan,
   PlanSchema,
   type PregeneratedMessage,
@@ -291,6 +294,96 @@ export async function getAllSelfTalk(): Promise<SelfTalk[]> {
       }
       resolve(list);
     };
+    req.onerror = () => reject(req.error);
+  });
+}
+
+export async function deleteSelfTalk(id: string): Promise<void> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORES.SELFTALK, 'readwrite');
+    const store = tx.objectStore(STORES.SELFTALK);
+    const req = store.delete(id);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+// 6. Image operations (Step 13)
+export async function getAllImages(): Promise<ImageRecord[]> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORES.IMAGES, 'readonly');
+    const store = tx.objectStore(STORES.IMAGES);
+    const req = store.getAll();
+    req.onsuccess = () => {
+      const records = req.result || [];
+      const list: ImageRecord[] = [];
+      for (const r of records) {
+        const parsed = ImageRecordSchema.safeParse(r);
+        if (parsed.success) list.push(parsed.data);
+      }
+      resolve(list.sort((a, b) => b.createdTs - a.createdTs));
+    };
+    req.onerror = () => reject(req.error);
+  });
+}
+
+export async function addImage(image: ImageRecord): Promise<void> {
+  const validated = ImageRecordSchema.parse(image);
+  const currentImages = await getAllImages();
+  const maxCount = activeConfig.app.imageLimits?.maxCount ?? 12;
+
+  // If replacing an existing image by id, allow it; otherwise check count cap
+  const isExisting = currentImages.some((img) => img.id === validated.id);
+  if (!isExisting && currentImages.length >= maxCount) {
+    throw new Error(`Maximum limit of ${maxCount} images reached. Delete an existing image first.`);
+  }
+
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORES.IMAGES, 'readwrite');
+    const store = tx.objectStore(STORES.IMAGES);
+    const req = store.put(validated);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+export async function getImageById(id: string): Promise<ImageRecord | null> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORES.IMAGES, 'readonly');
+    const store = tx.objectStore(STORES.IMAGES);
+    const req = store.get(id);
+    req.onsuccess = () => {
+      if (!req.result) return resolve(null);
+      const parsed = ImageRecordSchema.safeParse(req.result);
+      if (!parsed.success) return resolve(null);
+      resolve(parsed.data);
+    };
+    req.onerror = () => reject(req.error);
+  });
+}
+
+export async function deleteImage(id: string): Promise<void> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORES.IMAGES, 'readwrite');
+    const store = tx.objectStore(STORES.IMAGES);
+    const req = store.delete(id);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+export async function clearAllImages(): Promise<void> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORES.IMAGES, 'readwrite');
+    const store = tx.objectStore(STORES.IMAGES);
+    const req = store.clear();
+    req.onsuccess = () => resolve();
     req.onerror = () => reject(req.error);
   });
 }

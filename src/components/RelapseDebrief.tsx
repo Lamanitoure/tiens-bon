@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
-import { addPlan } from '../db/index.ts';
+import { addPlan, getAllImages } from '../db/index.ts';
 import { t } from '../i18n/index.ts';
 import { generateMotivation } from '../lib/api.ts';
+import { selectImageForRelapse } from '../lib/image-display.ts';
+import type { ImageRecord } from '../schemas/images.ts';
 import type { Profile } from '../schemas/profile.ts';
 import { getRandomFallback, validateModelOutput } from '../security/safety.ts';
 
@@ -25,8 +27,17 @@ export function RelapseDebrief({ profile, onFinish }: RelapseDebriefProps) {
   const [consolidationNote, setConsolidationNote] = useState<string>('');
   const [encouragementPhrase, setEncouragementPhrase] = useState<string>('');
   const [wantToSavePlan, setWantToSavePlan] = useState<boolean>(true);
+  const [calmImage, setCalmImage] = useState<ImageRecord | null>(null);
 
   useEffect(() => {
+    // 0. Load calm-only image (Step 11 & Step 13 display rules)
+    getAllImages()
+      .then((imgs) => {
+        const selected = selectImageForRelapse(imgs);
+        setCalmImage(selected);
+      })
+      .catch(() => {});
+
     // 1. Pick authentic encouragement phrase from profile
     if (profile.phrases && profile.phrases.length > 0) {
       setEncouragementPhrase(profile.phrases[Math.floor(Math.random() * profile.phrases.length)]);
@@ -151,6 +162,25 @@ export function RelapseDebrief({ profile, onFinish }: RelapseDebriefProps) {
           {t('relapse.message')}
         </p>
       </div>
+
+      {/* Soothing Calm Photo (Step 13: Calm ONLY, never motivating, never loved-one, never deterrent) */}
+      {calmImage && (
+        <div className="rounded-xl overflow-hidden border border-emerald-200/60 dark:border-emerald-900/60 bg-emerald-50/30 dark:bg-emerald-950/20 p-2.5 space-y-2">
+          <div className="relative rounded-lg overflow-hidden h-36 bg-stone-900">
+            <img
+              src={calmImage.dataUrl}
+              alt={calmImage.caption}
+              className="w-full h-full object-cover"
+            />
+            <span className="absolute top-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded-md bg-stone-900/80 text-white backdrop-blur-xs">
+              {t('gallery.kinds.calm')}
+            </span>
+          </div>
+          <p className="text-xs font-medium text-stone-800 dark:text-stone-200 italic px-1 leading-snug">
+            « {calmImage.caption} »
+          </p>
+        </div>
+      )}
 
       {/* Encouragement note */}
       {consolidationNote && (

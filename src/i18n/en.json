@@ -146,5 +146,36 @@
   "disclaimer": {
     "medical": "This application is not medical advice and does not provide medical services.",
     "doctor": "If you need medical advice, please consult a pharmacist or doctor."
+  },
+  "gallery": {
+    "title": "My resource photos",
+    "subtitle": "Calming photos, motivations or goals. GPS and camera metadata are automatically removed.",
+    "addPhoto": "Add a photo",
+    "uploadPrompt": "Select an image (JPEG, PNG, WebP)",
+    "captionLabel": "Personal caption (describe this moment)",
+    "captionPlaceholder": "E.g.: That sunset by the sea that brought so much peace...",
+    "kindLabel": "Image type:",
+    "kinds": {
+      "motivating": "🌟 Motivating (energy & strength)",
+      "calm": "🌿 Calm & Serenity (peace)",
+      "goal": "🎯 Goal (my savings, future plans)",
+      "deterrent": "⚠️ Deterrent (optional, my choice)"
+    },
+    "lovedOneLabel": "This photo represents a loved one",
+    "lovedOneNote": "Kindness rule: will never be shown after a slip or relapse.",
+    "countLimit": "Stored photos: {count}/{max}",
+    "noImages": "No photos stored yet.",
+    "deleteConfirm": "Delete this photo?",
+    "saved": "Photo added successfully.",
+    "reEncodedNotice": "Photo re-encoded locally via Canvas (no GPS metadata preserved)."
+  },
+  "selftalk": {
+    "title": "Messages to my future self",
+    "subtitle": "Written in a calm moment, replayed during a craving to remind you who you are.",
+    "addMessage": "Write a message to my future self",
+    "placeholder": "E.g.: Remember why you started. This craving is just a wave...",
+    "empty": "No personal messages written yet.",
+    "saved": "Message saved for your future craving moments.",
+    "deleteConfirm": "Delete this message?"
   }
 }

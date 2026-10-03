@@ -146,5 +146,36 @@
   "disclaimer": {
     "medical": "Cette application n'est pas un dispositif médical et ne fournit aucun avis médical.",
     "doctor": "En cas de besoin ou de questionnement de santé, consultez un médecin ou un pharmacien."
+  },
+  "gallery": {
+    "title": "Mes photos ressources",
+    "subtitle": "Photos apaisantes, motivations ou objectifs. Métadonnées GPS et EXIF automatiquement supprimées.",
+    "addPhoto": "Ajouter une photo",
+    "uploadPrompt": "Sélectionner une image (JPEG, PNG, WebP)",
+    "captionLabel": "Légende personnelle (décris ce moment)",
+    "captionPlaceholder": "Ex: Ce coucher de soleil à la mer qui m'a tant apaisée...",
+    "kindLabel": "Type d'image :",
+    "kinds": {
+      "motivating": "🌟 Motivation (énergie & force)",
+      "calm": "🌿 Calme & Sérénité (apaisement)",
+      "goal": "🎯 Objectif (mes économies, mes projets)",
+      "deterrent": "⚠️ Dissuasif (optionnel, mes choix)"
+    },
+    "lovedOneLabel": "Cette photo représente un proche ou un être cher",
+    "lovedOneNote": "Règle de bienveillance : ne sera jamais affichée après un faux pas.",
+    "countLimit": "Photos enregistrées : {count}/{max}",
+    "noImages": "Aucune photo enregistrée pour le moment.",
+    "deleteConfirm": "Supprimer cette photo ?",
+    "saved": "Photo ajoutée avec succès.",
+    "reEncodedNotice": "Photo recodée localement via Canvas (aucune métadonnée GPS conservée)."
+  },
+  "selftalk": {
+    "title": "Messages à mon futur moi",
+    "subtitle": "Écrits dans un moment de calme, réaffichés au cœur d'une envie pour te rappeler qui tu es.",
+    "addMessage": "Écrire un message à mon futur moi",
+    "placeholder": "Ex: Souviens-toi pourquoi tu as commencé. Cette envie n'est qu'une vague...",
+    "empty": "Aucun message rédigé pour le moment.",
+    "saved": "Message enregistré pour tes futurs moments d'envie.",
+    "deleteConfirm": "Supprimer ce message ?"
   }
 }

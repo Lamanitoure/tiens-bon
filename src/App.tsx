@@ -6,10 +6,16 @@
 import { type ChangeEvent, useCallback, useEffect, useState } from 'react';
 import demoProfile from '../demo/profile.demo.json';
 import { CravingSession } from './components/CravingSession.tsx';
+import { FutureSelfMessages } from './components/FutureSelfMessages.tsx';
+import { PersonalGallery } from './components/PersonalGallery.tsx';
 import {
   addEvent,
+  addImage,
+  addSelfTalk,
   getAllEvents,
+  getAllImages,
   getAllPlans,
+  getAllSelfTalk,
   getStoredProfile,
   getUnusedPregenerated,
   setStoredProfile,
@@ -281,9 +287,14 @@ export default function App() {
 
     try {
       const allEvts = await getAllEvents();
+      const allImgs = await getAllImages();
+      const allTalks = await getAllSelfTalk();
       const backupData: BackupData = {
         profile,
         events: allEvts,
+        images: allImgs,
+        selftalk: allTalks,
+        plans,
         exportedAt: Date.now(),
       };
 
@@ -323,6 +334,16 @@ export default function App() {
 
       await setStoredProfile(decrypted.profile);
       setProfile(decrypted.profile);
+      if (decrypted.images && decrypted.images.length > 0) {
+        for (const img of decrypted.images) {
+          await addImage(img).catch(() => {});
+        }
+      }
+      if (decrypted.selftalk && decrypted.selftalk.length > 0) {
+        for (const st of decrypted.selftalk) {
+          await addSelfTalk(st).catch(() => {});
+        }
+      }
       await refreshEventsAndStats(decrypted.profile);
       setBackupStatusMessage(t('backup.importSuccess'));
     } catch (err: unknown) {
@@ -859,6 +880,12 @@ export default function App() {
                 ))}
               </div>
             </div>
+
+            {/* Messages to future self (Step 13) */}
+            <FutureSelfMessages />
+
+            {/* Personal Photo Resources Gallery (Step 13) */}
+            <PersonalGallery />
 
             {/* Emergency & Support Contacts */}
             <div className="card space-y-2.5 bg-stone-50 dark:bg-stone-800/60 border-stone-200 dark:border-stone-700">

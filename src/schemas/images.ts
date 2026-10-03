@@ -9,6 +9,7 @@ export const ImageRecordSchema = z
     caption: z.string().min(1).max(200),
     dataUrl: z.string().min(1), // Base64 sanitized image URL
     createdTs: z.number().int().positive(),
+    isLovedOne: z.boolean().optional(),
   })
   .strict();
 
