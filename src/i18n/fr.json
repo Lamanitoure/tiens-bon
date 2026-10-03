@@ -60,6 +60,21 @@
     "badge": "Profil de démonstration fictif",
     "description": "Données locales fictives pour tester l'application."
   },
+  "model": {
+    "title": "Connexion au modèle local Gemma",
+    "tokenLabel": "Jeton d'accès serveur (ACCESS_TOKEN)",
+    "tokenPlaceholder": "Collez le jeton généré...",
+    "saveToken": "Enregistrer le jeton",
+    "checkStatus": "Tester la connexion au modèle",
+    "generateTest": "Tester la génération (Gemma 2:2b)",
+    "statusOk": "✓ Ollama est connecté et Gemma 2:2b est prêt.",
+    "statusMissing": "⚠️ Ollama est en ligne, mais le modèle gemma2:2b est manquant. Lancez : ollama pull gemma2:2b",
+    "statusUnreachable": "❌ Impossible de joindre Ollama. Vérifiez qu'Ollama tourne sur 127.0.0.1:11434.",
+    "statusUnauthorized": "🔒 Jeton manquant ou non autorisé (401).",
+    "generating": "Génération en cours avec Gemma...",
+    "challengeLabel": "Défi concret (3 min) :",
+    "messageLabel": "Message bienveillant :"
+  },
   "disclaimer": {
     "medical": "Cette application n'est pas un dispositif médical et ne fournit aucun avis médical.",
     "doctor": "En cas de besoin ou de questionnement de santé, consultez un médecin ou un pharmacien."

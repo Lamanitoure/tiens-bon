@@ -60,6 +60,21 @@
     "badge": "Fictional demo profile",
     "description": "Fictional local data to test the application."
   },
+  "model": {
+    "title": "Local Gemma Model Connection",
+    "tokenLabel": "Server access token (ACCESS_TOKEN)",
+    "tokenPlaceholder": "Paste the generated token...",
+    "saveToken": "Save token",
+    "checkStatus": "Test model connection",
+    "generateTest": "Test generation (Gemma 2:2b)",
+    "statusOk": "✓ Ollama is connected and Gemma 2:2b is ready.",
+    "statusMissing": "⚠️ Ollama is online, but gemma2:2b model is missing. Run: ollama pull gemma2:2b",
+    "statusUnreachable": "❌ Cannot reach Ollama. Check that Ollama is running on 127.0.0.1:11434.",
+    "statusUnauthorized": "🔒 Access token missing or unauthorized (401).",
+    "generating": "Generating with Gemma...",
+    "challengeLabel": "Concrete challenge (3 min):",
+    "messageLabel": "Kind message:"
+  },
   "disclaimer": {
     "medical": "This application is not medical advice and does not provide medical services.",
     "doctor": "If you need medical advice, please consult a pharmacist or doctor."
