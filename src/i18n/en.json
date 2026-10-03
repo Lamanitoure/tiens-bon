@@ -44,9 +44,33 @@
   },
   "relapse": {
     "title": "Breathe, no guilt",
-    "message": "A slip does not erase everything you achieved. Learning is how we move forward.",
-    "question": "What happened right before?",
-    "restart": "Restart gently"
+    "subtitle": "Every step is part of learning.",
+    "message": "A slip does not erase everything you achieved. By observing what happened, we move forward.",
+    "step1Title": "1. What happened right before?",
+    "step2Title": "2. What did you miss to hold on?",
+    "step3Title": "3. What would you like to adjust next time?",
+    "planIfLabel": "If this situation happens again:",
+    "planIfPlaceholder": "Ex: If I have a morning coffee...",
+    "planThenLabel": "Then I will do instead:",
+    "planThenPlaceholder": "Ex: Then I drink a big glass of water on the terrace...",
+    "saveAndRestart": "Save plan & Restart gently",
+    "skipDebrief": "Skip and restart now",
+    "restart": "Restart gently",
+    "triggers": {
+      "coffee": "☕ Coffee",
+      "alcohol": "🍷 Night out / Alcohol",
+      "stress": "⚡ Stress surge",
+      "argument": "💬 Emotion / Conflict",
+      "boredom": "⏳ Boredom / Waiting",
+      "social": "👥 Break with smokers",
+      "other": "📍 Other context"
+    },
+    "missing": {
+      "time": "A little more time to catch my breath",
+      "support": "A trusted friend to talk to",
+      "place": "Being able to change rooms or location",
+      "alternative": "A handy alternative activity"
+    }
   },
   "counters": {
     "streak": "Current streak",
@@ -69,7 +93,8 @@
     "phrases": "My phrases to hold on",
     "helpline": "Helpline & support",
     "support": "Support person",
-    "savingsGoal": "My savings goal"
+    "savingsGoal": "My savings goal",
+    "myPlans": "My If / Then plans"
   },
   "demo": {
     "badge": "Fictional demo profile",

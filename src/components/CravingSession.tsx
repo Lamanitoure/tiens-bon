@@ -5,11 +5,12 @@ import { activeConfig } from '../lib/config.ts';
 import type { Profile } from '../schemas/profile.ts';
 import { getRandomFallback, validateModelOutput } from '../security/safety.ts';
 import { BreathingAnchor } from './BreathingAnchor.tsx';
+import { RelapseDebrief } from './RelapseDebrief.tsx';
 
 interface CravingSessionProps {
   profile: Profile;
   onClose: () => void;
-  onLogged: (type: 'resisted' | 'relapse', trigger?: string) => void;
+  onLogged: (type: 'resisted' | 'relapse', trigger?: string, note?: string) => void;
 }
 
 export function CravingSession({ profile, onClose, onLogged }: CravingSessionProps) {
@@ -86,7 +87,16 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
   const handleRelapse = () => {
     setIsTimerRunning(false);
     setSessionStatus('relapse');
-    onLogged('relapse', activeChallenge);
+  };
+
+  const handleRelapseDebriefFinish = (data: {
+    trigger: string;
+    missingSupport?: string;
+    note?: string;
+    planSaved?: boolean;
+  }) => {
+    onLogged('relapse', data.trigger, data.note);
+    onClose();
   };
 
   const handleNextChallenge = () => {
@@ -120,35 +130,9 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
     );
   }
 
-  // Outcome: Relapse gentle view (Section 7: Step 7 non-guilt screen)
+  // Outcome: Relapse gentle view with micro-debrief (Step 7)
   if (sessionStatus === 'relapse') {
-    return (
-      <div className="card space-y-5 p-6 bg-stone-100 border-stone-300 text-stone-900 shadow-sm">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">☕</span>
-          <div>
-            <h3 className="text-base font-bold text-stone-900">{t('relapse.title')}</h3>
-            <span className="text-xs text-stone-500">Pas de panique, pas de jugement</span>
-          </div>
-        </div>
-
-        <p className="text-xs text-stone-700 leading-relaxed bg-white p-3.5 rounded-xl border border-stone-200">
-          {t('relapse.message')}
-        </p>
-
-        <div className="text-xs text-stone-600 italic">
-          « Ce n'est pas un retour à la case départ, c'est juste une étape d'apprentissage. »
-        </div>
-
-        <button
-          type="button"
-          onClick={onClose}
-          className="btn-primary text-xs py-3 w-full cursor-pointer"
-        >
-          {t('relapse.restart')}
-        </button>
-      </div>
-    );
+    return <RelapseDebrief profile={profile} onFinish={handleRelapseDebriefFinish} />;
   }
 
   // Active Craving Session View
@@ -174,7 +158,7 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
         <button
           type="button"
           onClick={() => setIsDiscreet(!isDiscreet)}
-          className={`text-[11px] px-2.5 py-1 rounded-full font-medium transition-all ${
+          className={`text-[11px] px-2.5 py-1 rounded-full font-medium transition-all cursor-pointer ${
             isDiscreet
               ? 'bg-stone-800 text-stone-200 border border-stone-700'
               : 'bg-emerald-50 text-emerald-800 border border-emerald-200'

@@ -6,13 +6,20 @@
 import { type ChangeEvent, useCallback, useEffect, useState } from 'react';
 import demoProfile from '../demo/profile.demo.json';
 import { CravingSession } from './components/CravingSession.tsx';
-import { addEvent, getAllEvents, getStoredProfile, setStoredProfile } from './db/index.ts';
+import {
+  addEvent,
+  getAllEvents,
+  getAllPlans,
+  getStoredProfile,
+  setStoredProfile,
+} from './db/index.ts';
 import { getLanguage, initLanguage, setLanguage, subscribeLanguage, t } from './i18n/index.ts';
 import { checkModelStatus, generateMotivation, getStoredToken, setStoredToken } from './lib/api.ts';
 import { activeConfig } from './lib/config.ts';
 import { computeUserStats, type UserStats } from './lib/stats.ts';
 import type { EventRecord } from './schemas/events.ts';
 import type { CravingOutput } from './schemas/model.ts';
+import type { Plan } from './schemas/plans.ts';
 import { type Profile, ProfileSchema } from './schemas/profile.ts';
 import {
   type BackupData,
@@ -26,6 +33,7 @@ export default function App() {
   const [lang, setCurrentLangState] = useState(getLanguage());
   const [profile, setProfile] = useState<Profile | null>(null);
   const [_events, setEvents] = useState<EventRecord[]>([]);
+  const [plans, setPlans] = useState<Plan[]>([]);
   const [stats, setStats] = useState<UserStats | null>(null);
 
   // Active craving session state (Step 6)
@@ -53,6 +61,8 @@ export default function App() {
     try {
       const allEvts = await getAllEvents();
       setEvents(allEvts);
+      const allPlans = await getAllPlans();
+      setPlans(allPlans);
       if (currentProfile) {
         setStats(computeUserStats(currentProfile, allEvts));
       }
@@ -175,13 +185,18 @@ export default function App() {
     }
   };
 
-  // Craving Flow: Log outcome event directly into IndexedDB (Step 6)
-  const handleCravingLogged = async (type: 'resisted' | 'relapse', trigger?: string) => {
+  // Craving Flow: Log outcome event directly into IndexedDB (Step 6 & Step 7)
+  const handleCravingLogged = async (
+    type: 'resisted' | 'relapse',
+    trigger?: string,
+    note?: string,
+  ) => {
     const newEvent: EventRecord = {
       id: `evt-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       ts: Date.now(),
       type,
       trigger: trigger || 'Craving session',
+      note,
     };
 
     await addEvent(newEvent);
@@ -575,6 +590,29 @@ export default function App() {
                 ))}
               </div>
             </div>
+
+            {plans.length > 0 && (
+              <div className="card space-y-3 border-emerald-200/70 bg-emerald-50/30">
+                <h4 className="text-sm font-semibold text-emerald-950 flex items-center gap-2">
+                  <span>🛡️</span> {t('profile.myPlans')}
+                </h4>
+                <div className="space-y-2">
+                  {plans.map((p) => (
+                    <div
+                      key={p.id}
+                      className="p-3 bg-white rounded-lg border border-emerald-200/60 text-xs space-y-1 shadow-2xs"
+                    >
+                      <div className="text-stone-700 font-medium">
+                        <span className="font-bold text-emerald-900">Si :</span> {p.ifText}
+                      </div>
+                      <div className="text-emerald-950 font-semibold">
+                        <span className="font-bold text-emerald-900">Alors :</span> {p.thenText}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="card space-y-3">
               <h4 className="text-sm font-semibold text-stone-900 flex items-center gap-2">

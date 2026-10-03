@@ -10,6 +10,8 @@ export const EventSchema = z
     trigger: z.string().max(200).optional(),
     emotion: z.string().max(100).optional(),
     challengeId: z.string().max(100).optional(),
+    note: z.string().max(500).optional(),
+    debrief: z.record(z.string(), z.string()).optional(),
   })
   .strict();
 

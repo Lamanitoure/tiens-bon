@@ -44,9 +44,33 @@
   },
   "relapse": {
     "title": "On respire, pas de culpabilité",
-    "message": "Un faux pas ne remet pas à zéro tout ce que tu as accompli. C'est en apprenant que l'on avance.",
-    "question": "Que s'est-il passé juste avant ?",
-    "restart": "Repartir sereinement"
+    "subtitle": "Chaque étape fait partie de l'apprentissage.",
+    "message": "Un faux pas ne remet pas à zéro tout ce que tu as accompli. C'est en observant ce qui s'est passé que l'on progresse.",
+    "step1Title": "1. Que s'est-il passé juste avant ?",
+    "step2Title": "2. Qu'est-ce qui t'a manqué pour tenir ?",
+    "step3Title": "3. Que veux-tu ajuster pour la prochaine fois ?",
+    "planIfLabel": "Si cette situation se reproduit :",
+    "planIfPlaceholder": "Ex: Si je bois un café...",
+    "planThenLabel": "Alors je ferai à la place :",
+    "planThenPlaceholder": "Ex: Alors je bois un grand verre d'eau et je change de pièce...",
+    "saveAndRestart": "Enregistrer mon plan & Repartir sereinement",
+    "skipDebrief": "Passer et repartir maintenant",
+    "restart": "Repartir sereinement",
+    "triggers": {
+      "coffee": "☕ Café",
+      "alcohol": "🍷 Soirée / Alcool",
+      "stress": "⚡ Coup de stress",
+      "argument": "💬 Émotion / Conflit",
+      "boredom": "⏳ Ennui / Attente",
+      "social": "👥 Pause avec des fumeurs",
+      "other": "📍 Autre contexte"
+    },
+    "missing": {
+      "time": "Un peu plus de temps pour souffler",
+      "support": "Un proche à qui parler",
+      "place": "Pouvoir changer d'endroit",
+      "alternative": "Une activité de remplacement sous la main"
+    }
   },
   "counters": {
     "streak": "Série actuelle",
@@ -69,7 +93,8 @@
     "phrases": "Mes phrases pour tenir",
     "helpline": "Ligne d'aide & écoute",
     "support": "Personne de confiance",
-    "savingsGoal": "Mon projet d'économies"
+    "savingsGoal": "Mon projet d'économies",
+    "myPlans": "Mes plans Si / Alors"
   },
   "demo": {
     "badge": "Profil de démonstration fictif",
