@@ -75,6 +75,26 @@
     "challengeLabel": "Concrete challenge (3 min):",
     "messageLabel": "Kind message:"
   },
+  "distress": {
+    "alert": "Need immediate help or support?",
+    "message": "You are not alone. If you are going through an intense moment of distress, these caring people and professionals are here for you:",
+    "helpline": "Helpline & support line",
+    "support": "Trusted contact",
+    "call": "Call"
+  },
+  "safety": {
+    "filtered": "The message was safely adjusted to remain 100% gentle and free of reproach."
+  },
+  "backup": {
+    "title": "Encrypted Backup (Web Crypto)",
+    "description": "Your data never leaves your device unencrypted. The export is sealed in AES-GCM 256-bit with HMAC signature.",
+    "passwordPrompt": "Encryption password",
+    "passwordPlaceholder": "Minimum 6 characters...",
+    "exportBtn": "Export encrypted data",
+    "importBtn": "Import encrypted backup",
+    "exportSuccess": "✓ Encrypted backup file downloaded.",
+    "importSuccess": "✓ Data restored and validated successfully!"
+  },
   "disclaimer": {
     "medical": "This application is not medical advice and does not provide medical services.",
     "doctor": "If you need medical advice, please consult a pharmacist or doctor."

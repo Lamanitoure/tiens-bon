@@ -75,6 +75,26 @@
     "challengeLabel": "Défi concret (3 min) :",
     "messageLabel": "Message bienveillant :"
   },
+  "distress": {
+    "alert": "Besoin d'aide ou de réconfort immédiat ?",
+    "message": "Tu n'es pas seul(e). Si tu traverses un moment de souffrance ou d'angoisse intense, ces personnes et professionnels bienveillants sont là pour toi :",
+    "helpline": "Ligne d'écoute & soutien",
+    "support": "Proche de confiance",
+    "call": "Appeler"
+  },
+  "safety": {
+    "filtered": "Le message a été ajusté par le filtre de sécurité pour rester 100% bienveillant et sans injonction."
+  },
+  "backup": {
+    "title": "Sauvegarde chiffrée (Web Crypto)",
+    "description": "Vos données ne quittent jamais votre appareil en clair. L'export est scellé en AES-GCM 256 bits avec signature HMAC.",
+    "passwordPrompt": "Mot de passe de chiffrement",
+    "passwordPlaceholder": "Minimum 6 caractères...",
+    "exportBtn": "Exporter mes données chiffrées",
+    "importBtn": "Importer une sauvegarde chiffrée",
+    "exportSuccess": "✓ Fichier de sauvegarde chiffré téléchargé.",
+    "importSuccess": "✓ Données restaurées et validées avec succès !"
+  },
   "disclaimer": {
     "medical": "Cette application n'est pas un dispositif médical et ne fournit aucun avis médical.",
     "doctor": "En cas de besoin ou de questionnement de santé, consultez un médecin ou un pharmacien."
