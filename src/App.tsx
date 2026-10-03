@@ -3,12 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { type ChangeEvent, useEffect, useState } from 'react';
+import { type ChangeEvent, useCallback, useEffect, useState } from 'react';
 import demoProfile from '../demo/profile.demo.json';
-import { getAllEvents, getStoredProfile, setStoredProfile } from './db/index.ts';
+import { CravingSession } from './components/CravingSession.tsx';
+import { addEvent, getAllEvents, getStoredProfile, setStoredProfile } from './db/index.ts';
 import { getLanguage, initLanguage, setLanguage, subscribeLanguage, t } from './i18n/index.ts';
 import { checkModelStatus, generateMotivation, getStoredToken, setStoredToken } from './lib/api.ts';
 import { activeConfig } from './lib/config.ts';
+import { computeUserStats, type UserStats } from './lib/stats.ts';
+import type { EventRecord } from './schemas/events.ts';
 import type { CravingOutput } from './schemas/model.ts';
 import { type Profile, ProfileSchema } from './schemas/profile.ts';
 import {
@@ -22,8 +25,13 @@ import { checkDistress, validateModelOutput } from './security/safety.ts';
 export default function App() {
   const [lang, setCurrentLangState] = useState(getLanguage());
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [_events, setEvents] = useState<EventRecord[]>([]);
+  const [stats, setStats] = useState<UserStats | null>(null);
 
-  // Model test state
+  // Active craving session state (Step 6)
+  const [isCravingActive, setIsCravingActive] = useState(false);
+
+  // Model connection & testing state
   const [tokenInput, setTokenInput] = useState(getStoredToken());
   const [modelStatus, setModelStatus] = useState<string | null>(null);
   const [isCheckingStatus, setIsCheckingStatus] = useState(false);
@@ -40,6 +48,18 @@ export default function App() {
   const [backupPassword, setBackupPassword] = useState('');
   const [backupStatusMessage, setBackupStatusMessage] = useState<string | null>(null);
   const [backupErrorMessage, setBackupErrorMessage] = useState<string | null>(null);
+
+  const refreshEventsAndStats = useCallback(async (currentProfile: Profile | null) => {
+    try {
+      const allEvts = await getAllEvents();
+      setEvents(allEvts);
+      if (currentProfile) {
+        setStats(computeUserStats(currentProfile, allEvts));
+      }
+    } catch (_err) {
+      // ignore
+    }
+  }, []);
 
   useEffect(() => {
     initLanguage('fr');
@@ -58,16 +78,18 @@ export default function App() {
           current = parsed;
         }
         setProfile(current);
+        await refreshEventsAndStats(current);
       } catch (_err) {
-        // Fallback to static demo profile if indexedDB not ready
-        setProfile(ProfileSchema.parse(demoProfile));
+        const fallback = ProfileSchema.parse(demoProfile);
+        setProfile(fallback);
+        setStats(computeUserStats(fallback, []));
       }
     })();
 
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, [refreshEventsAndStats]);
 
   if (!activeConfig.isValid) {
     return (
@@ -116,7 +138,6 @@ export default function App() {
     }
   };
 
-  // Distress check whenever note changes (Section 8 item 1)
   const handleNoteChange = (text: string) => {
     setUserInputNote(text);
     const distressCheck = checkDistress(text, lang);
@@ -124,7 +145,6 @@ export default function App() {
   };
 
   const handleTestGenerate = async () => {
-    // If distress word detected in note, immediately stop and do NOT call model!
     if (distressDetected || checkDistress(userInputNote, lang).isDistress) {
       setDistressDetected(true);
       return;
@@ -139,7 +159,6 @@ export default function App() {
 
     try {
       const output = await generateMotivation(testPrompt);
-      // Run through output safety filter (Section 8 item 2)
       const safetyResult = validateModelOutput(output, lang);
       setGeneratedResult(safetyResult.sanitized);
       if (!safetyResult.isValid) {
@@ -156,7 +175,20 @@ export default function App() {
     }
   };
 
-  // Web Crypto Encrypted Backup Export (Item 3 & Section 8 item 3)
+  // Craving Flow: Log outcome event directly into IndexedDB (Step 6)
+  const handleCravingLogged = async (type: 'resisted' | 'relapse', trigger?: string) => {
+    const newEvent: EventRecord = {
+      id: `evt-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      ts: Date.now(),
+      type,
+      trigger: trigger || 'Craving session',
+    };
+
+    await addEvent(newEvent);
+    await refreshEventsAndStats(profile);
+  };
+
+  // Web Crypto Encrypted Backup Export
   const handleExportBackup = async () => {
     setBackupErrorMessage(null);
     setBackupStatusMessage(null);
@@ -168,10 +200,10 @@ export default function App() {
     }
 
     try {
-      const events = await getAllEvents();
+      const allEvts = await getAllEvents();
       const backupData: BackupData = {
         profile,
-        events,
+        events: allEvts,
         exportedAt: Date.now(),
       };
 
@@ -209,9 +241,9 @@ export default function App() {
       const pkg = JSON.parse(text) as EncryptedBackupPackage;
       const decrypted = await decryptBackup(pkg, backupPassword);
 
-      // Restore to IndexedDB
       await setStoredProfile(decrypted.profile);
       setProfile(decrypted.profile);
+      await refreshEventsAndStats(decrypted.profile);
       setBackupStatusMessage(t('backup.importSuccess'));
     } catch (err: unknown) {
       setBackupErrorMessage(err instanceof Error ? err.message : 'Invalid backup file or password');
@@ -246,7 +278,7 @@ export default function App() {
 
       {/* Main Content Area */}
       <main className="flex-1 py-6 space-y-6">
-        {/* Immediate Distress Alert Card (Section 8 item 1) */}
+        {/* Immediate Distress Alert Card */}
         {distressDetected && profile && (
           <div className="p-4 bg-rose-50 border-2 border-rose-300 rounded-2xl space-y-3 shadow-sm animate-pulse-subtle">
             <div className="flex items-center gap-2 text-rose-900 font-bold text-sm">
@@ -272,30 +304,93 @@ export default function App() {
           </div>
         )}
 
+        {/* Live Counters & Stats Card (Step 6) */}
+        {stats && profile && (
+          <section className="grid grid-cols-2 gap-3">
+            <div className="card p-3.5 bg-white border-stone-200 space-y-1">
+              <div className="text-[11px] font-semibold text-stone-500 uppercase tracking-wide">
+                {t('counters.streak')}
+              </div>
+              <div className="text-xl font-bold text-emerald-900">
+                {stats.streakDays > 0 ? (
+                  <span>
+                    {stats.streakDays} {t('counters.days')}
+                  </span>
+                ) : (
+                  <span>
+                    {stats.streakHours} {t('counters.hours')}
+                  </span>
+                )}
+              </div>
+              <div className="text-[10px] text-stone-500">
+                {t('counters.bestStreak')}: {stats.bestStreakDays} {t('counters.days')}
+              </div>
+            </div>
+
+            <div className="card p-3.5 bg-white border-stone-200 space-y-1">
+              <div className="text-[11px] font-semibold text-stone-500 uppercase tracking-wide">
+                {t('counters.avoided')}
+              </div>
+              <div className="text-xl font-bold text-emerald-900">{stats.avoidedCigarettes}</div>
+              <div className="text-[10px] text-stone-500">
+                {stats.resistedCount} {t('craving.resisted').toLowerCase()}
+              </div>
+            </div>
+
+            {/* Savings Goal Card */}
+            <div className="col-span-2 card p-3.5 bg-emerald-50/60 border-emerald-200 space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-emerald-950 flex items-center gap-1.5">
+                  <span>💰</span> {profile.savingsGoal.label}
+                </span>
+                <span className="font-semibold text-emerald-900">
+                  {stats.moneySaved} {profile.currency} / {profile.savingsGoal.amount}{' '}
+                  {profile.currency}
+                </span>
+              </div>
+              <div className="w-full bg-emerald-200/70 rounded-full h-2 overflow-hidden">
+                <div
+                  className="bg-emerald-800 h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${stats.savingsGoalProgress}%` }}
+                />
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Big Craving Action Button OR Active Craving Session Modal */}
+        {profile && isCravingActive ? (
+          <CravingSession
+            profile={profile}
+            onClose={() => setIsCravingActive(false)}
+            onLogged={handleCravingLogged}
+          />
+        ) : (
+          <div className="card text-center space-y-4 bg-emerald-800 text-white border-transparent shadow-lg">
+            <div className="space-y-1">
+              <h2 className="text-lg font-bold">{t('craving.holdOn')}</h2>
+              <p className="text-xs text-emerald-100/90">{t('app.tagline')}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsCravingActive(true)}
+              className="w-full bg-white text-emerald-950 font-bold py-4 px-5 rounded-xl shadow-md text-base hover:bg-emerald-50 active:scale-[0.98] transition-all cursor-pointer flex items-center justify-center gap-2"
+            >
+              <span>⚡</span> {t('craving.button')}
+            </button>
+          </div>
+        )}
+
         {/* Demo Profile Badge */}
-        <div className="bg-emerald-50/80 border border-emerald-200/80 rounded-xl p-3.5 flex items-start gap-3">
-          <span className="text-lg">🌿</span>
+        <div className="bg-stone-50 border border-stone-200 rounded-xl p-3 flex items-start gap-3">
+          <span className="text-base">🌿</span>
           <div className="space-y-0.5">
-            <div className="text-xs font-semibold text-emerald-900">{t('demo.badge')}</div>
-            <div className="text-xs text-emerald-800/90">{t('demo.description')}</div>
+            <div className="text-xs font-semibold text-stone-900">{t('demo.badge')}</div>
+            <div className="text-xs text-stone-600">{t('demo.description')}</div>
           </div>
         </div>
 
-        {/* Craving Action Button */}
-        <div className="card text-center space-y-4 bg-emerald-800 text-white border-transparent">
-          <div className="space-y-1">
-            <h2 className="text-lg font-bold">{t('craving.holdOn')}</h2>
-            <p className="text-xs text-emerald-100/90">{t('app.tagline')}</p>
-          </div>
-          <button
-            type="button"
-            className="w-full bg-white text-emerald-950 font-bold py-3.5 px-5 rounded-xl shadow-xs text-base hover:bg-emerald-50 active:scale-[0.99] transition-all cursor-pointer"
-          >
-            ⚡ {t('craving.button')}
-          </button>
-        </div>
-
-        {/* Generation & Note input section */}
+        {/* Note input & test prompt section */}
         <section className="card space-y-4 border-stone-200 bg-white">
           <h3 className="text-sm font-bold text-stone-900 flex items-center gap-2">
             <span>✍️</span> Qu'est-ce qui se passe maintenant ?
@@ -306,7 +401,7 @@ export default function App() {
               type="text"
               value={userInputNote}
               onChange={(e) => handleNoteChange(e.target.value)}
-              placeholder="Ex: envie après le repas, stress au travail..."
+              placeholder="Ex: envie après le repas, pause café..."
               className="w-full px-3 py-2 text-xs rounded-lg border border-stone-300 bg-stone-50 text-stone-900 focus:bg-white"
             />
             <p className="text-[11px] text-stone-500">
@@ -399,7 +494,7 @@ export default function App() {
           )}
         </section>
 
-        {/* Encrypted Web Crypto Backup (Item 3 & Section 8 item 3) */}
+        {/* Encrypted Web Crypto Backup */}
         <section className="card space-y-3 border-stone-200 bg-white">
           <h4 className="text-xs font-bold text-stone-900 flex items-center gap-1.5">
             <span>🔐</span> {t('backup.title')}

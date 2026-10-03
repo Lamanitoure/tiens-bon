@@ -29,7 +29,18 @@
     "secondsLeft": "seconds",
     "resisted": "I resisted",
     "smoked": "I smoked",
-    "congrats": "Well done! One more craving overcome."
+    "congrats": "Well done! One more craving overcome.",
+    "breatheIn": "Breathe in slowly...",
+    "holdBreath": "Hold gently...",
+    "breatheOut": "Exhale deeply...",
+    "discreetToggle": "Discreet mode",
+    "discreetTitle": "Breathing pause",
+    "discreetTagline": "Take 3 minutes for yourself",
+    "discreetHeld": "Done",
+    "discreetSmoked": "Interrupt",
+    "heldSuccess": "Well done! You let this wave pass. This is a real victory.",
+    "anotherChallenge": "Switch activity",
+    "backHome": "Back to home"
   },
   "relapse": {
     "title": "Breathe, no guilt",
@@ -45,6 +56,10 @@
     "days": "days",
     "hours": "hours",
     "minutes": "min"
+  },
+  "stats": {
+    "title": "My victories",
+    "savingsTitle": "Savings toward my goal"
   },
   "profile": {
     "title": "My personal profile",

@@ -29,7 +29,18 @@
     "secondsLeft": "secondes",
     "resisted": "J'ai résisté",
     "smoked": "J'ai fumé",
-    "congrats": "Bravo ! Une envie de plus surmontée."
+    "congrats": "Bravo ! Une envie de plus surmontée.",
+    "breatheIn": "Inspirez lentement...",
+    "holdBreath": "Retenez doucement...",
+    "breatheOut": "Expirez profondément...",
+    "discreetToggle": "Mode discret",
+    "discreetTitle": "Pause de respiration",
+    "discreetTagline": "Prendre 3 minutes pour soi",
+    "discreetHeld": "Terminé",
+    "discreetSmoked": "Interrompre",
+    "heldSuccess": "Bravo ! Tu as laissé passer cette vague. C'est une vraie victoire.",
+    "anotherChallenge": "Changer d'activité",
+    "backHome": "Retour à l'accueil"
   },
   "relapse": {
     "title": "On respire, pas de culpabilité",
@@ -45,6 +56,10 @@
     "days": "jours",
     "hours": "heures",
     "minutes": "min"
+  },
+  "stats": {
+    "title": "Mes victoires",
+    "savingsTitle": "Économies vers mon objectif"
   },
   "profile": {
     "title": "Mon profil personnel",
