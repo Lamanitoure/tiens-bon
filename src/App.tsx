@@ -90,6 +90,12 @@ export default function App() {
       setCurrentLangState(newLang);
     });
 
+    // Ensure default token is set if not already present
+    if (!getStoredToken()) {
+      setStoredToken('tiens-bon-token');
+      setTokenInput('tiens-bon-token');
+    }
+
     // Initialize from IndexedDB or seed demo profile
     (async () => {
       try {

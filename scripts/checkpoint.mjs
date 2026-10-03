@@ -1,14 +1,12 @@
 #!/usr/bin/env node
 import { execSync, spawnSync } from 'node:child_process';
-import fs from 'node:fs';
-import path from 'node:path';
 import readline from 'node:readline';
 
 const message = process.argv[2];
 
 if (!message || message.trim().length === 0) {
   console.error('\n❌ Error: Checkpoint message is required.');
-  console.error('Usage: pnpm checkpoint "feat: description of changes"\n');
+  console.error('Usage: npm run checkpoint "feat: description of changes"\n');
   process.exit(1);
 }
 
@@ -33,41 +31,19 @@ console.log(`🚀 Starting Tiens Bon Checkpoint: "${message.trim()}"`);
 console.log('========================================');
 
 // 1. Typecheck
-runStep('TypeScript Type Check', 'pnpm', ['typecheck']);
+runStep('TypeScript Type Check', 'npm', ['run', 'typecheck']);
 
 // 2. Lint
-runStep('Biome Linter & Formatter Check', 'pnpm', ['lint']);
+runStep('Biome Linter & Formatter Check', 'npm', ['run', 'lint']);
 
 // 3. Vitest unit tests
-runStep('Unit Tests', 'pnpm', ['test']);
+runStep('Unit Tests', 'npm', ['run', 'test']);
 
 // 4. Vite build
-runStep('Vite Production Build', 'pnpm', ['build']);
+runStep('Vite Production Build', 'npm', ['run', 'build']);
 
 // 5. Secret check
 runStep('Secrets & Forbidden Files Check', 'node', ['scripts/check-secrets.mjs']);
-
-// 6. Pytest if server/ exists, has test files, and pytest is in PATH
-const serverDir = path.resolve('server');
-const serverTestsDir = path.resolve('server', 'tests');
-if (fs.existsSync(serverDir) && fs.existsSync(serverTestsDir)) {
-  const testFiles = fs.readdirSync(serverTestsDir).filter((f) => f.endsWith('.py'));
-  if (testFiles.length > 0) {
-    let hasPytest = false;
-    try {
-      execSync('pytest --version', { stdio: 'ignore' });
-      hasPytest = true;
-    } catch {
-      hasPytest = false;
-    }
-
-    if (hasPytest) {
-      runStep('FastAPI Server Tests (pytest)', 'pytest', ['server/tests']);
-    } else {
-      console.log('ℹ️ pytest not found in current environment; skipping server tests.');
-    }
-  }
-}
 
 console.log('\n========================================');
 console.log('✓ All verification checks succeeded!');

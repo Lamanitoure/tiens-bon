@@ -1,32 +1,38 @@
 import 'fake-indexeddb/auto';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import demoProfile from '../demo/profile.demo.json';
 import {
   clearPregenerated,
   getAllPregenerated,
   getUnusedPregenerated,
   resetDatabase,
+  setStoredProfile,
 } from '../src/db/index.ts';
+import * as apiModule from '../src/lib/api.ts';
 import {
   buildBatchPlans,
+  buildPersonalizedFallback,
   generateDailyBatch,
   getNextPregeneratedMessage,
+  refillQuietlyIfNeeded,
   shouldTriggerAutomaticBatch,
 } from '../src/lib/pregeneration.ts';
 import type { Profile } from '../src/schemas/profile.ts';
 
-describe('Batch Pregeneration (Step 8)', () => {
+describe('Pre-generation and offline fallback (Step 9)', () => {
   const profile = demoProfile as unknown as Profile;
 
   beforeEach(async () => {
     await resetDatabase();
     await clearPregenerated();
+    await setStoredProfile(profile);
+    vi.restoreAllMocks();
   });
 
-  it('builds a full batch plan covering morning, all risk windows, cravings, and evening', () => {
+  it('builds a full batch plan covering morning, all risk windows, config contexts, and evening', () => {
     const plans = buildBatchPlans(profile);
 
-    // Profile has 3 risk windows: 1 morning + 3 risk windows + 6 cravings + 2 evening = 12 items
+    // Batch size must be at least config default (10)
     expect(plans.length).toBeGreaterThanOrEqual(10);
 
     const categories = plans.map((p) => p.category);
@@ -38,6 +44,12 @@ describe('Batch Pregeneration (Step 8)', () => {
     // Risk windows count match profile
     const riskWindowPlans = plans.filter((p) => p.category === 'risk_window');
     expect(riskWindowPlans.length).toBe(profile.riskWindows.length);
+
+    // Plans have valid fallback challenge and message
+    for (const plan of plans) {
+      expect(plan.fallbackChallenge.length).toBeGreaterThan(0);
+      expect(plan.fallbackMessage.length).toBeGreaterThan(0);
+    }
   });
 
   it('generates and stores batch in IndexedDB pregenerated store', async () => {
@@ -62,18 +74,47 @@ describe('Batch Pregeneration (Step 8)', () => {
     }
   });
 
-  it('serves next pregenerated message and marks it as used', async () => {
+  it('serves next pregenerated message from local storage and marks it as used', async () => {
     await generateDailyBatch(profile);
 
     const initialUnused = await getUnusedPregenerated('craving');
     expect(initialUnused.length).toBeGreaterThan(0);
 
-    const first = await getNextPregeneratedMessage('craving', profile.language);
+    const first = await getNextPregeneratedMessage('craving', profile);
     expect(first.fromCache).toBe(true);
     expect(first.challenge).toBeTruthy();
+    expect(first.message).toBeTruthy();
 
     const remainingUnused = await getUnusedPregenerated('craving');
     expect(remainingUnused.length).toBe(initialUnused.length - 1);
+  });
+
+  it('builds fallback message using her own phrases and alternatives when offline (Section 8 Step 9)', () => {
+    const fallback = buildPersonalizedFallback(profile, 'craving');
+
+    expect(fallback.challenge).toBeTruthy();
+    expect(fallback.message).toBeTruthy();
+
+    // The message must be one of her own phrases from her profile
+    expect(profile.phrases).toContain(fallback.message);
+
+    // The challenge must be one of her own alternatives
+    expect(profile.alternatives).toContain(fallback.challenge);
+  });
+
+  it('returns a personalized message in her voice even with Tailscale off and airplane mode (cache empty)', async () => {
+    // Clear any pregenerated data in DB to simulate completely offline with empty cache
+    await clearPregenerated();
+
+    const result = await getNextPregeneratedMessage('craving', profile);
+
+    // Cache was empty, so result is not from cache
+    expect(result.fromCache).toBe(false);
+    expect(result.isFallback).toBe(true);
+
+    // Result is personalized in her voice
+    expect(profile.phrases).toContain(result.message);
+    expect(profile.alternatives).toContain(result.challenge);
   });
 
   it('evaluates automatic batch trigger rules (older than 20 hours or absent)', () => {
@@ -84,5 +125,17 @@ describe('Batch Pregeneration (Step 8)', () => {
 
     const twentyOneHoursAgo = Date.now() - 21 * 60 * 60 * 1000;
     expect(shouldTriggerAutomaticBatch(twentyOneHoursAgo)).toBe(true);
+  });
+
+  it('triggers quiet background refill when unused craving messages are low and model is reachable', async () => {
+    // Mock checkModelStatus to return ok
+    vi.spyOn(apiModule, 'checkModelStatus').mockResolvedValue({
+      ollama: 'ok',
+      model: 'gemini-3.8-flash',
+    });
+
+    // Currently 0 pregenerated messages in store (low stock)
+    const refilled = await refillQuietlyIfNeeded(profile);
+    expect(refilled).toBe(true);
   });
 });

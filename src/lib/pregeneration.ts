@@ -1,12 +1,15 @@
 import {
   addPregeneratedMessage,
+  getStoredProfile,
   getUnusedPregenerated,
   markPregeneratedUsed,
 } from '../db/index.ts';
+import type { CravingOutput } from '../schemas/model.ts';
 import type { PregeneratedMessage } from '../schemas/pregenerated.ts';
 import type { Profile } from '../schemas/profile.ts';
 import { getRandomFallback, validateModelOutput } from '../security/safety.ts';
-import { generateMotivation } from './api.ts';
+import { checkModelStatus, generateMotivation } from './api.ts';
+import { activeConfig } from './config.ts';
 
 export interface BatchItemPlan {
   category: 'morning' | 'risk_window' | 'craving' | 'evening';
@@ -16,26 +19,95 @@ export interface BatchItemPlan {
   fallbackMessage: string;
 }
 
+/**
+ * Builds personalized fallback messages directly from her own phrases and alternatives (Step 9).
+ * Used when the model/PC is unreachable (e.g. offline, airplane mode).
+ */
+export function buildPersonalizedFallback(
+  profile: Profile,
+  category: 'morning' | 'risk_window' | 'craving' | 'evening' = 'craving',
+): CravingOutput {
+  const lang = profile.language || 'fr';
+  const defaultFallback = getRandomFallback(lang);
+
+  // 1. Pick a phrase in her own voice
+  let phrase = defaultFallback.message;
+  if (profile.phrases && profile.phrases.length > 0) {
+    const randomPhrase = profile.phrases[Math.floor(Math.random() * profile.phrases.length)];
+    if (randomPhrase && randomPhrase.trim().length > 0) {
+      phrase = randomPhrase.trim();
+    }
+  }
+
+  // 2. Pick one of her preferred concrete alternatives
+  let challenge = defaultFallback.challenge;
+  if (profile.alternatives && profile.alternatives.length > 0) {
+    const randomAlt = profile.alternatives[Math.floor(Math.random() * profile.alternatives.length)];
+    if (randomAlt && randomAlt.trim().length > 0) {
+      challenge = randomAlt.trim();
+    }
+  }
+
+  // Special adjustments for specific categories
+  if (category === 'morning') {
+    challenge =
+      lang === 'fr'
+        ? `Boire un grand verre d'eau tiède et respirer : ${challenge}`
+        : `Drink a tall glass of warm water and breathe: ${challenge}`;
+  } else if (category === 'evening') {
+    challenge =
+      lang === 'fr'
+        ? `Prendre un temps calme de gratitude : ${challenge}`
+        : `Take a quiet moment of gratitude: ${challenge}`;
+  }
+
+  const rawOutput: CravingOutput = {
+    challenge,
+    message: phrase,
+  };
+
+  const validation = validateModelOutput(rawOutput, lang);
+  return validation.sanitized;
+}
+
+/**
+ * Builds plans for the daily pregeneration batch based on config contexts and batch size.
+ */
 export function buildBatchPlans(profile: Profile): BatchItemPlan[] {
   const plans: BatchItemPlan[] = [];
   const lang = profile.language;
   const tone = profile.tone;
   const reasons = profile.reasons.join(', ');
   const alts = profile.alternatives;
+  const contextsList = activeConfig.app.contextsList || [
+    'morning_coffee',
+    'after_meal',
+    'work_break',
+    'stress',
+    'evening_relaxation',
+    'social',
+  ];
+  const targetBatchSize = activeConfig.app.batchSize || 10;
 
   // 1. Morning motivation (1)
+  const defaultMorningMsg =
+    lang === 'fr'
+      ? 'Une nouvelle journée commence, chaque respiration libre est une victoire pour toi.'
+      : 'A new day begins, every clean breath is a victory for you.';
+  const defaultMorningChallenge =
+    lang === 'fr'
+      ? 'Boire un grand verre d eau tiède et respirer profondément à la fenêtre.'
+      : 'Drink a tall glass of warm water and take 3 deep breaths at the window.';
+
   plans.push({
     category: 'morning',
     context: 'morning',
     prompt: `You are helping Camille wake up and start her smoke-free day with calm confidence. Her core reasons: ${reasons}. Tone: ${tone}. Write in ${lang}. Return JSON: {"challenge": "...", "message": "..."}`,
-    fallbackChallenge:
-      lang === 'fr'
-        ? 'Boire un grand verre d eau tiède et respirer profondément à la fenêtre.'
-        : 'Drink a tall glass of warm water and take 3 deep breaths at the window.',
+    fallbackChallenge: defaultMorningChallenge,
     fallbackMessage:
-      lang === 'fr'
-        ? 'Une nouvelle journée commence, chaque respiration libre est une victoire pour toi.'
-        : 'A new day begins, every clean breath is a victory for you.',
+      profile.phrases.length > 0
+        ? `${profile.phrases[0]} ${defaultMorningMsg}`.slice(0, 500)
+        : defaultMorningMsg,
   });
 
   // 2. Risk windows from profile (one per window)
@@ -54,56 +126,15 @@ export function buildBatchPlans(profile: Profile): BatchItemPlan[] {
     });
   }
 
-  // 3. Generic craving responses (6 varied responses)
-  const cravingPrompts = [
-    {
-      context: 'craving:sensory',
-      focus: 'sensory anchor (drinking ice water, washing hands in cool water)',
-      challengeFr:
-        'Boire un grand verre d eau glacée lentement en observant la sensation de fraîcheur.',
-      msgFr: 'Sens cette fraîcheur pure descendre. Ton corps te remercie de chaque gorgée.',
-    },
-    {
-      context: 'craving:movement',
-      focus: 'movement anchor (stretching shoulders, walking briskly)',
-      challengeFr: 'Faire 10 rotations lentes des épaules et étirer les bras vers le ciel.',
-      msgFr:
-        'Décharge la tension musculaire. L envie n est qu une vague passagère qui va redescendre.',
-    },
-    {
-      context: 'craving:distraction',
-      focus: 'puzzle or mental engagement (counting 5 objects of green color)',
-      challengeFr: 'Identifier 5 objets de couleur verte autour de toi et observer leurs détails.',
-      msgFr: 'Ton cerveau se reconnecte au présent. Tu es maître de ton attention.',
-    },
-    {
-      context: 'craving:connection',
-      focus: 'support or writing a gentle thought',
-      challengeFr: 'Écrire un mot doux à une personne que tu aimes ou noter ta fierté du jour.',
-      msgFr: 'Chaque envie surmontée consolide ta liberté et protège ceux qui comptent pour toi.',
-    },
-    {
-      context: 'craving:breath',
-      focus: 'calming 4-7-8 breathing',
-      challengeFr: 'Faire 4 cycles de respiration lente : inspire sur 4, expire sur 6.',
-      msgFr: 'Ton rythme cardiaque s apaise. Tu es en sécurité, l envie s éloigne.',
-    },
-    {
-      context: 'craving:comfort',
-      focus: 'comfort tea or warm infusion',
-      challengeFr:
-        'Préparer une infusion ou un thé chaud et savourer la première gorgée sans hâte.',
-      msgFr: 'Offre-toi ce moment de réconfort sans fumée. Tu mérites cette douceur.',
-    },
-  ];
-
-  for (const cp of cravingPrompts) {
+  // 3. Contextual craving responses from config contexts
+  for (const ctx of contextsList) {
+    const fallback = buildPersonalizedFallback(profile, 'craving');
     plans.push({
       category: 'craving',
-      context: cp.context,
-      prompt: `Camille is experiencing a strong urge right now. Focus: ${cp.focus}. Tone: ${tone}. Write in ${lang}. Return JSON: {"challenge": "...", "message": "..."}`,
-      fallbackChallenge: cp.challengeFr,
-      fallbackMessage: cp.msgFr,
+      context: `craving:${ctx}`,
+      prompt: `Camille is experiencing a craving in context "${ctx}". Alternatives she enjoys: ${alts.join(', ')}. Tone: ${tone}. Write in ${lang}. Return JSON: {"challenge": "...", "message": "..."}`,
+      fallbackChallenge: fallback.challenge,
+      fallbackMessage: fallback.message,
     });
   }
 
@@ -136,9 +167,26 @@ export function buildBatchPlans(profile: Profile): BatchItemPlan[] {
         : 'Your lungs regenerated all day. Rest peacefully, you did amazing.',
   });
 
+  // 5. Ensure batch size reaches at least targetBatchSize
+  let extraIndex = 0;
+  while (plans.length < targetBatchSize) {
+    extraIndex++;
+    const fallback = buildPersonalizedFallback(profile, 'craving');
+    plans.push({
+      category: 'craving',
+      context: `craving:extra_${extraIndex}`,
+      prompt: `Camille needs immediate craving support. Focus on quick distraction. Tone: ${tone}. Write in ${lang}. Return JSON: {"challenge": "...", "message": "..."}`,
+      fallbackChallenge: fallback.challenge,
+      fallbackMessage: fallback.message,
+    });
+  }
+
   return plans;
 }
 
+/**
+ * Generates a full daily batch, validating each item with Zod and safety filters before storing.
+ */
 export async function generateDailyBatch(
   profile: Profile,
   onProgress?: (current: number, total: number) => void,
@@ -164,7 +212,7 @@ export async function generateDailyBatch(
         message = validated.sanitized.message;
       }
     } catch (_err) {
-      // Offline fallback: Use the safe pre-tested fallback
+      // Offline fallback: Use the personalized fallback in her voice
     }
 
     const pregenMsg: PregeneratedMessage = {
@@ -187,6 +235,9 @@ export async function generateDailyBatch(
   return results;
 }
 
+/**
+ * Triggers batch generation automatically if last batch is older than 20 hours.
+ */
 export function shouldTriggerAutomaticBatch(lastBatchTs: number | null): boolean {
   if (!lastBatchTs) return true;
   const elapsedMs = Date.now() - lastBatchTs;
@@ -194,15 +245,75 @@ export function shouldTriggerAutomaticBatch(lastBatchTs: number | null): boolean
   return elapsedMs > 20 * 60 * 60 * 1000;
 }
 
+// Background quiet refill flag to avoid concurrent refill runs
+let isQuietRefilling = false;
+
+/**
+ * Quietly refills stock in the background when stock is low (Step 9).
+ */
+export async function refillQuietlyIfNeeded(profile: Profile): Promise<boolean> {
+  if (isQuietRefilling) return false;
+
+  try {
+    const unusedCraving = await getUnusedPregenerated('craving');
+    // If stock of craving messages is low (<= 2)
+    if (unusedCraving.length <= 2) {
+      const status = await checkModelStatus();
+      if (status.ollama === 'ok') {
+        isQuietRefilling = true;
+        generateDailyBatch(profile)
+          .then(() => {
+            localStorage.setItem('tb_last_batch_ts', Date.now().toString());
+          })
+          .catch(() => {})
+          .finally(() => {
+            isQuietRefilling = false;
+          });
+        return true;
+      }
+    }
+  } catch {
+    // Non-blocking
+  }
+  return false;
+}
+
+/**
+ * Serves the next pregenerated message from local storage with zero latency.
+ * If offline or cache is exhausted, builds a personalized fallback in her voice.
+ */
 export async function getNextPregeneratedMessage(
   category: 'morning' | 'risk_window' | 'craving' | 'evening',
-  language: 'fr' | 'en' = 'fr',
-): Promise<{ challenge: string; message: string; fromCache: boolean }> {
+  profileOrLang?: Profile | 'fr' | 'en',
+  langFallback: 'fr' | 'en' = 'fr',
+): Promise<{ challenge: string; message: string; fromCache: boolean; isFallback?: boolean }> {
+  let profile: Profile | null = null;
+  let language: 'fr' | 'en' = langFallback;
+
+  if (profileOrLang && typeof profileOrLang === 'object') {
+    profile = profileOrLang;
+    language = profile.language || 'fr';
+  } else if (typeof profileOrLang === 'string') {
+    language = profileOrLang;
+  }
+
   try {
     const unused = await getUnusedPregenerated(category);
     if (unused.length > 0) {
       const selected = unused[0];
       await markPregeneratedUsed(selected.id);
+
+      // Check for quiet refill in background if profile is known
+      if (profile) {
+        refillQuietlyIfNeeded(profile).catch(() => {});
+      } else {
+        getStoredProfile()
+          .then((stored) => {
+            if (stored) refillQuietlyIfNeeded(stored).catch(() => {});
+          })
+          .catch(() => {});
+      }
+
       return {
         challenge: selected.challenge,
         message: selected.message,
@@ -210,13 +321,33 @@ export async function getNextPregeneratedMessage(
       };
     }
   } catch (_err) {
-    // ignore
+    // IndexedDB error or unavailable
   }
 
-  const fallback = getRandomFallback(language);
+  // If cache is empty or offline, generate personalized fallback
+  if (!profile) {
+    try {
+      profile = await getStoredProfile();
+    } catch {
+      // ignore
+    }
+  }
+
+  if (profile) {
+    const fallback = buildPersonalizedFallback(profile, category);
+    return {
+      challenge: fallback.challenge,
+      message: fallback.message,
+      fromCache: false,
+      isFallback: true,
+    };
+  }
+
+  const standardFallback = getRandomFallback(language);
   return {
-    challenge: fallback.challenge,
-    message: fallback.message,
+    challenge: standardFallback.challenge,
+    message: standardFallback.message,
     fromCache: false,
+    isFallback: true,
   };
 }
