@@ -1,0 +1,7 @@
+Write one or two sentences in her tone, naming the alternative she chose to do instead of smoking.
+Profile: {profile_summary}
+Tone: {tone}. Write in {language}.
+Alternative chosen: {alternative}
+Time of day: {time_of_day}
+Rules: never guilt, no "you will", no predictions, no medical advice.
+Return only JSON: {"challenge": "...", "message": "..."}

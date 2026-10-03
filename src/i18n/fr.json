@@ -1,0 +1,67 @@
+{
+  "app": {
+    "name": "Tiens Bon",
+    "tagline": "Compagnon local d'aide au sevrage tabagique, respectueux de votre voix et de votre vie privée."
+  },
+  "nav": {
+    "home": "Accueil",
+    "craving": "J'ai une envie",
+    "journal": "Journal",
+    "profile": "Profil",
+    "settings": "Paramètres"
+  },
+  "common": {
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "confirm": "Confirmer",
+    "edit": "Modifier",
+    "back": "Retour",
+    "error": "Une erreur est survenue.",
+    "configError": "Erreur de configuration",
+    "configErrorDesc": "Le fichier de configuration n'a pas pu être validé."
+  },
+  "craving": {
+    "button": "J'ai une envie maintenant",
+    "holdOn": "Tiens bon, 3 minutes pour souffler",
+    "timer": "Temps restant :",
+    "secondsLeft": "secondes",
+    "resisted": "J'ai résisté",
+    "smoked": "J'ai fumé",
+    "congrats": "Bravo ! Une envie de plus surmontée."
+  },
+  "relapse": {
+    "title": "On respire, pas de culpabilité",
+    "message": "Un faux pas ne remet pas à zéro tout ce que tu as accompli. C'est en apprenant que l'on avance.",
+    "question": "Que s'est-il passé juste avant ?",
+    "restart": "Repartir sereinement"
+  },
+  "counters": {
+    "streak": "Série actuelle",
+    "bestStreak": "Meilleure série",
+    "avoided": "Cigarettes évitées",
+    "saved": "Économies réalisées",
+    "days": "jours",
+    "hours": "heures",
+    "minutes": "min"
+  },
+  "profile": {
+    "title": "Mon profil personnel",
+    "reasons": "Mes motivations profondes",
+    "riskWindows": "Mes moments à risque",
+    "alternatives": "Ce que je préfère faire à la place",
+    "phrases": "Mes phrases pour tenir",
+    "helpline": "Ligne d'aide & écoute",
+    "support": "Personne de confiance",
+    "savingsGoal": "Mon projet d'économies"
+  },
+  "demo": {
+    "badge": "Profil de démonstration fictif",
+    "description": "Données locales fictives pour tester l'application."
+  },
+  "disclaimer": {
+    "medical": "Cette application n'est pas un dispositif médical et ne fournit aucun avis médical.",
+    "doctor": "En cas de besoin ou de questionnement de santé, consultez un médecin ou un pharmacien."
+  }
+}

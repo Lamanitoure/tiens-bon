@@ -1,0 +1,22 @@
+{
+  "defaultLanguage": "fr",
+  "supportedLanguages": ["fr", "en"],
+  "challengeDurationSeconds": 180,
+  "reminderLeadTimeMinutes": 10,
+  "batchSize": 10,
+  "contextsList": ["morning_coffee", "after_meal", "work_break", "stress", "evening_relaxation", "social"],
+  "tonesList": ["warm", "direct", "poetic", "humorous", "calm"],
+  "retryCounts": 2,
+  "minEventsBeforeLearnedWindow": 5,
+  "imageLimits": {
+    "maxCount": 12,
+    "maxSizeBytes": 1572864,
+    "quality": 0.8
+  },
+  "maxPromptLength": 3000,
+  "discreetModeDefault": true,
+  "units": {
+    "habitDefault": "cigarettes",
+    "timeUnit": "minutes"
+  }
+}

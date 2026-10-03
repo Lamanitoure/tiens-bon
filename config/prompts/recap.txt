@@ -1,0 +1,7 @@
+Given numbers computed by code, write a short recap in her tone starting with what worked.
+Resisted: {resisted}
+Money saved: {money_saved}
+Hardest moments: {hardest_moments}
+Rules: Start with what worked. Use the numbers exactly as given and never add or change a number.
+Tone: {tone}. Write in {language}. At most 3 sentences.
+No medical advice, no reproach.

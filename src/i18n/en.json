@@ -1,0 +1,67 @@
+{
+  "app": {
+    "name": "Tiens Bon",
+    "tagline": "A local-first companion to help you quit smoking at home, in your own voice and with total privacy."
+  },
+  "nav": {
+    "home": "Home",
+    "craving": "I have a craving",
+    "journal": "Journal",
+    "profile": "Profile",
+    "settings": "Settings"
+  },
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "edit": "Edit",
+    "back": "Back",
+    "error": "An error occurred.",
+    "configError": "Configuration error",
+    "configErrorDesc": "The configuration file failed validation."
+  },
+  "craving": {
+    "button": "I have a craving now",
+    "holdOn": "Hold on, 3 minutes to catch your breath",
+    "timer": "Time remaining:",
+    "secondsLeft": "seconds",
+    "resisted": "I resisted",
+    "smoked": "I smoked",
+    "congrats": "Well done! One more craving overcome."
+  },
+  "relapse": {
+    "title": "Breathe, no guilt",
+    "message": "A slip does not erase everything you achieved. Learning is how we move forward.",
+    "question": "What happened right before?",
+    "restart": "Restart gently"
+  },
+  "counters": {
+    "streak": "Current streak",
+    "bestStreak": "Best streak",
+    "avoided": "Cigarettes avoided",
+    "saved": "Money saved",
+    "days": "days",
+    "hours": "hours",
+    "minutes": "min"
+  },
+  "profile": {
+    "title": "My personal profile",
+    "reasons": "My deep motivations",
+    "riskWindows": "My risk moments",
+    "alternatives": "What I like to do instead",
+    "phrases": "My phrases to hold on",
+    "helpline": "Helpline & support",
+    "support": "Support person",
+    "savingsGoal": "My savings goal"
+  },
+  "demo": {
+    "badge": "Fictional demo profile",
+    "description": "Fictional local data to test the application."
+  },
+  "disclaimer": {
+    "medical": "This application is not medical advice and does not provide medical services.",
+    "doctor": "If you need medical advice, please consult a pharmacist or doctor."
+  }
+}

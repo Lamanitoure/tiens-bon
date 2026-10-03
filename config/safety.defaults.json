@@ -1,0 +1,21 @@
+{
+  "blockedPatterns": [
+    "\\b\\d{1,3}\\s?%\\b",
+    "\\b(statistic|statistique|risk reduced by|risque réduit de)\\b",
+    "\\b(mg|milligram|dosage|dose)\\b",
+    "\\b(you will|tu vas|tu seras|vous allez|vous serez)\\b",
+    "\\b(nicotine replacement|champix|varenicline|bupropion|zyban|patch|gomme à mâcher)\\b",
+    "\\b(shame on|fail|failed|disappointed|déçu|honte|tu as échoué|tu aurais dû)\\b"
+  ],
+  "disallowedWords": [
+    "guilt",
+    "culpabilité",
+    "honte",
+    "faible",
+    "échoué",
+    "loser",
+    "promis",
+    "guaranteed",
+    "garanti"
+  ]
+}

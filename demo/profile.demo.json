@@ -1,0 +1,60 @@
+{
+  "language": "fr",
+  "tone": "Chaleureux, direct et complice",
+  "reasons": [
+    "Retrouver mon souffle pour monter les escaliers sans m'arrêter",
+    "Profiter pleinement de mes balades le week-end sans tousser",
+    "M'offrir un voyage en train dans les Alpes grâce à l'argent économisé",
+    "Ne plus avoir cette odeur de tabac froid sur mes vêtements"
+  ],
+  "riskWindows": [
+    { "label": "Café du matin", "time": "08:15" },
+    { "label": "Pause de milieu de matinée", "time": "10:30" },
+    { "label": "Fin du déjeuner", "time": "13:45" },
+    { "label": "Décompression fin de journée", "time": "18:30" }
+  ],
+  "alternatives": [
+    "Boire une infusion chaude à la menthe",
+    "Faire 5 minutes de respiration ventrale",
+    "Faire un tour dehors de 3 minutes les mains dans les poches",
+    "Écouter un morceau de musique apaisant au casque"
+  ],
+  "interests": [
+    "Randonnée en montagne",
+    "Jardinage sur le balcon",
+    "Lecture de romans",
+    "Cuisine maison"
+  ],
+  "phrases": [
+    "Allez Camille, trois minutes et l'envie est passée.",
+    "T'as pas fait tout ce chemin pour abandonner maintenant.",
+    "Respire un grand coup, ce n'est que de la fumée dans ta tête.",
+    "Bois un grand verre d'eau fraîche, ça va te poser.",
+    "Regarde l'objectif : les Alpes en train !",
+    "Tu es plus forte que ce vieux réflexe automatique.",
+    "Même pas mal, laisse passer la vague sans te crisper.",
+    "Souviens-toi de la fierté ce soir quand tu te coucheras.",
+    "Chaque minute gagnée est une victoire définitive.",
+    "Ne laisse pas une minute gâcher tes efforts de toute la journée.",
+    "C'est ton corps qui te remercie, sois patiente avec lui.",
+    "Tiens bon, tu es sur la bonne voie !"
+  ],
+  "supportPerson": {
+    "label": "Alex (ami de confiance)",
+    "contact": "+33 6 00 00 00 00"
+  },
+  "helpline": {
+    "label": "Tabac Info Service",
+    "contact": "3989"
+  },
+  "habitLabel": "cigarettes",
+  "unitsPerDay": 15,
+  "unitPrice": 0.6,
+  "currency": "€",
+  "savingsGoal": {
+    "label": "Voyage en train dans les Alpes",
+    "amount": 600
+  },
+  "quitDate": "2026-10-01T08:00:00.000Z",
+  "discreetMode": true
+}
