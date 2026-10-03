@@ -196,5 +196,34 @@
     "copyLabel": "Copy label",
     "copied": "Copied!",
     "noWindows": "No risk windows defined in profile."
+  },
+  "checkin": {
+    "title": "Evening check-in (2 min)",
+    "subtitle": "A moment to lay down your day in free text. The AI extracts key themes without ever judging you, and you maintain complete control over what is saved.",
+    "promptPlaceholder": "Freely describe your day... What moments were easy? Were there temptations, a hard coffee, or stress? Did you hold on or smoke?",
+    "extractBtn": "🤖 Analyze my check-in",
+    "analyzing": "Kind analysis in progress...",
+    "reviewTitle": "What the AI extracted (you can edit anything):",
+    "triggerLabel": "Main trigger identified:",
+    "emotionLabel": "Dominant emotion felt:",
+    "outcomeLabel": "Day's outcome:",
+    "outcomeResisted": "🌱 I held on / resisted",
+    "outcomeSmoked": "⚠️ I smoked",
+    "outcomeUnknown": "❓ Neutral / Mixed",
+    "notesLabel": "Your full reflection notes:",
+    "saveBtn": "Save check-in to my journal",
+    "savedSuccess": "✓ Check-in saved to your journal!",
+    "editAgain": "Write another check-in",
+    "distressTitle": "Need immediate support?",
+    "distressMsg": "We detected distress in your message. Your helpline and trusted support contact are top priority."
+  },
+  "journalView": {
+    "title": "My freedom journal",
+    "filterAll": "All",
+    "filterCheckins": "Evening check-ins",
+    "filterCravings": "Resisted cravings",
+    "filterRelapses": "Slips & Relapses",
+    "empty": "No journal entries yet.",
+    "newCheckin": "New evening check-in"
   }
 }

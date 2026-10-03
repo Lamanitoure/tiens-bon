@@ -126,6 +126,8 @@ app.post('/api/generate', verifyToken, checkRateLimit, async (req: Request, res:
     return res.status(422).json({ detail: 'prompt must be a string between 1 and 4000 characters' });
   }
 
+  const isCheckin = body.expected_format === 'checkin';
+
   // 1. Try Gemini API if key is available
   if (process.env.GEMINI_API_KEY) {
     try {
@@ -138,16 +140,25 @@ app.post('/api/generate', verifyToken, checkRateLimit, async (req: Request, res:
         },
       });
 
+      const systemInstruction = isCheckin
+        ? 'You are an extraction assistant for a quit-smoking journal. ' +
+          'Extract trigger, emotion, and outcome from the user evening check-in. ' +
+          'Return strictly JSON with fields: ' +
+          '"trigger" (short string, e.g. "café", "stress", or "unknown"), ' +
+          '"emotion" (one word string, e.g. "calme", "fatigué", "fier", or "unknown"), ' +
+          '"outcome" (must be strictly one of: "resisted", "smoked", "unknown"). ' +
+          'Do not provide advice, medical commentary, or health statistics.'
+        : 'You are Tiens Bon, an empathetic, non-judgmental quit-smoking companion. ' +
+          'You must respond strictly in JSON with exactly two fields: ' +
+          '"challenge" (a 3-minute concrete, safe distraction or grounding task) ' +
+          'and "message" (a warm, encouraging message in 1-3 sentences in the requested language and tone). ' +
+          'Do not wrap in markdown fences or any other text.';
+
       const response = await ai.models.generateContent({
         model: 'gemini-3.8-flash',
         contents: prompt,
         config: {
-          systemInstruction:
-            'You are Tiens Bon, an empathetic, non-judgmental quit-smoking companion. ' +
-            'You must respond strictly in JSON with exactly two fields: ' +
-            '"challenge" (a 3-minute concrete, safe distraction or grounding task) ' +
-            'and "message" (a warm, encouraging message in 1-3 sentences in the requested language and tone). ' +
-            'Do not wrap in markdown fences or any other text.',
+          systemInstruction,
           responseMimeType: 'application/json',
         },
       });
@@ -155,6 +166,16 @@ app.post('/api/generate', verifyToken, checkRateLimit, async (req: Request, res:
       const raw = response.text || '';
       const cleaned = stripMarkdownFences(raw);
       const parsed = JSON.parse(cleaned);
+
+      if (isCheckin) {
+        const validOutcomes = new Set(['resisted', 'smoked', 'unknown']);
+        const outcome = validOutcomes.has(parsed.outcome) ? parsed.outcome : 'unknown';
+        return res.json({
+          trigger: String(parsed.trigger || 'Moment de pause').slice(0, 200),
+          emotion: String(parsed.emotion || 'Calme').slice(0, 100),
+          outcome,
+        });
+      }
 
       if (
         typeof parsed.challenge === 'string' &&
@@ -196,6 +217,17 @@ app.post('/api/generate', verifyToken, checkRateLimit, async (req: Request, res:
       const data = (await ollamaResp.json()) as { response?: string };
       const cleaned = stripMarkdownFences(data.response || '');
       const parsed = JSON.parse(cleaned);
+
+      if (isCheckin) {
+        const validOutcomes = new Set(['resisted', 'smoked', 'unknown']);
+        const outcome = validOutcomes.has(parsed.outcome) ? parsed.outcome : 'unknown';
+        return res.json({
+          trigger: String(parsed.trigger || 'Bilan de soirée').slice(0, 200),
+          emotion: String(parsed.emotion || 'Serein').slice(0, 100),
+          outcome,
+        });
+      }
+
       if (parsed.challenge && parsed.message) {
         return res.json({
           challenge: String(parsed.challenge).slice(0, 500),
@@ -205,6 +237,31 @@ app.post('/api/generate', verifyToken, checkRateLimit, async (req: Request, res:
     }
   } catch {
     // Continue to fallback
+  }
+
+  // 3. Fallback generator
+  if (isCheckin) {
+    const lower = prompt.toLowerCase();
+    const outcome =
+      lower.includes('fumé') || lower.includes('smoked') || lower.includes('rechute')
+        ? 'smoked'
+        : 'resisted';
+    const emotion = lower.includes('stress')
+      ? 'stressé'
+      : lower.includes('fatig')
+        ? 'fatigué'
+        : 'calme';
+    const trigger = lower.includes('café')
+      ? 'Café'
+      : lower.includes('soir')
+        ? 'Soirée'
+        : 'Fin de journée';
+
+    return res.json({
+      trigger,
+      emotion,
+      outcome,
+    });
   }
 
   // 3. Fallback generator

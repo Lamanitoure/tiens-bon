@@ -196,5 +196,34 @@
     "copyLabel": "Copier le libellé",
     "copied": "Copié !",
     "noWindows": "Aucune fenêtre à risque définie dans le profil."
+  },
+  "checkin": {
+    "title": "Bilan de soirée (2 min)",
+    "subtitle": "Un moment pour poser ta journée en texte libre. L'IA en dégage les points clés sans jamais te juger, et tu gardes le contrôle absolu sur ce qui est enregistré.",
+    "promptPlaceholder": "Raconte ta journée librement... Quels moments ont été faciles ? Y a-t-il eu une tentation, un café difficile, du stress ? As-tu tenu bon ou fumé ?",
+    "extractBtn": "🤖 Analyser mon bilan",
+    "analyzing": "Analyse bienveillante en cours...",
+    "reviewTitle": "Ce que l'IA a compris (tu peux tout corriger) :",
+    "triggerLabel": "Déclencheur principal identifié :",
+    "emotionLabel": "Émotion dominante ressentie :",
+    "outcomeLabel": "Résultat de la journée :",
+    "outcomeResisted": "🌱 J'ai tenu bon / résisté",
+    "outcomeSmoked": "⚠️ J'ai fumé",
+    "outcomeUnknown": "❓ Neutre / Partagé",
+    "notesLabel": "Tes réflexions complètes :",
+    "saveBtn": "Enregistrer mon bilan dans le journal",
+    "savedSuccess": "✓ Bilan enregistré dans ton journal !",
+    "editAgain": "Écrire un autre bilan",
+    "distressTitle": "Besoin d'aide immédiat ?",
+    "distressMsg": "Nous avons détecté une détresse dans ton message. La ligne d'aide et ton contact de soutien sont prioritaires."
+  },
+  "journalView": {
+    "title": "Mon journal de liberté",
+    "filterAll": "Tout",
+    "filterCheckins": "Bilans de soirée",
+    "filterCravings": "Envies surmontées",
+    "filterRelapses": "Faux pas & Rechutes",
+    "empty": "Aucune entrée dans le journal pour le moment.",
+    "newCheckin": "Nouveau bilan de soirée"
   }
 }

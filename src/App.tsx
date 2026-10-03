@@ -7,6 +7,7 @@ import { type ChangeEvent, useCallback, useEffect, useState } from 'react';
 import demoProfile from '../demo/profile.demo.json';
 import { CravingSession } from './components/CravingSession.tsx';
 import { FutureSelfMessages } from './components/FutureSelfMessages.tsx';
+import { JournalView } from './components/JournalView.tsx';
 import { PersonalGallery } from './components/PersonalGallery.tsx';
 import { RemindersManager } from './components/RemindersManager.tsx';
 import {
@@ -655,82 +656,14 @@ export default function App() {
         )}
 
         {/* TAB 2: JOURNAL & ÉVÉNEMENTS */}
-        {activeTab === 'journal' && (
+        {activeTab === 'journal' && profile && (
           <div className="space-y-4">
-            <div className="card space-y-3">
-              <div className="flex items-center justify-between border-b border-stone-200 dark:border-stone-800 pb-2">
-                <h3 className="text-sm font-bold text-stone-900 dark:text-stone-50 flex items-center gap-2">
-                  <span>📖</span> {lang === 'fr' ? 'Historique des vagues' : 'Waves history'}
-                </h3>
-                <span className="badge-status">
-                  {events.length} {lang === 'fr' ? 'enregistrements' : 'entries'}
-                </span>
-              </div>
-
-              {events.length === 0 ? (
-                <div className="py-8 text-center space-y-2">
-                  <div className="text-3xl">🌱</div>
-                  <p className="text-xs text-stone-500 dark:text-stone-400 font-medium">
-                    {lang === 'fr'
-                      ? 'Aucun événement pour le moment. Votre premier défi apparaîtra dès que vous surmonterez une envie !'
-                      : 'No events yet. Your first challenge will appear here as soon as you conquer a craving!'}
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-2.5 max-h-96 overflow-y-auto pr-1">
-                  {events
-                    .slice()
-                    .reverse()
-                    .map((evt) => {
-                      const isResisted = evt.type === 'resisted';
-                      return (
-                        <div
-                          key={evt.id}
-                          className={`p-3 rounded-xl border text-xs space-y-1 transition-all ${
-                            isResisted
-                              ? 'bg-emerald-50/50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/80 text-stone-800 dark:text-stone-200'
-                              : 'bg-stone-50 dark:bg-stone-800/60 border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="font-bold flex items-center gap-1.5">
-                              <span>{isResisted ? '🌱' : '⚠️'}</span>
-                              <span>
-                                {isResisted
-                                  ? lang === 'fr'
-                                    ? 'Envie surmontée'
-                                    : 'Resisted'
-                                  : lang === 'fr'
-                                    ? 'Rechute passagère'
-                                    : 'Relapse'}
-                              </span>
-                            </span>
-                            <span className="text-[10px] text-stone-500 dark:text-stone-400">
-                              {new Date(evt.ts).toLocaleString(lang === 'fr' ? 'fr-FR' : 'en-US', {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                                day: '2-digit',
-                                month: 'short',
-                              })}
-                            </span>
-                          </div>
-
-                          {evt.trigger && (
-                            <p className="text-xs font-semibold text-stone-900 dark:text-stone-100">
-                              {evt.trigger}
-                            </p>
-                          )}
-                          {evt.note && (
-                            <p className="text-[11px] italic text-stone-500 dark:text-stone-400">
-                              « {evt.note} »
-                            </p>
-                          )}
-                        </div>
-                      );
-                    })}
-                </div>
-              )}
-            </div>
+            {/* Journal View with Evening Check-in (Step 15) */}
+            <JournalView
+              profile={profile}
+              events={events}
+              onEventAdded={() => refreshEventsAndStats(profile)}
+            />
 
             {/* Encrypted Web Crypto Backup Card */}
             <section className="card space-y-3">
