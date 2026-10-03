@@ -225,5 +225,23 @@
     "filterRelapses": "Faux pas & Rechutes",
     "empty": "Aucune entrée dans le journal pour le moment.",
     "newCheckin": "Nouveau bilan de soirée"
+  },
+  "recap": {
+    "title": "Bilan de la semaine & apprentissages",
+    "subtitle": "Tes victoires agrégées, ton épargne cumulée et tes fenêtres de vigilance observées.",
+    "cravingsResisted": "Envies surmontées",
+    "totalCravings": "Envies totales",
+    "successRate": "Taux de résistance",
+    "moneySaved": "Économies réalisées",
+    "goalProgress": "Objectif {goal} : {percent}%",
+    "topTriggers": "Déclencheurs les plus fréquents :",
+    "noTriggers": "Aucun déclencheur dominant identifié cette semaine.",
+    "learnedWindowsTitle": "Nouvelle fenêtre de risque observée !",
+    "acceptBtn": "✓ Accepter et ajouter ce rappel",
+    "declineBtn": "✗ Non merci",
+    "windowAddedNotice": "✓ Fenêtre ajoutée à tes rappels : {label} à {time}.",
+    "generateRecapBtn": "✨ Lire mon message d'encouragement hebdomadaire",
+    "generating": "Rédaction bienveillante...",
+    "encouragementTitle": "Le mot de la semaine :"
   }
 }

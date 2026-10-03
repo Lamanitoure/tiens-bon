@@ -127,6 +127,7 @@ app.post('/api/generate', verifyToken, checkRateLimit, async (req: Request, res:
   }
 
   const isCheckin = body.expected_format === 'checkin';
+  const isRecap = body.expected_format === 'recap';
 
   // 1. Try Gemini API if key is available
   if (process.env.GEMINI_API_KEY) {
@@ -140,19 +141,29 @@ app.post('/api/generate', verifyToken, checkRateLimit, async (req: Request, res:
         },
       });
 
-      const systemInstruction = isCheckin
-        ? 'You are an extraction assistant for a quit-smoking journal. ' +
+      let systemInstruction =
+        'You are Tiens Bon, an empathetic, non-judgmental quit-smoking companion. ' +
+        'You must respond strictly in JSON with exactly two fields: ' +
+        '"challenge" (a 3-minute concrete, safe distraction or grounding task) ' +
+        'and "message" (a warm, encouraging message in 1-3 sentences in the requested language and tone). ' +
+        'Do not wrap in markdown fences or any other text.';
+
+      if (isCheckin) {
+        systemInstruction =
+          'You are an extraction assistant for a quit-smoking journal. ' +
           'Extract trigger, emotion, and outcome from the user evening check-in. ' +
           'Return strictly JSON with fields: ' +
           '"trigger" (short string, e.g. "café", "stress", or "unknown"), ' +
           '"emotion" (one word string, e.g. "calme", "fatigué", "fier", or "unknown"), ' +
           '"outcome" (must be strictly one of: "resisted", "smoked", "unknown"). ' +
-          'Do not provide advice, medical commentary, or health statistics.'
-        : 'You are Tiens Bon, an empathetic, non-judgmental quit-smoking companion. ' +
-          'You must respond strictly in JSON with exactly two fields: ' +
-          '"challenge" (a 3-minute concrete, safe distraction or grounding task) ' +
-          'and "message" (a warm, encouraging message in 1-3 sentences in the requested language and tone). ' +
-          'Do not wrap in markdown fences or any other text.';
+          'Do not provide advice, medical commentary, or health statistics.';
+      } else if (isRecap) {
+        systemInstruction =
+          'You are Tiens Bon, an encouraging quit-smoking companion. ' +
+          'Write a warm, uplifting weekly recap (2-3 sentences max) in her requested tone. ' +
+          'Start with what worked. Use the numbers exactly as given and never add or change a number. ' +
+          'No medical advice, no reproach. Return strictly JSON: {"message": "<your text>"}';
+      }
 
       const response = await ai.models.generateContent({
         model: 'gemini-3.8-flash',
@@ -174,6 +185,12 @@ app.post('/api/generate', verifyToken, checkRateLimit, async (req: Request, res:
           trigger: String(parsed.trigger || 'Moment de pause').slice(0, 200),
           emotion: String(parsed.emotion || 'Calme').slice(0, 100),
           outcome,
+        });
+      }
+
+      if (isRecap && parsed.message) {
+        return res.json({
+          message: String(parsed.message).slice(0, 1000),
         });
       }
 
@@ -228,6 +245,12 @@ app.post('/api/generate', verifyToken, checkRateLimit, async (req: Request, res:
         });
       }
 
+      if (isRecap && parsed.message) {
+        return res.json({
+          message: String(parsed.message).slice(0, 1000),
+        });
+      }
+
       if (parsed.challenge && parsed.message) {
         return res.json({
           challenge: String(parsed.challenge).slice(0, 500),
@@ -261,6 +284,15 @@ app.post('/api/generate', verifyToken, checkRateLimit, async (req: Request, res:
       trigger,
       emotion,
       outcome,
+    });
+  }
+
+  if (isRecap) {
+    const isEn = /write in en|in english/i.test(prompt);
+    return res.json({
+      message: isEn
+        ? 'Every resisted craving is a true victory for your health and your wallet. Keep moving forward step by step.'
+        : 'Bravo pour chaque envie surmontée cette semaine ! Vos victoires consolident votre liberté et vos économies grandissent chaque jour.',
     });
   }
 

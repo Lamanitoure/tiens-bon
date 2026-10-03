@@ -10,6 +10,7 @@ import { FutureSelfMessages } from './components/FutureSelfMessages.tsx';
 import { JournalView } from './components/JournalView.tsx';
 import { PersonalGallery } from './components/PersonalGallery.tsx';
 import { RemindersManager } from './components/RemindersManager.tsx';
+import { WeeklyRecap } from './components/WeeklyRecap.tsx';
 import {
   addEvent,
   addImage,
@@ -658,6 +659,13 @@ export default function App() {
         {/* TAB 2: JOURNAL & ÉVÉNEMENTS */}
         {activeTab === 'journal' && profile && (
           <div className="space-y-4">
+            {/* Weekly Recap & Learned Risk Windows (Step 16) */}
+            <WeeklyRecap
+              events={events}
+              profile={profile}
+              onProfileUpdated={(updated) => setProfile(updated)}
+            />
+
             {/* Journal View with Evening Check-in (Step 15) */}
             <JournalView
               profile={profile}

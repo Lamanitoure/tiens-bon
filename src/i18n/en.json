@@ -225,5 +225,23 @@
     "filterRelapses": "Slips & Relapses",
     "empty": "No journal entries yet.",
     "newCheckin": "New evening check-in"
+  },
+  "recap": {
+    "title": "Weekly recap & learned patterns",
+    "subtitle": "Your aggregated victories, savings to date, and observed risk windows.",
+    "cravingsResisted": "Resisted cravings",
+    "totalCravings": "Total cravings",
+    "successRate": "Success rate",
+    "moneySaved": "Money saved",
+    "goalProgress": "Goal {goal}: {percent}%",
+    "topTriggers": "Top recurring triggers:",
+    "noTriggers": "No dominant triggers identified this week.",
+    "learnedWindowsTitle": "New recurring pattern observed!",
+    "acceptBtn": "✓ Accept and add this reminder",
+    "declineBtn": "✗ No thanks",
+    "windowAddedNotice": "✓ Reminder added: {label} at {time}.",
+    "generateRecapBtn": "✨ Read my weekly encouraging note",
+    "generating": "Composing warm recap...",
+    "encouragementTitle": "Word of the week:"
   }
 }
