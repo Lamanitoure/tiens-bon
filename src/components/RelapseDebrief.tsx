@@ -17,11 +17,14 @@ interface RelapseDebriefProps {
 
 export function RelapseDebrief({ profile, onFinish }: RelapseDebriefProps) {
   const [selectedTrigger, setSelectedTrigger] = useState<string>('coffee');
-  const [selectedMissing, setSelectedMissing] = useState<string>('time');
-  const [planIf, setPlanIf] = useState<string>('');
-  const [planThen, setPlanThen] = useState<string>('');
+  const [selectedMissing, setSelectedMissing] = useState<string>('alternative');
+  const [planIf, setPlanIf] = useState<string>('Si j’ai envie de fumer avec mon café du matin');
+  const [planThen, setPlanThen] = useState<string>(
+    'Alors je bois un grand verre d’eau fraîche et je change de pièce',
+  );
   const [consolidationNote, setConsolidationNote] = useState<string>('');
   const [encouragementPhrase, setEncouragementPhrase] = useState<string>('');
+  const [wantToSavePlan, setWantToSavePlan] = useState<boolean>(true);
 
   useEffect(() => {
     // 1. Pick authentic encouragement phrase from profile
@@ -29,7 +32,7 @@ export function RelapseDebrief({ profile, onFinish }: RelapseDebriefProps) {
       setEncouragementPhrase(profile.phrases[Math.floor(Math.random() * profile.phrases.length)]);
     }
 
-    // 2. Fetch consolidation note from Gemma or fallback
+    // 2. Fetch consolidation note from model or fallback (compassionate & non-guilt)
     const fallback = getRandomFallback(profile.language);
     setConsolidationNote(fallback.message);
 
@@ -41,7 +44,7 @@ export function RelapseDebrief({ profile, onFinish }: RelapseDebriefProps) {
         if (validated.sanitized?.message) {
           setConsolidationNote(validated.sanitized.message);
         }
-      } catch (_err) {
+      } catch {
         // use fallback without network
       }
     })();
@@ -49,15 +52,41 @@ export function RelapseDebrief({ profile, onFinish }: RelapseDebriefProps) {
 
   const handleSelectTrigger = (triggerKey: string) => {
     setSelectedTrigger(triggerKey);
-    if (!planIf) {
-      const triggerLabel = t(`relapse.triggers.${triggerKey}`);
-      setPlanIf(`Si je me retrouve dans la situation : ${triggerLabel}`);
+    const triggerLabel = t(`relapse.triggers.${triggerKey}`);
+
+    // Pre-populate compassionate and realistic if-then plan suggestions
+    switch (triggerKey) {
+      case 'coffee':
+        setPlanIf('Si j’ai envie d’une cigarette avec mon café');
+        setPlanThen('Alors je prends un grand verre d’eau fraîche et je change de place');
+        break;
+      case 'stress':
+        setPlanIf('Si un coup de stress soudain me submerge');
+        setPlanThen('Alors je fais 3 respirations complètes et je marche 2 minutes');
+        break;
+      case 'alcohol':
+      case 'social':
+        setPlanIf('Si je suis en soirée ou en groupe autour de fumeurs');
+        setPlanThen('Alors je garde un verre frais à la main et je reste un peu à l’écart');
+        break;
+      case 'boredom':
+        setPlanIf('Si je m’ennuie ou que j’attends');
+        setPlanThen('Alors j’occupe mes mains avec une activité ou une courte marche');
+        break;
+      case 'argument':
+        setPlanIf('Si une tension ou une dispute survient');
+        setPlanThen('Alors je souffle 3 minutes avant de réagir');
+        break;
+      default:
+        setPlanIf(`Si je me retrouve dans la situation : ${triggerLabel}`);
+        setPlanThen('Alors je bois un verre d’eau et je respire profondément');
+        break;
     }
   };
 
   const handleSaveAndRestart = async () => {
     let planSaved = false;
-    if (planIf.trim() && planThen.trim()) {
+    if (wantToSavePlan && planIf.trim() && planThen.trim()) {
       try {
         await addPlan({
           id: `plan-${Date.now()}`,
@@ -65,7 +94,7 @@ export function RelapseDebrief({ profile, onFinish }: RelapseDebriefProps) {
           thenText: planThen.trim(),
         });
         planSaved = true;
-      } catch (_err) {
+      } catch {
         // ignore
       }
     }
@@ -81,65 +110,75 @@ export function RelapseDebrief({ profile, onFinish }: RelapseDebriefProps) {
   const handleSkip = () => {
     onFinish({
       trigger: selectedTrigger,
+      missingSupport: selectedMissing,
+      planSaved: false,
     });
   };
 
   const triggersList = [
     { key: 'coffee', label: t('relapse.triggers.coffee') },
-    { key: 'alcohol', label: t('relapse.triggers.alcohol') },
     { key: 'stress', label: t('relapse.triggers.stress') },
+    { key: 'social', label: t('relapse.triggers.social') },
+    { key: 'alcohol', label: t('relapse.triggers.alcohol') },
     { key: 'argument', label: t('relapse.triggers.argument') },
     { key: 'boredom', label: t('relapse.triggers.boredom') },
-    { key: 'social', label: t('relapse.triggers.social') },
     { key: 'other', label: t('relapse.triggers.other') },
   ];
 
   const missingList = [
-    { key: 'time', label: t('relapse.missing.time') },
-    { key: 'support', label: t('relapse.missing.support') },
-    { key: 'place', label: t('relapse.missing.place') },
     { key: 'alternative', label: t('relapse.missing.alternative') },
+    { key: 'support', label: t('relapse.missing.support') },
+    { key: 'calm', label: t('relapse.missing.place') },
+    { key: 'distraction', label: t('relapse.missing.time') },
   ];
 
   return (
-    <div className="card space-y-6 p-6 bg-white border-stone-200 text-stone-900 shadow-md">
-      {/* Compassionate Header */}
-      <div className="space-y-2 border-b border-stone-200 pb-4">
+    <div className="card space-y-5 p-5 bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 text-stone-900 dark:text-stone-100 shadow-md">
+      {/* Compassionate Header (Anti-alarm, No guilt) */}
+      <div className="space-y-2 border-b border-stone-200 dark:border-stone-800 pb-3">
         <div className="flex items-center gap-2.5">
           <span className="text-2xl">🌱</span>
           <div>
-            <h3 className="text-base font-bold text-stone-900">{t('relapse.title')}</h3>
-            <p className="text-xs text-stone-500 font-medium">{t('relapse.subtitle')}</p>
+            <h3 className="text-sm font-bold text-stone-900 dark:text-stone-50">
+              {t('relapse.title')}
+            </h3>
+            <p className="text-[11px] text-stone-500 dark:text-stone-400 font-medium">
+              {t('relapse.subtitle')}
+            </p>
           </div>
         </div>
-        <p className="text-xs text-stone-700 leading-relaxed bg-stone-50 p-3 rounded-xl border border-stone-200/80">
+        <p className="text-xs text-stone-700 dark:text-stone-300 leading-relaxed bg-stone-50 dark:bg-stone-800/60 p-3 rounded-xl border border-stone-200/80 dark:border-stone-700">
           {t('relapse.message')}
         </p>
       </div>
 
-      {/* Consolidation Note */}
+      {/* Encouragement note */}
       {consolidationNote && (
-        <div className="p-3.5 bg-emerald-50/70 border border-emerald-200/80 rounded-xl space-y-1">
-          <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-900">
+        <div className="p-3 bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800 rounded-xl space-y-1">
+          <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-900 dark:text-emerald-300">
             Un mot pour souffler
           </div>
-          <p className="text-xs text-stone-800 italic leading-relaxed">« {consolidationNote} »</p>
+          <p className="text-xs text-stone-800 dark:text-stone-200 italic leading-relaxed">
+            « {consolidationNote} »
+          </p>
         </div>
       )}
 
-      {/* Step 1: Trigger Selection */}
-      <div className="space-y-2">
-        <h4 className="text-xs font-bold text-stone-900 block">{t('relapse.step1Title')}</h4>
-        <div className="flex flex-wrap gap-2">
+      {/* Question 1: What happened? (Trigger selection) */}
+      <div className="space-y-1.5">
+        <span className="text-xs font-bold text-stone-900 dark:text-stone-100 block">
+          1. {t('relapse.step1Title')}
+        </span>
+        <div className="flex flex-wrap gap-1.5">
           {triggersList.map((trig) => (
             <button
               key={trig.key}
               type="button"
               onClick={() => handleSelectTrigger(trig.key)}
-              className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-all cursor-pointer ${
+              className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-all cursor-pointer min-h-[34px] ${
                 selectedTrigger === trig.key
-                  ? 'bg-emerald-800 text-white border-emerald-800 shadow-xs'
-                  : 'bg-stone-50 text-stone-700 border-stone-300 hover:bg-stone-100'
+                  ? 'bg-emerald-800 dark:bg-emerald-700 text-white border-emerald-800 shadow-xs'
+                  : 'bg-stone-50 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-700 hover:bg-stone-100'
               }`}
             >
               {trig.label}
@@ -148,19 +187,21 @@ export function RelapseDebrief({ profile, onFinish }: RelapseDebriefProps) {
         </div>
       </div>
 
-      {/* Step 2: What was missing */}
-      <div className="space-y-2">
-        <h4 className="text-xs font-bold text-stone-900 block">{t('relapse.step2Title')}</h4>
-        <div className="flex flex-col gap-1.5">
+      {/* Question 2: What was missing? (support, distraction, calm, alternative) */}
+      <div className="space-y-1.5">
+        <span className="text-xs font-bold text-stone-900 dark:text-stone-100 block">
+          2. {t('relapse.step2Title')}
+        </span>
+        <div className="grid grid-cols-2 gap-1.5">
           {missingList.map((item) => (
             <button
               key={item.key}
               type="button"
               onClick={() => setSelectedMissing(item.key)}
-              className={`text-xs text-left px-3 py-2 rounded-lg border transition-all cursor-pointer ${
+              className={`text-xs text-left p-2.5 rounded-lg border transition-all cursor-pointer min-h-[38px] ${
                 selectedMissing === item.key
-                  ? 'bg-emerald-50 text-emerald-950 border-emerald-300 font-semibold'
-                  : 'bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100'
+                  ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-950 dark:text-emerald-200 border-emerald-300 dark:border-emerald-700 font-semibold'
+                  : 'bg-stone-50 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-700 hover:bg-stone-100'
               }`}
             >
               {item.label}
@@ -169,55 +210,75 @@ export function RelapseDebrief({ profile, onFinish }: RelapseDebriefProps) {
         </div>
       </div>
 
-      {/* Step 3: If/Then Plan Adjustment */}
-      <div className="space-y-3 pt-1 border-t border-stone-100">
-        <h4 className="text-xs font-bold text-stone-900 block">{t('relapse.step3Title')}</h4>
-
-        <div className="space-y-1">
-          <label htmlFor="plan-if-input" className="text-[11px] font-semibold text-stone-600 block">
-            {t('relapse.planIfLabel')}
+      {/* Question 3: What can we try next time? (If/Then Plan) */}
+      <div className="space-y-2.5 pt-2 border-t border-stone-200 dark:border-stone-800">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold text-stone-900 dark:text-stone-100 block">
+            3. {t('relapse.step3Title')}
+          </span>
+          <label className="flex items-center gap-1.5 text-[11px] text-stone-600 dark:text-stone-300 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={wantToSavePlan}
+              onChange={(e) => setWantToSavePlan(e.target.checked)}
+              className="accent-emerald-700 rounded"
+            />
+            <span>Enregistrer ce plan</span>
           </label>
-          <input
-            id="plan-if-input"
-            type="text"
-            value={planIf}
-            onChange={(e) => setPlanIf(e.target.value)}
-            placeholder={t('relapse.planIfPlaceholder')}
-            className="w-full px-3 py-2 text-xs rounded-lg border border-stone-300 bg-stone-50 text-stone-900 focus:bg-white"
-          />
         </div>
 
-        <div className="space-y-1">
-          <label
-            htmlFor="plan-then-input"
-            className="text-[11px] font-semibold text-stone-600 block"
-          >
-            {t('relapse.planThenLabel')}
-          </label>
-          <input
-            id="plan-then-input"
-            type="text"
-            value={planThen}
-            onChange={(e) => setPlanThen(e.target.value)}
-            placeholder={t('relapse.planThenPlaceholder')}
-            className="w-full px-3 py-2 text-xs rounded-lg border border-stone-300 bg-stone-50 text-stone-900 focus:bg-white"
-          />
-        </div>
+        {wantToSavePlan && (
+          <div className="space-y-2 p-3 bg-stone-50 dark:bg-stone-800/50 rounded-xl border border-stone-200 dark:border-stone-700">
+            <div className="space-y-1">
+              <label
+                htmlFor="plan-if-input"
+                className="text-[11px] font-semibold text-stone-600 dark:text-stone-300 block"
+              >
+                {t('relapse.planIfLabel')}
+              </label>
+              <input
+                id="plan-if-input"
+                type="text"
+                value={planIf}
+                onChange={(e) => setPlanIf(e.target.value)}
+                placeholder={t('relapse.planIfPlaceholder')}
+                className="w-full px-3 py-2 text-xs rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label
+                htmlFor="plan-then-input"
+                className="text-[11px] font-semibold text-stone-600 dark:text-stone-300 block"
+              >
+                {t('relapse.planThenLabel')}
+              </label>
+              <input
+                id="plan-then-input"
+                type="text"
+                value={planThen}
+                onChange={(e) => setPlanThen(e.target.value)}
+                placeholder={t('relapse.planThenPlaceholder')}
+                className="w-full px-3 py-2 text-xs rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-stone-100"
+              />
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Personal Voice Phrase */}
+      {/* Authentic Voice Phrase */}
       {encouragementPhrase && (
-        <blockquote className="text-xs italic text-stone-600 border-l-2 border-emerald-700 pl-3 py-1">
+        <blockquote className="text-xs italic text-stone-600 dark:text-stone-300 border-l-2 border-emerald-700 dark:border-emerald-400 pl-3 py-1">
           « {encouragementPhrase} »
         </blockquote>
       )}
 
-      {/* Actions */}
-      <div className="space-y-2 pt-2">
+      {/* Action Buttons */}
+      <div className="space-y-2 pt-1">
         <button
           type="button"
           onClick={handleSaveAndRestart}
-          className="btn-primary text-xs py-3 w-full cursor-pointer flex justify-center items-center gap-1.5"
+          className="btn-primary text-xs py-3 w-full cursor-pointer flex justify-center items-center gap-1.5 min-h-[46px]"
         >
           <span>🚀</span> {t('relapse.saveAndRestart')}
         </button>
@@ -225,7 +286,7 @@ export function RelapseDebrief({ profile, onFinish }: RelapseDebriefProps) {
         <button
           type="button"
           onClick={handleSkip}
-          className="btn-secondary text-xs py-2 w-full text-stone-600 border-transparent hover:bg-stone-100 cursor-pointer"
+          className="btn-secondary text-xs py-2 w-full text-stone-600 dark:text-stone-300 border-transparent hover:bg-stone-100 dark:hover:bg-stone-800 cursor-pointer min-h-[38px]"
         >
           {t('relapse.skipDebrief')}
         </button>

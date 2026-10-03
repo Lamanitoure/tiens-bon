@@ -1,8 +1,10 @@
 import { useEffect, useId, useState } from 'react';
+import { getAllPlans } from '../db/index.ts';
 import { t } from '../i18n/index.ts';
 import { activeConfig } from '../lib/config.ts';
 import { getAvailableContextChips, suggestContextFromTime } from '../lib/craving.ts';
 import { buildPersonalizedFallback, getNextPregeneratedMessage } from '../lib/pregeneration.ts';
+import type { Plan } from '../schemas/plans.ts';
 import type { Profile } from '../schemas/profile.ts';
 import { BreathingAnchor } from './BreathingAnchor.tsx';
 import { RelapseDebrief } from './RelapseDebrief.tsx';
@@ -24,6 +26,27 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
   // Context suggestion based on current time (Step 10)
   const [selectedContext, setSelectedContext] = useState(() => suggestContextFromTime(profile));
   const availableChips = getAvailableContextChips(profile);
+  const [userPlans, setUserPlans] = useState<Plan[]>([]);
+
+  // Load existing If-Then plans to surface during craving (Step 11)
+  useEffect(() => {
+    getAllPlans()
+      .then(setUserPlans)
+      .catch(() => {});
+  }, []);
+
+  // Find if an if-then plan matches current context (Step 11)
+  const matchingPlan = userPlans.find((p) => {
+    const search = selectedContext.toLowerCase();
+    const ifLower = p.ifText.toLowerCase();
+    return (
+      ifLower.includes(search) ||
+      (search.includes('café') && ifLower.includes('café')) ||
+      (search.includes('stress') && ifLower.includes('stress')) ||
+      (search.includes('repas') && ifLower.includes('repas')) ||
+      (search.includes('soir') && ifLower.includes('soir'))
+    );
+  });
 
   // Instant local-first challenge and message (< 100 ms)
   const initialFallback = buildPersonalizedFallback(profile, 'craving');
@@ -272,6 +295,32 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
 
       {/* Visual Anchor: Breathing Anchor */}
       <BreathingAnchor isDiscreet={isDiscreet} />
+
+      {/* Surfaced If-Then Plan for this context (Step 11) */}
+      {matchingPlan && (
+        <div
+          className={`p-3.5 rounded-xl border space-y-1.5 ${
+            isDiscreet
+              ? 'bg-stone-900 border-stone-700 text-stone-200'
+              : 'bg-emerald-100/70 border-emerald-300 text-emerald-950'
+          }`}
+        >
+          <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider">
+            <span className="flex items-center gap-1.5">
+              <span>🛡️</span>
+              <span>{isDiscreet ? 'Plan préparé' : 'Ton plan d’action prévu'}</span>
+            </span>
+            <button
+              type="button"
+              onClick={() => setActiveChallenge(matchingPlan.thenText)}
+              className="text-[10px] underline font-bold cursor-pointer opacity-90 hover:opacity-100"
+            >
+              Utiliser comme défi
+            </button>
+          </div>
+          <p className="text-xs font-semibold leading-relaxed">{matchingPlan.thenText}</p>
+        </div>
+      )}
 
       {/* Concrete Challenge Section */}
       <div
