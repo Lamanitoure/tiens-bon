@@ -243,5 +243,17 @@
     "generateRecapBtn": "✨ Lire mon message d'encouragement hebdomadaire",
     "generating": "Rédaction bienveillante...",
     "encouragementTitle": "Le mot de la semaine :"
+  },
+  "audio": {
+    "listenBtn": "🎧 Écouter le défi (yeux fermés)",
+    "playing": "Lecture audio en cours...",
+    "paused": "En pause",
+    "pauseBtn": "⏸️ Pause",
+    "resumeBtn": "▶️ Reprendre",
+    "stopBtn": "⏹️ Arrêter",
+    "speed": "Vitesse :",
+    "speedCalm": "0.8x Calme",
+    "speedNormal": "1.0x Normale",
+    "unsupported": "Synthèse vocale non disponible sur ce navigateur."
   }
 }

@@ -9,6 +9,7 @@ import type { ImageRecord } from '../schemas/images.ts';
 import type { Plan } from '../schemas/plans.ts';
 import type { Profile } from '../schemas/profile.ts';
 import type { SelfTalk } from '../schemas/selftalk.ts';
+import { AudioChallengePlayer } from './AudioChallengePlayer.tsx';
 import { BreathingAnchor } from './BreathingAnchor.tsx';
 import { RelapseDebrief } from './RelapseDebrief.tsx';
 
@@ -342,9 +343,9 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
         </div>
       )}
 
-      {/* Concrete Challenge Section */}
+      {/* Concrete Challenge Section with Audio Player (Step 17) */}
       <div
-        className={`p-3.5 rounded-xl border space-y-1.5 ${
+        className={`p-3.5 rounded-xl border space-y-2.5 ${
           isDiscreet
             ? 'bg-stone-900 border-stone-800 text-stone-200'
             : 'bg-emerald-50/70 border-emerald-200 text-emerald-950'
@@ -361,6 +362,13 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
           </button>
         </div>
         <p className="text-xs font-semibold leading-relaxed">{activeChallenge}</p>
+
+        {/* Audio Challenge Player (Step 17) */}
+        <AudioChallengePlayer
+          text={activeChallenge}
+          language={profile.language}
+          isDiscreet={isDiscreet}
+        />
       </div>
 
       {/* Personal Resource Photo & Caption (Step 13) */}

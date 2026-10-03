@@ -243,5 +243,17 @@
     "generateRecapBtn": "✨ Read my weekly encouraging note",
     "generating": "Composing warm recap...",
     "encouragementTitle": "Word of the week:"
+  },
+  "audio": {
+    "listenBtn": "🎧 Listen (eyes closed)",
+    "playing": "Playing challenge audio...",
+    "paused": "Paused",
+    "pauseBtn": "⏸️ Pause",
+    "resumeBtn": "▶️ Resume",
+    "stopBtn": "⏹️ Stop",
+    "speed": "Speed:",
+    "speedCalm": "0.8x Calm",
+    "speedNormal": "1.0x Normal",
+    "unsupported": "Speech synthesis not supported on this browser."
   }
 }
