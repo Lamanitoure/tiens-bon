@@ -5,11 +5,14 @@
 
 import { type ChangeEvent, useCallback, useEffect, useState } from 'react';
 import demoProfile from '../demo/profile.demo.json';
+import { AppPinLockCard, AppPinUnlockOverlay } from './components/AppPinLock.tsx';
 import { CravingSession } from './components/CravingSession.tsx';
 import { FutureSelfMessages } from './components/FutureSelfMessages.tsx';
 import { JournalView } from './components/JournalView.tsx';
 import { PersonalGallery } from './components/PersonalGallery.tsx';
+import { ProfileEditor } from './components/ProfileEditor.tsx';
 import { RemindersManager } from './components/RemindersManager.tsx';
+import { SourcedFacts } from './components/SourcedFacts.tsx';
 import { WearableManager } from './components/WearableManager.tsx';
 import { WeeklyRecap } from './components/WeeklyRecap.tsx';
 import {
@@ -20,13 +23,16 @@ import {
   getAllImages,
   getAllPlans,
   getAllSelfTalk,
+  getSettings,
   getStoredProfile,
   getUnusedPregenerated,
+  resetDatabase,
   setStoredProfile,
 } from './db/index.ts';
 import { getLanguage, initLanguage, setLanguage, subscribeLanguage, t } from './i18n/index.ts';
 import { checkModelStatus, generateMotivation, getStoredToken, setStoredToken } from './lib/api.ts';
 import { activeConfig } from './lib/config.ts';
+import { ensureDemoPregeneratedSeeded, isStaticDemoMode } from './lib/demo-mode.ts';
 import { generateDailyBatch, shouldTriggerAutomaticBatch } from './lib/pregeneration.ts';
 import { computeUserStats, type UserStats } from './lib/stats.ts';
 import { checkActiveTrigger, consumeActiveTrigger, detectUrlTrigger } from './lib/wearable.ts';
@@ -34,6 +40,7 @@ import type { EventRecord } from './schemas/events.ts';
 import type { CravingOutput } from './schemas/model.ts';
 import type { Plan } from './schemas/plans.ts';
 import { type Profile, ProfileSchema } from './schemas/profile.ts';
+import type { LockSettings } from './schemas/settings.ts';
 import {
   type BackupData,
   decryptBackup,
@@ -80,6 +87,11 @@ export default function App() {
     null,
   );
   const [pregenSuccessMessage, setPregenSuccessMessage] = useState<string | null>(null);
+
+  // Optional App PIN Lock state (Step 19)
+  const [lockSettings, setLockSettings] = useState<LockSettings | undefined>(undefined);
+  const [isLocked, setIsLocked] = useState(false);
+  const isDemo = isStaticDemoMode();
 
   const refreshEventsAndStats = useCallback(async (currentProfile: Profile | null) => {
     try {
@@ -130,6 +142,16 @@ export default function App() {
           current = parsed;
         }
         setProfile(current);
+
+        // Load optional PIN lock settings (Step 19)
+        const storedSettings = await getSettings();
+        if (storedSettings?.lockSettings?.enabled) {
+          setLockSettings(storedSettings.lockSettings);
+          setIsLocked(true);
+        }
+
+        // Seed bundled Gemma messages if cache is empty (Step 20)
+        await ensureDemoPregeneratedSeeded();
         await refreshEventsAndStats(current);
 
         // Check for automatic batch generation (older than 20 hours and model online)
@@ -217,6 +239,51 @@ export default function App() {
           </ul>
         </div>
       </main>
+    );
+  }
+
+  // Delete everything handler (Section 5 Item 20)
+  const handleDeleteAllData = async () => {
+    try {
+      await resetDatabase();
+      localStorage.clear();
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+      }
+      if ('serviceWorker' in navigator) {
+        const reg = await navigator.serviceWorker.getRegistration();
+        const sub = await reg?.pushManager?.getSubscription();
+        if (sub) {
+          await sub.unsubscribe().catch(() => {});
+        }
+      }
+      const token = getStoredToken();
+      if (token) {
+        await fetch('/api/data/clear', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+        }).catch(() => {});
+      }
+    } catch {
+      // ignore
+    }
+    const freshProfile = ProfileSchema.parse(demoProfile);
+    await setStoredProfile(freshProfile);
+    await ensureDemoPregeneratedSeeded();
+    setProfile(freshProfile);
+    setLockSettings({ enabled: false });
+    setIsLocked(false);
+    await refreshEventsAndStats(freshProfile);
+  };
+
+  if (isLocked && lockSettings?.enabled) {
+    return (
+      <AppPinUnlockOverlay
+        lockSettings={lockSettings}
+        onUnlocked={() => setIsLocked(false)}
+        onResetAllData={handleDeleteAllData}
+      />
     );
   }
 
@@ -455,6 +522,12 @@ export default function App() {
 
       {/* Main Content Area */}
       <main className="flex-1 py-2 space-y-5">
+        {/* Bundled Gemma Demo Banner (Step 20) */}
+        <div className="px-3.5 py-2 rounded-xl bg-emerald-50/90 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/80 text-[11px] text-emerald-900 dark:text-emerald-200 flex items-center gap-2 font-medium">
+          <span>✨</span>
+          <span>{t('demo.bundledBanner')}</span>
+        </div>
+
         {/* Immediate Distress Alert Banner */}
         {distressDetected && profile && (
           <div className="p-4 bg-rose-50 dark:bg-rose-950/70 border-2 border-rose-300 dark:border-rose-800 rounded-2xl space-y-3 shadow-sm">
@@ -618,6 +691,9 @@ export default function App() {
                 </button>
               </section>
             )}
+
+            {/* Sourced Health Facts (Step 17 v2) */}
+            <SourcedFacts />
 
             {/* Quick Note & Test Prompt Section */}
             <section className="card space-y-4">
@@ -878,47 +954,66 @@ export default function App() {
               </div>
             </div>
 
-            {/* Model Connection Settings Card */}
-            <section className="card space-y-3 border-stone-200 dark:border-stone-700">
-              <div className="flex items-center justify-between">
-                <h4 className="text-xs font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">
-                  <span>🤖</span> {t('model.title')}
-                </h4>
-                <span className="badge-status">Gemma 2:2b</span>
-              </div>
+            {/* Optional App PIN Lock (Step 19) */}
+            <AppPinLockCard
+              lockSettings={lockSettings}
+              onLockSettingsChanged={(next) => setLockSettings(next)}
+              onLockNow={() => setIsLocked(true)}
+            />
 
-              <div className="flex gap-2">
-                <input
-                  type="password"
-                  value={tokenInput}
-                  onChange={(e) => setTokenInput(e.target.value)}
-                  placeholder={t('model.tokenPlaceholder')}
-                  className="flex-1 px-3 py-2 text-xs rounded-lg border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-900"
-                />
+            {/* Personal Profile Editor & Delete Everything (Step 6 & Item 20) */}
+            <ProfileEditor
+              profile={profile}
+              onProfileUpdated={(updated) => {
+                setProfile(updated);
+                refreshEventsAndStats(updated);
+              }}
+              onDeleteAll={handleDeleteAllData}
+            />
+
+            {/* Model Connection Settings Card (hidden in static demo mode) */}
+            {!isDemo && (
+              <section className="card space-y-3 border-stone-200 dark:border-stone-700">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">
+                    <span>🤖</span> {t('model.title')}
+                  </h4>
+                  <span className="badge-status">Gemma 2:2b</span>
+                </div>
+
+                <div className="flex gap-2">
+                  <input
+                    type="password"
+                    value={tokenInput}
+                    onChange={(e) => setTokenInput(e.target.value)}
+                    placeholder={t('model.tokenPlaceholder')}
+                    className="flex-1 px-3 py-2 text-xs rounded-lg border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-900"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleSaveToken}
+                    className="btn-secondary !w-auto text-xs py-2 px-3 shrink-0 min-h-[38px]"
+                  >
+                    {t('model.saveToken')}
+                  </button>
+                </div>
+
                 <button
                   type="button"
-                  onClick={handleSaveToken}
-                  className="btn-secondary !w-auto text-xs py-2 px-3 shrink-0 min-h-[38px]"
+                  onClick={handleCheckModelStatus}
+                  disabled={isCheckingStatus}
+                  className="btn-secondary text-xs py-2.5 w-full flex justify-center items-center gap-2 min-h-[40px]"
                 >
-                  {t('model.saveToken')}
+                  {isCheckingStatus ? t('common.loading') : t('model.checkStatus')}
                 </button>
-              </div>
 
-              <button
-                type="button"
-                onClick={handleCheckModelStatus}
-                disabled={isCheckingStatus}
-                className="btn-secondary text-xs py-2.5 w-full flex justify-center items-center gap-2 min-h-[40px]"
-              >
-                {isCheckingStatus ? t('common.loading') : t('model.checkStatus')}
-              </button>
-
-              {modelStatus && (
-                <div className="p-2.5 bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 text-xs text-stone-800 dark:text-stone-200 font-medium">
-                  {modelStatus}
-                </div>
-              )}
-            </section>
+                {modelStatus && (
+                  <div className="p-2.5 bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 text-xs text-stone-800 dark:text-stone-200 font-medium">
+                    {modelStatus}
+                  </div>
+                )}
+              </section>
+            )}
           </div>
         )}
       </main>

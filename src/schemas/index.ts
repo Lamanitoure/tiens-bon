@@ -1,5 +1,6 @@
 export * from './config.ts';
 export * from './events.ts';
+export * from './facts.ts';
 export * from './images.ts';
 export * from './model.ts';
 export * from './plans.ts';

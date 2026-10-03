@@ -14,28 +14,38 @@ describe('Step 17: Audio challenges via SpeechSynthesis (TTS)', () => {
   let mockCancel: ReturnType<typeof vi.fn>;
   let mockPause: ReturnType<typeof vi.fn>;
   let mockResume: ReturnType<typeof vi.fn>;
+  let mockSynthesis: {
+    speak: ReturnType<typeof vi.fn>;
+    cancel: ReturnType<typeof vi.fn>;
+    pause: ReturnType<typeof vi.fn>;
+    resume: ReturnType<typeof vi.fn>;
+    speaking: boolean;
+    paused: boolean;
+    getVoices: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(() => {
     mockSpeak = vi.fn();
     mockCancel = vi.fn();
     mockPause = vi.fn();
     mockResume = vi.fn();
+    mockSynthesis = {
+      speak: mockSpeak,
+      cancel: mockCancel,
+      pause: mockPause,
+      resume: mockResume,
+      speaking: false,
+      paused: false,
+      getVoices: vi.fn().mockReturnValue([
+        { lang: 'fr-FR', name: 'Voix française', localService: true },
+        { lang: 'en-US', name: 'English voice', localService: true },
+      ]),
+    };
 
     // Mock window.speechSynthesis
     Object.defineProperty(window, 'speechSynthesis', {
       writable: true,
-      value: {
-        speak: mockSpeak,
-        cancel: mockCancel,
-        pause: mockPause,
-        resume: mockResume,
-        speaking: false,
-        paused: false,
-        getVoices: vi.fn().mockReturnValue([
-          { lang: 'fr-FR', name: 'Voix française', localService: true },
-          { lang: 'en-US', name: 'English voice', localService: true },
-        ]),
-      },
+      value: mockSynthesis,
     });
 
     // Mock SpeechSynthesisUtterance
@@ -91,10 +101,10 @@ describe('Step 17: Audio challenges via SpeechSynthesis (TTS)', () => {
       expect(mockSpeak).toHaveBeenCalledWith(utterance);
 
       // Simulate start and end events
-      utterance?.onstart?.();
+      utterance?.onstart?.call(utterance, new Event('start') as SpeechSynthesisEvent);
       expect(onStart).toHaveBeenCalled();
 
-      utterance?.onend?.();
+      utterance?.onend?.call(utterance, new Event('end') as SpeechSynthesisEvent);
       expect(onEnd).toHaveBeenCalled();
     });
 
@@ -114,15 +124,15 @@ describe('Step 17: Audio challenges via SpeechSynthesis (TTS)', () => {
 
   describe('Pause, Resume, and Stop controls', () => {
     it('pauses ongoing speech when playing', () => {
-      window.speechSynthesis.speaking = true;
-      window.speechSynthesis.paused = false;
+      mockSynthesis.speaking = true;
+      mockSynthesis.paused = false;
 
       pauseSpeech();
       expect(mockPause).toHaveBeenCalled();
     });
 
     it('resumes paused speech', () => {
-      window.speechSynthesis.paused = true;
+      mockSynthesis.paused = true;
 
       resumeSpeech();
       expect(mockResume).toHaveBeenCalled();
@@ -134,12 +144,12 @@ describe('Step 17: Audio challenges via SpeechSynthesis (TTS)', () => {
     });
 
     it('reflects speech state helpers accurately', () => {
-      window.speechSynthesis.speaking = true;
-      window.speechSynthesis.paused = false;
+      mockSynthesis.speaking = true;
+      mockSynthesis.paused = false;
       expect(isSpeaking()).toBe(true);
       expect(isPaused()).toBe(false);
 
-      window.speechSynthesis.paused = true;
+      mockSynthesis.paused = true;
       expect(isPaused()).toBe(true);
     });
   });

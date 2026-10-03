@@ -3,7 +3,9 @@ import { z } from 'zod';
 export const LockSettingsSchema = z
   .object({
     enabled: z.boolean(),
-    salt: z.string().optional(),
+    salt: z.string().max(256).optional(),
+    iv: z.string().max(256).optional(),
+    verifier: z.string().max(512).optional(),
   })
   .strict();
 

@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { GoogleGenAI } from '@google/genai';
@@ -39,6 +40,15 @@ function stripMarkdownFences(rawText: string): string {
   return cleaned.trim();
 }
 
+function safeCompareTokens(a: string, b: string): boolean {
+  const bufA = Buffer.from(a, 'utf-8');
+  const bufB = Buffer.from(b, 'utf-8');
+  if (bufA.length !== bufB.length) {
+    return false;
+  }
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
 // Bearer token verification
 function verifyToken(req: Request, res: Response, next: NextFunction) {
   const configuredToken = (process.env.ACCESS_TOKEN || 'tiens-bon-token').trim();
@@ -51,7 +61,7 @@ function verifyToken(req: Request, res: Response, next: NextFunction) {
   }
 
   const providedToken = authHeader.slice(7).trim();
-  if (configuredToken && providedToken !== configuredToken) {
+  if (configuredToken && !safeCompareTokens(providedToken, configuredToken)) {
     return res.status(401).json({
       detail: 'Invalid access token.',
     });
@@ -88,7 +98,7 @@ function verifyTokenOrQuery(req: Request, res: Response, next: NextFunction) {
     });
   }
 
-  if (configuredToken && providedToken !== configuredToken) {
+  if (configuredToken && !safeCompareTokens(providedToken, configuredToken)) {
     return res.status(401).json({
       detail: 'Invalid access token.',
     });
@@ -105,6 +115,12 @@ app.use((_req: Request, res: Response, next: NextFunction) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Referrer-Policy', 'no-referrer');
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  if (isProd) {
+    res.setHeader(
+      'Content-Security-Policy',
+      "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'self'",
+    );
+  }
   next();
 });
 
@@ -176,6 +192,11 @@ app.get('/api/trigger/status', verifyTokenOrQuery, (_req: Request, res: Response
 app.post('/api/trigger/consume', verifyTokenOrQuery, (_req: Request, res: Response) => {
   activeWearableTrigger = null;
   res.json({ status: 'consumed' });
+});
+
+app.post('/api/data/clear', verifyToken, (_req: Request, res: Response) => {
+  activeWearableTrigger = null;
+  res.json({ status: 'cleared' });
 });
 
 app.post('/api/generate', verifyToken, checkRateLimit, async (req: Request, res: Response) => {

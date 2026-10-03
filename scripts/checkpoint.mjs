@@ -6,12 +6,16 @@ const message = process.argv[2];
 
 if (!message || message.trim().length === 0) {
   console.error('\n❌ Error: Checkpoint message is required.');
-  console.error('Usage: npm run checkpoint "feat: description of changes"\n');
+  console.error('Usage: pnpm checkpoint "feat: description of changes"\n');
   process.exit(1);
 }
 
+const hasPnpm = spawnSync('pnpm', ['--version'], { shell: true, stdio: 'ignore' }).status === 0;
+const pkgCmd = hasPnpm ? 'pnpm' : 'npm';
+
 function runStep(label, command, args = []) {
-  console.log(`\n⏳ Running: ${label} (${command} ${args.join(' ')})...`);
+  const displayCmd = command === pkgCmd ? 'pnpm' : command;
+  console.log(`\n⏳ Running: ${label} (${displayCmd} ${args.join(' ')})...`);
   const result = spawnSync(command, args, {
     stdio: 'inherit',
     shell: true,
@@ -31,16 +35,16 @@ console.log(`🚀 Starting Tiens Bon Checkpoint: "${message.trim()}"`);
 console.log('========================================');
 
 // 1. Typecheck
-runStep('TypeScript Type Check', 'npm', ['run', 'typecheck']);
+runStep('TypeScript Type Check', pkgCmd, ['run', 'typecheck']);
 
 // 2. Lint
-runStep('Biome Linter & Formatter Check', 'npm', ['run', 'lint']);
+runStep('Biome Linter & Formatter Check', pkgCmd, ['run', 'lint']);
 
 // 3. Vitest unit tests
-runStep('Unit Tests', 'npm', ['run', 'test']);
+runStep('Unit Tests', pkgCmd, ['run', 'test']);
 
 // 4. Vite build
-runStep('Vite Production Build', 'npm', ['run', 'build']);
+runStep('Vite Production Build', pkgCmd, ['run', 'build']);
 
 // 5. Secret check
 runStep('Secrets & Forbidden Files Check', 'node', ['scripts/check-secrets.mjs']);

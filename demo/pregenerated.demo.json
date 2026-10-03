@@ -1,0 +1,122 @@
+[
+  {
+    "id": "demo-pregen-1",
+    "context": "morning: Café du matin",
+    "tone": "Chaleureux, direct et complice",
+    "language": "fr",
+    "challenge": "Prépare une infusion chaude à la menthe et respire l'air frais 3 minutes à la fenêtre avant de commencer ta journée.",
+    "message": "Allez Camille, chaque matin sans fumée rapproche ton souffle des sentiers des Alpes. Trois minutes de calme et la vague du matin est déjà derrière toi.",
+    "createdTs": 1759392000000,
+    "shownCount": 0,
+    "category": "morning",
+    "used": false
+  },
+  {
+    "id": "demo-pregen-2",
+    "context": "morning: Pause de milieu de matinée",
+    "tone": "Chaleureux, direct et complice",
+    "language": "fr",
+    "challenge": "Bois un grand verre d'eau fraîche à petites gorgées et fais 5 minutes de respiration ventrale les épaules relâchées.",
+    "message": "T'as pas fait tout ce chemin pour laisser un vieux réflexe décider à ta place. Ton corps te remercie déjà, continue sur cette belle lancée !",
+    "createdTs": 1759392001000,
+    "shownCount": 0,
+    "category": "morning",
+    "used": false
+  },
+  {
+    "id": "demo-pregen-3",
+    "context": "risk_window: Fin du déjeuner (13:45)",
+    "tone": "Chaleureux, direct et complice",
+    "language": "fr",
+    "challenge": "Sors marcher 3 minutes dehors les mains dans les poches en observant les arbres ou le ciel.",
+    "message": "Après le repas, l'envie n'est qu'une habitude automatique qui dure trois minutes. Change de décor un court instant, tu es plus forte que ce réflexe.",
+    "createdTs": 1759392002000,
+    "shownCount": 0,
+    "category": "risk_window",
+    "used": false
+  },
+  {
+    "id": "demo-pregen-4",
+    "context": "risk_window: Décompression fin de journée (18:30)",
+    "tone": "Chaleureux, direct et complice",
+    "language": "fr",
+    "challenge": "Mets ton casque et écoute un morceau de musique apaisant pendant 3 minutes en fermant les yeux.",
+    "message": "La journée de travail est finie, offre-toi une vraie pause qui te fait du bien. Souviens-toi de la fierté que tu ressentiras ce soir en te couchant.",
+    "createdTs": 1759392003000,
+    "shownCount": 0,
+    "category": "risk_window",
+    "used": false
+  },
+  {
+    "id": "demo-pregen-5",
+    "context": "craving: Coup de stress imprévu",
+    "tone": "Chaleureux, direct et complice",
+    "language": "fr",
+    "challenge": "Arrose ou observe tes plantes sur le balcon pendant 3 minutes en inspirant lentement par le nez.",
+    "message": "Même pas mal, laisse passer la vague sans te crisper. Regarde l'objectif : le train vers les Alpes se rapproche à chaque envie surmontée !",
+    "createdTs": 1759392004000,
+    "shownCount": 0,
+    "category": "craving",
+    "used": false
+  },
+  {
+    "id": "demo-pregen-6",
+    "context": "evening: Bilan et détente du soir",
+    "tone": "Chaleureux, direct et complice",
+    "language": "fr",
+    "challenge": "Lis trois pages de ton roman en buvant une tisane chaude loin de tes anciens repères.",
+    "message": "Chaque minute gagnée aujourd'hui est une victoire définitive pour ton souffle et ta liberté. Passe une soirée paisible, tiens bon !",
+    "createdTs": 1759392005000,
+    "shownCount": 0,
+    "category": "evening",
+    "used": false
+  },
+  {
+    "id": "demo-pregen-7",
+    "context": "morning: Morning coffee",
+    "tone": "Warm, direct and supportive",
+    "language": "en",
+    "challenge": "Brew a warm mint herbal tea and take 10 slow belly breaths by the window for 3 minutes.",
+    "message": "Hold on Camille, three minutes and this wave will pass. Every smoke-free morning brings your Alpine train trip closer.",
+    "createdTs": 1759392006000,
+    "shownCount": 0,
+    "category": "morning",
+    "used": false
+  },
+  {
+    "id": "demo-pregen-8",
+    "context": "risk_window: After lunch (13:45)",
+    "tone": "Warm, direct and supportive",
+    "language": "en",
+    "challenge": "Take a 3-minute walk outside with your hands in your pockets and notice five details around you.",
+    "message": "You have come too far to let an automatic post-meal habit decide for you. Step outside for three minutes and let the urge roll by.",
+    "createdTs": 1759392007000,
+    "shownCount": 0,
+    "category": "risk_window",
+    "used": false
+  },
+  {
+    "id": "demo-pregen-9",
+    "context": "craving: Afternoon stress",
+    "tone": "Warm, direct and supportive",
+    "language": "en",
+    "challenge": "Drink a tall glass of cold water slowly and put on a calming song on your headphones for 3 minutes.",
+    "message": "This craving is only smoke in your head. Breathe deeply, relax your shoulders, and remember how proud you will feel tonight.",
+    "createdTs": 1759392008000,
+    "shownCount": 0,
+    "category": "craving",
+    "used": false
+  },
+  {
+    "id": "demo-pregen-10",
+    "context": "evening: Evening wind-down (18:30)",
+    "tone": "Warm, direct and supportive",
+    "language": "en",
+    "challenge": "Check on your balcony plants for 3 minutes and read a few pages of your novel.",
+    "message": "Every minute won today is a lasting victory for your lungs and your freedom. Enjoy a calm evening!",
+    "createdTs": 1759392009000,
+    "shownCount": 0,
+    "category": "evening",
+    "used": false
+  }
+]

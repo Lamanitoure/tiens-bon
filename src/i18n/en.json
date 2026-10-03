@@ -106,7 +106,8 @@
   },
   "demo": {
     "badge": "Fictional demo profile",
-    "description": "Fictional local data to test the application."
+    "description": "Fictional local data to test the application.",
+    "bundledBanner": "These messages were generated locally by Gemma and bundled for this demo."
   },
   "model": {
     "title": "Local Gemma Model Connection",
@@ -269,5 +270,56 @@
     "instruction1": "Samsung Galaxy Watch: create a Bixby Routine sending a GET request to this URL.",
     "instruction2": "Apple Watch: use iOS Shortcuts app with 'Get Contents of URL' and add to watch face complications.",
     "instruction3": "Android / Wear OS: configure Tasker or HTTP Shortcuts widget."
+  },
+  "facts": {
+    "title": "Sourced health facts (WHO & Public Health)",
+    "subtitle": "Hand-written from official health authorities. Never generated or reworded by the AI model.",
+    "sourcePrefix": "Official source:",
+    "nextFact": "Show another fact"
+  },
+  "pinLock": {
+    "title": "Optional App PIN Lock (Web Crypto)",
+    "subtitle": "Protects app access from casual snooping using PBKDF2 + AES-GCM.",
+    "honestNote": "Transparency note: this PIN blocks casual snooping if someone picks up your unlocked phone, but does not replace Android's device screen lock and disk encryption against a determined attacker.",
+    "warningForgotten": "Important: if you forget your PIN, your data cannot be recovered. Export a backup before turning it on.",
+    "pinPlaceholder": "PIN code (4 to 8 digits)...",
+    "enableBtn": "Enable PIN lock",
+    "disableBtn": "Disable PIN lock",
+    "lockNowBtn": "🔒 Lock screen now",
+    "unlockTitle": "App Locked",
+    "unlockSubtitle": "Enter your personal PIN to unlock Tiens Bon.",
+    "unlockBtn": "Unlock",
+    "wrongPin": "Incorrect PIN. Please try again.",
+    "invalidPinFormat": "PIN must be 4 to 8 digits.",
+    "enabledSuccess": "✓ App PIN lock enabled.",
+    "disabledSuccess": "✓ App PIN lock disabled.",
+    "forgotResetPrompt": "Forgot PIN? Reset and delete all data"
+  },
+  "profileEditor": {
+    "editBtn": "✏️ Customize my profile",
+    "wizardTitle": "Personal Profile Setup",
+    "toneLabel": "My preferred tone:",
+    "quitDateLabel": "Quit date:",
+    "unitsPerDayLabel": "Units per day before quitting:",
+    "unitPriceLabel": "Price per unit:",
+    "currencyLabel": "Currency:",
+    "goalLabel": "Savings goal label:",
+    "goalAmountLabel": "Savings goal amount:",
+    "helplineLabel": "Helpline name (required):",
+    "helplineContact": "Helpline number (required):",
+    "supportLabel": "Support person name:",
+    "supportContact": "Support person contact:",
+    "reasonsLabel": "My reasons (one per line):",
+    "alternativesLabel": "My alternatives (one per line):",
+    "phrasesLabel": "My phrases in my voice (one per line):",
+    "savedSuccess": "✓ Personal profile updated and validated!"
+  },
+  "deleteAll": {
+    "title": "Data Control & Delete Everything",
+    "desc": "Permanently deletes your profile, journal, photos, cached messages, and local settings from this device.",
+    "deleteBtn": "🗑️ Delete everything from this device",
+    "confirmPrompt": "Are you sure you want to permanently erase all local data? This cannot be undone.",
+    "confirmYes": "Yes, permanently delete everything",
+    "deletedSuccess": "✓ All local data and caches have been erased."
   }
 }

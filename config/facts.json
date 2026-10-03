@@ -1,0 +1,58 @@
+[
+  {
+    "id": "fact-fr-1",
+    "language": "fr",
+    "text": "20 minutes après la dernière cigarette, la fréquence cardiaque et la pression artérielle commencent déjà à redescendre vers un niveau normal.",
+    "sourceName": "Organisation mondiale de la Santé (OMS)",
+    "sourceUrl": "https://www.who.int/fr/news-room/questions-and-answers/item/tobacco-health-benefits-of-smoking-cessation"
+  },
+  {
+    "id": "fact-fr-2",
+    "language": "fr",
+    "text": "Après 12 heures sans tabac, le taux de monoxyde de carbone dans le sang diminue et redevient normal, permettant une meilleure oxygénation des organes.",
+    "sourceName": "Organisation mondiale de la Santé (OMS)",
+    "sourceUrl": "https://www.who.int/fr/news-room/questions-and-answers/item/tobacco-health-benefits-of-smoking-cessation"
+  },
+  {
+    "id": "fact-fr-3",
+    "language": "fr",
+    "text": "Après 48 heures sans fumer, le goût et l'odorat commencent à s'améliorer à mesure que les terminaisons nerveuses se régénèrent.",
+    "sourceName": "Tabac Info Service (Santé publique France)",
+    "sourceUrl": "https://www.tabac-info-service.fr/je-trouve-ma-motivation/les-bienfaits-de-l-arret-du-tabac"
+  },
+  {
+    "id": "fact-fr-4",
+    "language": "fr",
+    "text": "Une envie de fumer intense dure en moyenne entre 3 et 5 minutes : laisser passer cette vague suffit souvent à faire retomber la pression.",
+    "sourceName": "Tabac Info Service (Santé publique France)",
+    "sourceUrl": "https://www.tabac-info-service.fr/j-arrete-de-fumer/je-surmonte-les-difficultes-du-quotidien"
+  },
+  {
+    "id": "fact-en-1",
+    "language": "en",
+    "text": "Within 20 minutes of quitting smoking, your heart rate and blood pressure begin to drop toward normal levels.",
+    "sourceName": "World Health Organization (WHO)",
+    "sourceUrl": "https://www.who.int/news-room/questions-and-answers/item/tobacco-health-benefits-of-smoking-cessation"
+  },
+  {
+    "id": "fact-en-2",
+    "language": "en",
+    "text": "After 12 hours without smoking, the carbon monoxide level in your blood drops to normal, restoring oxygen levels.",
+    "sourceName": "World Health Organization (WHO)",
+    "sourceUrl": "https://www.who.int/news-room/questions-and-answers/item/tobacco-health-benefits-of-smoking-cessation"
+  },
+  {
+    "id": "fact-en-3",
+    "language": "en",
+    "text": "Within 2 to 12 weeks of stopping smoking, your circulation improves and your lung function increases.",
+    "sourceName": "World Health Organization (WHO)",
+    "sourceUrl": "https://www.who.int/news-room/questions-and-answers/item/tobacco-health-benefits-of-smoking-cessation"
+  },
+  {
+    "id": "fact-en-4",
+    "language": "en",
+    "text": "Most acute nicotine cravings peak and pass within 3 to 5 minutes when you shift attention to a short grounding activity.",
+    "sourceName": "Santé publique France / Tabac Info Service",
+    "sourceUrl": "https://www.tabac-info-service.fr/j-arrete-de-fumer/je-surmonte-les-difficultes-du-quotidien"
+  }
+]

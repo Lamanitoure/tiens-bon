@@ -106,7 +106,8 @@
   },
   "demo": {
     "badge": "Profil de démonstration fictif",
-    "description": "Données locales fictives pour tester l'application."
+    "description": "Données locales fictives pour tester l'application.",
+    "bundledBanner": "Ces messages ont été générés localement par Gemma et inclus pour cette démo."
   },
   "model": {
     "title": "Connexion au modèle local Gemma",
@@ -269,5 +270,56 @@
     "instruction1": "Samsung Galaxy Watch : crée une Bixby Routine ou un bouton rapide qui envoie une requête GET sur cette URL.",
     "instruction2": "Apple Watch : utilise l'app Raccourcis iOS avec l'action « Obtenir le contenu de l'URL » et ajoute le raccourci sur le cadran.",
     "instruction3": "Android / Wear OS : configure Tasker ou un widget HTTP Shortcuts."
+  },
+  "facts": {
+    "title": "Repères santé sourcés (OMS & Santé publique)",
+    "subtitle": "Rédigés à la main depuis des sources officielles. Jamais générés ni reformulés par le modèle IA.",
+    "sourcePrefix": "Source officielle :",
+    "nextFact": "Autre repère officiel"
+  },
+  "pinLock": {
+    "title": "Verrouillage par code PIN (Web Crypto)",
+    "subtitle": "Protège l'ouverture de l'application contre les regards indiscrets (PBKDF2 + AES-GCM).",
+    "honestNote": "Note de transparence : ce code PIN protège contre la curiosité occasionnelle si quelqu'un prend votre téléphone déverrouillé, mais ne remplace pas le verrouillage d'écran d'Android face à un attaquant déterminé.",
+    "warningForgotten": "Important : si vous oubliez votre code PIN, vos données ne pourront pas être récupérées. Exportez une sauvegarde avant de l'activer.",
+    "pinPlaceholder": "Code PIN (4 à 8 chiffres)...",
+    "enableBtn": "Activer le code PIN",
+    "disableBtn": "Désactiver le code PIN",
+    "lockNowBtn": "🔒 Verrouiller l'écran maintenant",
+    "unlockTitle": "Application verrouillée",
+    "unlockSubtitle": "Entrez votre code PIN personnel pour déverrouiller Tiens Bon.",
+    "unlockBtn": "Déverrouiller",
+    "wrongPin": "Code PIN incorrect. Veuillez réessayer.",
+    "invalidPinFormat": "Le code PIN doit contenir entre 4 et 8 chiffres.",
+    "enabledSuccess": "✓ Verrouillage par code PIN activé.",
+    "disabledSuccess": "✓ Verrouillage par code PIN désactivé.",
+    "forgotResetPrompt": "Code PIN oublié ? Réinitialiser et tout effacer"
+  },
+  "profileEditor": {
+    "editBtn": "✏️ Personnaliser mon profil",
+    "wizardTitle": "Configuration de mon profil personnel",
+    "toneLabel": "Mon ton préféré :",
+    "quitDateLabel": "Date d'arrêt :",
+    "unitsPerDayLabel": "Unités par jour avant l'arrêt :",
+    "unitPriceLabel": "Prix par unité :",
+    "currencyLabel": "Devise :",
+    "goalLabel": "Nom de mon objectif d'épargne :",
+    "goalAmountLabel": "Montant de l'objectif :",
+    "helplineLabel": "Nom de la ligne d'aide (obligatoire) :",
+    "helplineContact": "Numéro de la ligne d'aide (obligatoire) :",
+    "supportLabel": "Nom de la personne de confiance :",
+    "supportContact": "Numéro de la personne de confiance :",
+    "reasonsLabel": "Mes motivations (une par ligne) :",
+    "alternativesLabel": "Mes alternatives (une par ligne) :",
+    "phrasesLabel": "Mes phrases dans ma voix (une par ligne) :",
+    "savedSuccess": "✓ Profil personnel mis à jour et validé !"
+  },
+  "deleteAll": {
+    "title": "Contrôle des données & Suppression totale",
+    "desc": "Efface définitivement le profil, le journal, les photos, les messages en cache et les préférences locales de cet appareil.",
+    "deleteBtn": "🗑️ Tout supprimer de cet appareil",
+    "confirmPrompt": "Êtes-vous sûr(e) de vouloir effacer toutes vos données locales ? Cette action est irréversible.",
+    "confirmYes": "Oui, tout effacer définitivement",
+    "deletedSuccess": "✓ Toutes les données locales et les caches ont été effacés."
   }
 }

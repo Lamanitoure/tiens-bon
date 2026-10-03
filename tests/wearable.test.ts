@@ -22,10 +22,10 @@ describe('Step 18: Smartwatch & wearable trigger endpoint', () => {
     it('detects ?trigger=craving deep link from smartwatch and clears search param', () => {
       // Mock window.location and history.replaceState
       const replaceStateSpy = vi.spyOn(window.history, 'replaceState');
-      delete (window as unknown as { location?: unknown }).location;
-      window.location = new URL(
-        'https://tiens-bon.app/?trigger=craving&utm_source=watch',
-      ) as unknown as Location;
+      Object.defineProperty(window, 'location', {
+        writable: true,
+        value: new URL('https://tiens-bon.app/?trigger=craving&utm_source=watch'),
+      });
 
       const detected = detectUrlTrigger();
       expect(detected).toBe(true);
@@ -33,8 +33,10 @@ describe('Step 18: Smartwatch & wearable trigger endpoint', () => {
     });
 
     it('returns false when ?trigger=craving is not present', () => {
-      delete (window as unknown as { location?: unknown }).location;
-      window.location = new URL('https://tiens-bon.app/?tab=journal') as unknown as Location;
+      Object.defineProperty(window, 'location', {
+        writable: true,
+        value: new URL('https://tiens-bon.app/?tab=journal'),
+      });
 
       const detected = detectUrlTrigger();
       expect(detected).toBe(false);
