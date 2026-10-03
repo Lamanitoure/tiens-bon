@@ -1,17 +1,70 @@
 import 'fake-indexeddb/auto';
 import { beforeEach, describe, expect, it } from 'vitest';
 import demoProfile from '../demo/profile.demo.json';
-import { addEvent, getAllEvents, resetDatabase } from '../src/db/index.ts';
+import { addEvent, getAllEvents, resetDatabase, setStoredProfile } from '../src/db/index.ts';
+import { getAvailableContextChips, suggestContextFromTime } from '../src/lib/craving.ts';
+import { getNextPregeneratedMessage } from '../src/lib/pregeneration.ts';
 import { computeUserStats } from '../src/lib/stats.ts';
 import type { EventRecord } from '../src/schemas/events.ts';
 import type { Profile } from '../src/schemas/profile.ts';
-import { getRandomFallback } from '../src/security/safety.ts';
 
-describe('Craving Workflow & Stats (Step 6)', () => {
+describe('The craving screen (Step 10)', () => {
   const profile = demoProfile as unknown as Profile;
 
   beforeEach(async () => {
     await resetDatabase();
+    await setStoredProfile(profile);
+  });
+
+  it('suggests the right context based on proximity to personal risk windows', () => {
+    // profile.riskWindows has:
+    // { label: "Café du matin", time: "08:15" }
+    // { label: "Pause de milieu de matinée", time: "10:30" }
+    // { label: "Fin du déjeuner", time: "13:45" }
+    // { label: "Décompression fin de journée", time: "18:30" }
+
+    // Test time: 08:20 (within 5 minutes of Café du matin)
+    const morningDate = new Date(2026, 9, 4, 8, 20);
+    const suggestedMorning = suggestContextFromTime(profile, morningDate);
+    expect(suggestedMorning).toBe('Café du matin');
+
+    // Test time: 13:50 (within 5 minutes of Fin du déjeuner)
+    const lunchDate = new Date(2026, 9, 4, 13, 50);
+    const suggestedLunch = suggestContextFromTime(profile, lunchDate);
+    expect(suggestedLunch).toBe('Fin du déjeuner');
+
+    // Test time: 18:25 (within 5 minutes of Décompression fin de journée)
+    const eveningDate = new Date(2026, 9, 4, 18, 25);
+    const suggestedEvening = suggestContextFromTime(profile, eveningDate);
+    expect(suggestedEvening).toBe('Décompression fin de journée');
+
+    // Test time: 15:30 (not near any window, in afternoon)
+    const afternoonDate = new Date(2026, 9, 4, 15, 30);
+    const suggestedAfternoon = suggestContextFromTime(profile, afternoonDate);
+    expect(suggestedAfternoon).toBe('Pause de l’après-midi');
+  });
+
+  it('provides quick trigger chips including her risk windows and common triggers', () => {
+    const chips = getAvailableContextChips(profile);
+    expect(chips.length).toBeGreaterThanOrEqual(5);
+
+    // Contains her customized risk window labels
+    expect(chips).toContain('Café du matin');
+    expect(chips).toContain('Fin du déjeuner');
+
+    // Contains common contextual triggers
+    expect(chips).toContain('Coup de stress');
+  });
+
+  it('resolves instant challenge and message in under 100 ms completely offline', async () => {
+    const start = performance.now();
+    const result = await getNextPregeneratedMessage('craving', profile);
+    const elapsed = performance.now() - start;
+
+    expect(elapsed).toBeLessThan(100);
+    expect(result.challenge).toBeTruthy();
+    expect(result.message).toBeTruthy();
+    expect(profile.phrases).toContain(result.message);
   });
 
   it('computes stats correctly when cravings are resisted', () => {
@@ -43,22 +96,12 @@ describe('Craving Workflow & Stats (Step 6)', () => {
     expect(stats.streakHours).toBe(2);
   });
 
-  it('provides offline fallback challenge and message without server', () => {
-    const frFallback = getRandomFallback('fr');
-    expect(frFallback.challenge).toBeTruthy();
-    expect(frFallback.message).toBeTruthy();
-
-    const enFallback = getRandomFallback('en');
-    expect(enFallback.challenge).toBeTruthy();
-    expect(enFallback.message).toBeTruthy();
-  });
-
-  it('logs resisted and relapse events directly into IndexedDB', async () => {
+  it('logs resisted and relapse events directly into IndexedDB with context', async () => {
     await addEvent({
       id: 'craving-1',
       ts: Date.now(),
       type: 'resisted',
-      trigger: 'Boire un grand verre d eau',
+      trigger: 'Café du matin',
     });
 
     await addEvent({
@@ -71,6 +114,8 @@ describe('Craving Workflow & Stats (Step 6)', () => {
     const all = await getAllEvents();
     expect(all.length).toBe(2);
     expect(all[0].type).toBe('resisted');
+    expect(all[0].trigger).toBe('Café du matin');
     expect(all[1].type).toBe('relapse');
+    expect(all[1].trigger).toBe('Soirée entre amis');
   });
 });

@@ -96,6 +96,16 @@ export default function App() {
       setTokenInput('tiens-bon-token');
     }
 
+    // Check if opened via home-screen shortcut (?craving=1 or #craving) (Step 10)
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('craving') === '1' || window.location.hash === '#craving') {
+        setIsCravingActive(true);
+      }
+    } catch {
+      // ignore
+    }
+
     // Initialize from IndexedDB or seed demo profile
     (async () => {
       try {

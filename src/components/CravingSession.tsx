@@ -1,10 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { t } from '../i18n/index.ts';
-import { generateMotivation } from '../lib/api.ts';
 import { activeConfig } from '../lib/config.ts';
-import { getNextPregeneratedMessage } from '../lib/pregeneration.ts';
+import { getAvailableContextChips, suggestContextFromTime } from '../lib/craving.ts';
+import { buildPersonalizedFallback, getNextPregeneratedMessage } from '../lib/pregeneration.ts';
 import type { Profile } from '../schemas/profile.ts';
-import { getRandomFallback, validateModelOutput } from '../security/safety.ts';
 import { BreathingAnchor } from './BreathingAnchor.tsx';
 import { RelapseDebrief } from './RelapseDebrief.tsx';
 
@@ -15,52 +14,41 @@ interface CravingSessionProps {
 }
 
 export function CravingSession({ profile, onClose, onLogged }: CravingSessionProps) {
-  const [secondsRemaining, setSecondsRemaining] = useState(
-    activeConfig.app.challengeDurationSeconds || 180,
-  );
+  const timerLiveId = useId();
+  const totalDuration = activeConfig.app.challengeDurationSeconds || 180;
+  const [secondsRemaining, setSecondsRemaining] = useState(totalDuration);
   const [isDiscreet, setIsDiscreet] = useState(profile.discreetMode ?? true);
-  const [activeChallenge, setActiveChallenge] = useState<string>('');
-  const [activePhrase, setActivePhrase] = useState<string>('');
   const [sessionStatus, setSessionStatus] = useState<'active' | 'resisted' | 'relapse'>('active');
   const [isTimerRunning, setIsTimerRunning] = useState(true);
 
-  // Initialize phrase and challenge
+  // Context suggestion based on current time (Step 10)
+  const [selectedContext, setSelectedContext] = useState(() => suggestContextFromTime(profile));
+  const availableChips = getAvailableContextChips(profile);
+
+  // Instant local-first challenge and message (< 100 ms)
+  const initialFallback = buildPersonalizedFallback(profile, 'craving');
+  const [activeChallenge, setActiveChallenge] = useState<string>(initialFallback.challenge);
+  const [activePhrase, setActivePhrase] = useState<string>(initialFallback.message);
+
+  // Load from pregenerated daily batch with zero latency
   useEffect(() => {
-    // 1. Pick random phrase from her own authentic list
-    if (profile.phrases && profile.phrases.length > 0) {
-      const randomIdx = Math.floor(Math.random() * profile.phrases.length);
-      setActivePhrase(profile.phrases[randomIdx]);
-    }
+    let isMounted = true;
 
-    // 2. Pick immediate fallback or profile alternative first for instant rendering
-    const fallback = getRandomFallback(profile.language);
-    const initialAlt =
-      profile.alternatives && profile.alternatives.length > 0
-        ? profile.alternatives[Math.floor(Math.random() * profile.alternatives.length)]
-        : fallback.challenge;
-
-    setActiveChallenge(initialAlt);
-
-    // 3. Draw from precalculated daily cache with zero latency
     (async () => {
       try {
-        const cached = await getNextPregeneratedMessage('craving', profile.language);
-        if (cached?.fromCache && cached.challenge) {
+        const cached = await getNextPregeneratedMessage('craving', profile);
+        if (isMounted && cached?.challenge && cached?.message) {
           setActiveChallenge(cached.challenge);
-          return;
+          setActivePhrase(cached.message);
         }
-
-        // If cache empty and online, query local model
-        const prompt = `You help Camille through a 3-minute craving. Profile: ${profile.reasons.join(', ')}. Alternatives she likes: ${profile.alternatives.join(', ')}. Tone: ${profile.tone}. Write in ${profile.language}. Return JSON: {"challenge": "...", "message": "..."}`;
-        const modelOutput = await generateMotivation(prompt);
-        const validated = validateModelOutput(modelOutput, profile.language);
-        if (validated.sanitized?.challenge) {
-          setActiveChallenge(validated.sanitized.challenge);
-        }
-      } catch (_err) {
-        // Smoothly fall back to local profile alternative (100% offline)
+      } catch {
+        // Fallback already synchronously loaded
       }
     })();
+
+    return () => {
+      isMounted = false;
+    };
   }, [profile]);
 
   // Timer countdown
@@ -86,10 +74,15 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+  // SVG Circular Ring calculation
+  const radius = 54;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference * (1 - secondsRemaining / totalDuration);
+
   const handleResisted = () => {
     setIsTimerRunning(false);
     setSessionStatus('resisted');
-    onLogged('resisted', activeChallenge);
+    onLogged('resisted', selectedContext, activeChallenge);
   };
 
   const handleRelapse = () => {
@@ -103,34 +96,40 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
     note?: string;
     planSaved?: boolean;
   }) => {
-    onLogged('relapse', data.trigger, data.note);
+    onLogged('relapse', data.trigger || selectedContext, data.note);
     onClose();
   };
 
   const handleNextChallenge = () => {
     if (profile.alternatives && profile.alternatives.length > 0) {
-      const next = profile.alternatives[Math.floor(Math.random() * profile.alternatives.length)];
+      const remaining = profile.alternatives.filter((alt) => alt !== activeChallenge);
+      const next =
+        remaining.length > 0
+          ? remaining[Math.floor(Math.random() * remaining.length)]
+          : profile.alternatives[0];
       setActiveChallenge(next);
     } else {
-      setActiveChallenge(getRandomFallback(profile.language).challenge);
+      const fallback = buildPersonalizedFallback(profile, 'craving');
+      setActiveChallenge(fallback.challenge);
     }
   };
 
   // Outcome: Resisted view
   if (sessionStatus === 'resisted') {
     return (
-      <div className="card space-y-5 text-center p-6 bg-emerald-900 text-white border-none shadow-md">
-        <div className="text-4xl animate-bounce">🌱</div>
+      <div className="card space-y-5 text-center p-6 bg-emerald-900 text-white border-none shadow-md animate-fade-in">
+        <div className="text-4xl">🌱</div>
         <div className="space-y-2">
           <h3 className="text-xl font-bold">{t('craving.heldSuccess')}</h3>
           <p className="text-xs text-emerald-100/90 leading-relaxed">
-            Chaque seconde passée renforce ton indépendance et régénère ton corps.
+            Chaque vague surmontée renforce ta liberté et prouve que tu es plus fort(e) que cette
+            habitude.
           </p>
         </div>
         <button
           type="button"
           onClick={onClose}
-          className="w-full bg-white text-emerald-950 font-bold py-3 px-4 rounded-xl text-sm hover:bg-emerald-50 active:scale-95 transition-all cursor-pointer"
+          className="w-full bg-white text-emerald-950 font-bold py-3.5 px-4 rounded-xl text-sm hover:bg-emerald-50 active:scale-95 transition-all cursor-pointer min-h-[48px]"
         >
           {t('craving.backHome')}
         </button>
@@ -138,21 +137,21 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
     );
   }
 
-  // Outcome: Relapse gentle view with micro-debrief (Step 7)
+  // Outcome: Relapse gentle view with micro-debrief (Step 11)
   if (sessionStatus === 'relapse') {
     return <RelapseDebrief profile={profile} onFinish={handleRelapseDebriefFinish} />;
   }
 
-  // Active Craving Session View
+  // Active Craving Session View (Step 10)
   return (
     <div
-      className={`card transition-colors duration-300 p-5 space-y-5 ${
+      className={`card transition-colors duration-300 p-5 space-y-4 shadow-lg ${
         isDiscreet
           ? 'bg-stone-950 text-stone-100 border-stone-800'
-          : 'bg-white text-stone-900 border-emerald-300 shadow-md'
+          : 'bg-white text-stone-900 border-emerald-300'
       }`}
     >
-      {/* Header: Title and Discreet Mode Toggle */}
+      {/* Header: Title, Context Chip, and Discreet Mode Toggle */}
       <div className="flex items-center justify-between pb-2 border-b border-stone-200/20">
         <div>
           <h3 className="text-sm font-bold tracking-tight">
@@ -166,10 +165,10 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
         <button
           type="button"
           onClick={() => setIsDiscreet(!isDiscreet)}
-          className={`text-[11px] px-2.5 py-1 rounded-full font-medium transition-all cursor-pointer ${
+          className={`text-[11px] px-3 py-1.5 rounded-full font-medium transition-all cursor-pointer min-h-[36px] ${
             isDiscreet
               ? 'bg-stone-800 text-stone-200 border border-stone-700'
-              : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+              : 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100'
           }`}
           aria-label="Toggle discreet mode"
         >
@@ -177,24 +176,104 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
         </button>
       </div>
 
-      {/* 3-Minute Timer Countdown */}
-      <div className="text-center space-y-1">
-        <div
-          className={`text-4xl font-mono font-bold tracking-wider ${
-            isDiscreet ? 'text-stone-100' : 'text-emerald-900'
-          }`}
-        >
-          {formatTime(secondsRemaining)}
+      {/* Context Selection Row (Step 10: context choice or suggested from time) */}
+      <div className="space-y-1.5">
+        <span className="text-[11px] font-semibold opacity-70 block">
+          {isDiscreet ? 'Contexte actuel :' : 'Moment actuel (suggéré) :'}
+        </span>
+        <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs">
+          {availableChips.map((chip) => {
+            const isSelected = selectedContext === chip;
+            return (
+              <button
+                key={chip}
+                type="button"
+                onClick={() => setSelectedContext(chip)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-all cursor-pointer shrink-0 min-h-[32px] ${
+                  isSelected
+                    ? isDiscreet
+                      ? 'bg-stone-200 text-stone-950 font-bold'
+                      : 'bg-emerald-800 text-white font-bold'
+                    : isDiscreet
+                      ? 'bg-stone-900 text-stone-400 border border-stone-800 hover:text-stone-200'
+                      : 'bg-stone-100 text-stone-700 border border-stone-200 hover:bg-stone-200'
+                }`}
+              >
+                {chip}
+              </button>
+            );
+          })}
         </div>
-        <p className="text-[11px] opacity-60">
-          {secondsRemaining > 0 ? 'Laissez passer la vague' : 'Les 3 minutes sont passées !'}
-        </p>
       </div>
 
-      {/* Visual Anchor: Breathing Animation */}
+      {/* Circular SVG Timer Ring */}
+      <div className="flex flex-col items-center justify-center py-2 space-y-2">
+        <div className="relative flex items-center justify-center w-36 h-36">
+          <svg
+            className="w-full h-full -rotate-90 transform"
+            viewBox="0 0 120 120"
+            role="img"
+            aria-label="Minuteur de respiration"
+          >
+            <title>Minuteur circulaire</title>
+            {/* Background ring */}
+            <circle
+              cx="60"
+              cy="60"
+              r={radius}
+              className={`${isDiscreet ? 'text-stone-800' : 'text-emerald-100'}`}
+              strokeWidth="7"
+              stroke="currentColor"
+              fill="transparent"
+            />
+            {/* Animated countdown ring */}
+            <circle
+              cx="60"
+              cy="60"
+              r={radius}
+              className={`transition-all duration-1000 ease-linear ${
+                isDiscreet ? 'text-stone-300' : 'text-emerald-700'
+              }`}
+              strokeWidth="7"
+              strokeDasharray={circumference}
+              strokeDashoffset={strokeDashoffset}
+              strokeLinecap="round"
+              stroke="currentColor"
+              fill="transparent"
+            />
+          </svg>
+
+          {/* Time Display centered inside ring */}
+          <div className="absolute flex flex-col items-center justify-center text-center">
+            <span
+              className={`text-3xl font-mono font-bold tracking-wider ${
+                isDiscreet ? 'text-stone-100' : 'text-emerald-950'
+              }`}
+            >
+              {formatTime(secondsRemaining)}
+            </span>
+            <span className="text-[10px] opacity-60 font-medium">
+              {secondsRemaining > 0 ? 'Surfer sur la vague' : 'Temps écoulé !'}
+            </span>
+          </div>
+        </div>
+
+        {/* Accessible live region for timer state */}
+        <div id={timerLiveId} className="sr-only" aria-live="polite">
+          {secondsRemaining === 0
+            ? 'Trois minutes écoulées. Félicitations pour avoir tenu bon.'
+            : secondsRemaining === 60
+              ? 'Il reste une minute.'
+              : secondsRemaining === 30
+                ? 'Plus que trente secondes.'
+                : ''}
+        </div>
+      </div>
+
+      {/* Visual Anchor: Breathing Anchor */}
       <BreathingAnchor isDiscreet={isDiscreet} />
 
-      {/* Concrete Challenge */}
+      {/* Concrete Challenge Section */}
       <div
         className={`p-3.5 rounded-xl border space-y-1.5 ${
           isDiscreet
@@ -207,14 +286,12 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
           <button
             type="button"
             onClick={handleNextChallenge}
-            className="hover:underline opacity-80 cursor-pointer text-[10px]"
+            className="hover:underline opacity-80 cursor-pointer text-[10px] p-1"
           >
             🔄 {t('craving.anotherChallenge')}
           </button>
         </div>
-        <p className="text-xs font-semibold leading-relaxed">
-          {activeChallenge || 'Prenez 5 respirations profondes et buvez un verre d eau.'}
-        </p>
+        <p className="text-xs font-semibold leading-relaxed">{activeChallenge}</p>
       </div>
 
       {/* Her Own Voice Phrase */}
@@ -224,30 +301,30 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
         </blockquote>
       )}
 
-      {/* Action Buttons: "J'ai tenu" and "J'ai fumé" */}
-      <div className="space-y-2 pt-2">
+      {/* Action Buttons: Thumb-friendly targets (> 48px height) */}
+      <div className="space-y-2 pt-1">
         <button
           type="button"
           onClick={handleResisted}
-          className={`w-full py-3.5 px-4 rounded-xl font-bold text-sm shadow-xs transition-all cursor-pointer ${
+          className={`w-full py-4 px-4 rounded-xl font-bold text-sm shadow-md transition-all cursor-pointer min-h-[48px] flex items-center justify-center gap-2 ${
             isDiscreet
               ? 'bg-stone-200 text-stone-900 hover:bg-white active:scale-[0.98]'
               : 'bg-emerald-800 text-white hover:bg-emerald-900 active:scale-[0.98]'
           }`}
         >
-          ✓ {isDiscreet ? t('craving.discreetHeld') : t('craving.resisted')}
+          <span>✓</span> {isDiscreet ? t('craving.discreetHeld') : t('craving.resisted')}
         </button>
 
         <button
           type="button"
           onClick={handleRelapse}
-          className={`w-full py-2.5 px-4 rounded-xl text-xs font-medium transition-all cursor-pointer ${
+          className={`w-full py-3 px-4 rounded-xl text-xs font-medium transition-all cursor-pointer min-h-[44px] flex items-center justify-center gap-1.5 ${
             isDiscreet
               ? 'text-stone-400 hover:text-stone-200 bg-stone-900 border border-stone-800'
               : 'text-stone-600 hover:text-stone-900 bg-stone-100 border border-stone-200 hover:bg-stone-200'
           }`}
         >
-          {isDiscreet ? t('craving.discreetSmoked') : t('craving.smoked')}
+          <span>⚠️</span> {isDiscreet ? t('craving.discreetSmoked') : t('craving.smoked')}
         </button>
       </div>
     </div>

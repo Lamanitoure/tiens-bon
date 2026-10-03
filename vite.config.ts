@@ -25,6 +25,21 @@ export default defineConfig(() => {
           orientation: 'portrait',
           start_url: '/',
           scope: '/',
+          shortcuts: [
+            {
+              name: "J'ai une envie",
+              short_name: 'Envie',
+              description: "Ouvrir immédiatement l'écran d'aide pour surmonter une envie",
+              url: '/?craving=1',
+              icons: [
+                {
+                  src: '/icon.svg',
+                  sizes: '192x192',
+                  type: 'image/svg+xml',
+                },
+              ],
+            },
+          ],
           icons: [
             {
               src: '/icon.svg',
