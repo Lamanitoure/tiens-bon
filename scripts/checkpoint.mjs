@@ -47,13 +47,25 @@ runStep('Vite Production Build', 'pnpm', ['build']);
 // 5. Secret check
 runStep('Secrets & Forbidden Files Check', 'node', ['scripts/check-secrets.mjs']);
 
-// 6. Pytest if server/ exists and has test files
+// 6. Pytest if server/ exists, has test files, and pytest is in PATH
 const serverDir = path.resolve('server');
 const serverTestsDir = path.resolve('server', 'tests');
 if (fs.existsSync(serverDir) && fs.existsSync(serverTestsDir)) {
   const testFiles = fs.readdirSync(serverTestsDir).filter((f) => f.endsWith('.py'));
   if (testFiles.length > 0) {
-    runStep('FastAPI Server Tests (pytest)', 'pytest', ['server/tests']);
+    let hasPytest = false;
+    try {
+      execSync('pytest --version', { stdio: 'ignore' });
+      hasPytest = true;
+    } catch {
+      hasPytest = false;
+    }
+
+    if (hasPytest) {
+      runStep('FastAPI Server Tests (pytest)', 'pytest', ['server/tests']);
+    } else {
+      console.log('ℹ️ pytest not found in current environment; skipping server tests.');
+    }
   }
 }
 

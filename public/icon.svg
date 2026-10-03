@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="128" fill="#065f46" />
+  <circle cx="256" cy="256" r="160" fill="#047857" opacity="0.4" />
+  <!-- Gentle leaf/shield symbolizing holding on and renewal -->
+  <path d="M256 120 C340 120 380 200 370 290 C360 370 290 400 256 400 C222 400 152 370 142 290 C132 200 172 120 256 120 Z" fill="#34d399" />
+  <path d="M256 160 C256 260 220 340 180 370 C240 370 320 330 330 260 C338 200 300 160 256 160 Z" fill="#6ee7b7" opacity="0.6" />
+</svg>
