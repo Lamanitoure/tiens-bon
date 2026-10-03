@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { t } from '../i18n/index.ts';
 import { generateMotivation } from '../lib/api.ts';
 import { activeConfig } from '../lib/config.ts';
+import { getNextPregeneratedMessage } from '../lib/pregeneration.ts';
 import type { Profile } from '../schemas/profile.ts';
 import { getRandomFallback, validateModelOutput } from '../security/safety.ts';
 import { BreathingAnchor } from './BreathingAnchor.tsx';
@@ -40,9 +41,16 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
 
     setActiveChallenge(initialAlt);
 
-    // 3. Try to fetch a live personalized Gemma challenge asynchronously if online
+    // 3. Draw from precalculated daily cache with zero latency
     (async () => {
       try {
+        const cached = await getNextPregeneratedMessage('craving', profile.language);
+        if (cached?.fromCache && cached.challenge) {
+          setActiveChallenge(cached.challenge);
+          return;
+        }
+
+        // If cache empty and online, query local model
         const prompt = `You help Camille through a 3-minute craving. Profile: ${profile.reasons.join(', ')}. Alternatives she likes: ${profile.alternatives.join(', ')}. Tone: ${profile.tone}. Write in ${profile.language}. Return JSON: {"challenge": "...", "message": "..."}`;
         const modelOutput = await generateMotivation(prompt);
         const validated = validateModelOutput(modelOutput, profile.language);

@@ -11,11 +11,13 @@ import {
   getAllEvents,
   getAllPlans,
   getStoredProfile,
+  getUnusedPregenerated,
   setStoredProfile,
 } from './db/index.ts';
 import { getLanguage, initLanguage, setLanguage, subscribeLanguage, t } from './i18n/index.ts';
 import { checkModelStatus, generateMotivation, getStoredToken, setStoredToken } from './lib/api.ts';
 import { activeConfig } from './lib/config.ts';
+import { generateDailyBatch, shouldTriggerAutomaticBatch } from './lib/pregeneration.ts';
 import { computeUserStats, type UserStats } from './lib/stats.ts';
 import type { EventRecord } from './schemas/events.ts';
 import type { CravingOutput } from './schemas/model.ts';
@@ -57,12 +59,22 @@ export default function App() {
   const [backupStatusMessage, setBackupStatusMessage] = useState<string | null>(null);
   const [backupErrorMessage, setBackupErrorMessage] = useState<string | null>(null);
 
+  // Offline Pregeneration state (Step 8)
+  const [pregenCount, setPregenCount] = useState(0);
+  const [isPregenerating, setIsPregenerating] = useState(false);
+  const [pregenProgress, setPregenProgress] = useState<{ current: number; total: number } | null>(
+    null,
+  );
+  const [pregenSuccessMessage, setPregenSuccessMessage] = useState<string | null>(null);
+
   const refreshEventsAndStats = useCallback(async (currentProfile: Profile | null) => {
     try {
       const allEvts = await getAllEvents();
       setEvents(allEvts);
       const allPlans = await getAllPlans();
       setPlans(allPlans);
+      const unusedPregen = await getUnusedPregenerated();
+      setPregenCount(unusedPregen.length);
       if (currentProfile) {
         setStats(computeUserStats(currentProfile, allEvts));
       }
@@ -89,6 +101,21 @@ export default function App() {
         }
         setProfile(current);
         await refreshEventsAndStats(current);
+
+        // Check for automatic batch generation (older than 20 hours and model online)
+        const storedTs = localStorage.getItem('tb_last_batch_ts');
+        const lastBatchTs = storedTs ? Number(storedTs) : null;
+        if (shouldTriggerAutomaticBatch(lastBatchTs)) {
+          checkModelStatus()
+            .then(async (status) => {
+              if (status.ollama === 'ok' && current) {
+                const batch = await generateDailyBatch(current);
+                localStorage.setItem('tb_last_batch_ts', Date.now().toString());
+                setPregenCount(batch.length);
+              }
+            })
+            .catch(() => {});
+        }
       } catch (_err) {
         const fallback = ProfileSchema.parse(demoProfile);
         setProfile(fallback);
@@ -100,6 +127,25 @@ export default function App() {
       unsubscribe();
     };
   }, [refreshEventsAndStats]);
+
+  const handlePrepareDay = async () => {
+    if (!profile || isPregenerating) return;
+    setIsPregenerating(true);
+    setPregenSuccessMessage(null);
+    try {
+      const generated = await generateDailyBatch(profile, (current, total) => {
+        setPregenProgress({ current, total });
+      });
+      localStorage.setItem('tb_last_batch_ts', Date.now().toString());
+      setPregenCount(generated.length);
+      setPregenSuccessMessage(t('pregen.success'));
+    } catch (_err) {
+      // ignore
+    } finally {
+      setIsPregenerating(false);
+      setPregenProgress(null);
+    }
+  };
 
   if (!activeConfig.isValid) {
     return (
@@ -404,6 +450,54 @@ export default function App() {
             <div className="text-xs text-stone-600">{t('demo.description')}</div>
           </div>
         </div>
+
+        {/* Offline Batch Pregeneration Card (Step 8) */}
+        <section className="card space-y-3.5 border-emerald-200 bg-emerald-50/40 p-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold text-emerald-950 flex items-center gap-1.5">
+              <span>🌅</span> {t('pregen.title')}
+            </h3>
+            <span className="text-[11px] font-semibold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full border border-emerald-200">
+              {pregenCount} {t('pregen.cacheStatus')}
+            </span>
+          </div>
+
+          <p className="text-xs text-stone-600 leading-relaxed">{t('pregen.desc')}</p>
+
+          {isPregenerating && pregenProgress && (
+            <div className="space-y-1.5">
+              <div className="text-[11px] font-medium text-emerald-900">
+                {t('pregen.generating', {
+                  current: pregenProgress.current.toString(),
+                  total: pregenProgress.total.toString(),
+                })}
+              </div>
+              <div className="w-full bg-emerald-200 rounded-full h-2 overflow-hidden">
+                <div
+                  className="bg-emerald-800 h-2 rounded-full transition-all duration-300"
+                  style={{
+                    width: `${Math.round((pregenProgress.current / pregenProgress.total) * 100)}%`,
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
+          {pregenSuccessMessage && (
+            <div className="p-2.5 bg-white text-emerald-900 text-xs rounded-lg border border-emerald-300 font-medium">
+              {pregenSuccessMessage}
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={handlePrepareDay}
+            disabled={isPregenerating}
+            className="btn-primary text-xs py-2.5 w-full flex justify-center items-center gap-2 cursor-pointer disabled:opacity-50"
+          >
+            <span>⚡</span> {t('pregen.button')}
+          </button>
+        </section>
 
         {/* Note input & test prompt section */}
         <section className="card space-y-4 border-stone-200 bg-white">

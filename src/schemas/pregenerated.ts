@@ -18,6 +18,8 @@ export const PregeneratedMessageSchema = z
     createdTs: z.number().int().positive(),
     shownCount: z.number().int().nonnegative().default(0),
     outcomeStats: OutcomeStatsSchema.optional(),
+    category: z.enum(['morning', 'risk_window', 'craving', 'evening']).optional(),
+    used: z.boolean().default(false).optional(),
   })
   .strict();
 

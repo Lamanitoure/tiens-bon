@@ -72,6 +72,14 @@
       "alternative": "A handy alternative activity"
     }
   },
+  "pregen": {
+    "title": "Prepare my day (Offline cache)",
+    "desc": "Pregenerates 12 personalized messages (morning, risk windows, cravings, evening) for 100% offline availability with zero latency.",
+    "button": "Prepare my day now",
+    "generating": "Batch generation in progress ({current}/{total})...",
+    "success": "✓ Day ready! 12 messages in local cache ready for today.",
+    "cacheStatus": "messages ready in local cache"
+  },
   "counters": {
     "streak": "Current streak",
     "bestStreak": "Best streak",

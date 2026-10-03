@@ -184,6 +184,53 @@ export async function getAllPregenerated(): Promise<PregeneratedMessage[]> {
   });
 }
 
+export async function getUnusedPregenerated(
+  category?: PregeneratedMessage['category'],
+): Promise<PregeneratedMessage[]> {
+  const all = await getAllPregenerated();
+  return all.filter((m) => {
+    const isUnused = !m.used && m.shownCount === 0;
+    if (!isUnused) return false;
+    if (category) {
+      return m.category === category || m.context.startsWith(category);
+    }
+    return true;
+  });
+}
+
+export async function markPregeneratedUsed(id: string): Promise<void> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORES.PREGENERATED, 'readwrite');
+    const store = tx.objectStore(STORES.PREGENERATED);
+    const req = store.get(id);
+    req.onsuccess = () => {
+      if (!req.result) {
+        resolve();
+        return;
+      }
+      const item = req.result;
+      item.used = true;
+      item.shownCount = (item.shownCount || 0) + 1;
+      const putReq = store.put(item);
+      putReq.onsuccess = () => resolve();
+      putReq.onerror = () => reject(putReq.error);
+    };
+    req.onerror = () => reject(req.error);
+  });
+}
+
+export async function clearPregenerated(): Promise<void> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORES.PREGENERATED, 'readwrite');
+    const store = tx.objectStore(STORES.PREGENERATED);
+    const req = store.clear();
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
 // 4. Plans (If/Then) operations
 export async function addPlan(plan: Plan): Promise<void> {
   const validated = PlanSchema.parse(plan);

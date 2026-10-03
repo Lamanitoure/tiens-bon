@@ -72,6 +72,14 @@
       "alternative": "Une activité de remplacement sous la main"
     }
   },
+  "pregen": {
+    "title": "Préparer ma journée (Hors-ligne)",
+    "desc": "Précalcule 12 messages personnalisés (matin, fenêtres à risque, envies, soir) pour une disponibilité 100% hors-ligne sans latence.",
+    "button": "Préparer ma journée maintenant",
+    "generating": "Génération du lot en cours ({current}/{total})...",
+    "success": "✓ Journée prête ! 12 messages en cache prêts pour la journée.",
+    "cacheStatus": "messages prêts en cache local"
+  },
   "counters": {
     "streak": "Série actuelle",
     "bestStreak": "Meilleure série",
