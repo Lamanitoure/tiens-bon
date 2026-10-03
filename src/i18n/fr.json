@@ -177,5 +177,24 @@
     "empty": "Aucun message rédigé pour le moment.",
     "saved": "Message enregistré pour tes futurs moments d'envie.",
     "deleteConfirm": "Supprimer ce message ?"
+  },
+  "reminders": {
+    "title": "Rappels avant mes moments à risque",
+    "subtitle": "Programmation automatique {leadTime} minutes avant chaque fenêtre à risque avec ton alternative.",
+    "discreetModeTitle": "Mode discret sur l'écran verrouillé",
+    "discreetModeOn": "Activé : texte neutre visible de l'extérieur. Rien sur le tabac n'apparaît.",
+    "discreetModeOff": "Désactivé : affiche directement ton message personnalisé et ton alternative.",
+    "leadTimeInfo": "Rappel calculé : {minutes} minutes avant",
+    "lockscreenPreview": "Aperçu écran verrouillé :",
+    "appMessagePreview": "Message complet à l'ouverture :",
+    "testBtn": "Tester un rappel maintenant (notification)",
+    "testing": "Envoi du rappel test...",
+    "testSuccess": "✓ Notification de rappel envoyée !",
+    "testDenied": "⚠️ Les notifications sont désactivées sur ce navigateur.",
+    "planBTitle": "Plan B : Mes alarmes réveil sur le téléphone",
+    "planBSubtitle": "Si le PC ou la connexion n'est pas disponible, configure ces alarmes dans l'horloge native de ton téléphone :",
+    "copyLabel": "Copier le libellé",
+    "copied": "Copié !",
+    "noWindows": "Aucune fenêtre à risque définie dans le profil."
   }
 }

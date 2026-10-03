@@ -177,5 +177,24 @@
     "empty": "No personal messages written yet.",
     "saved": "Message saved for your future craving moments.",
     "deleteConfirm": "Delete this message?"
+  },
+  "reminders": {
+    "title": "Reminders before risk moments",
+    "subtitle": "Automatically scheduled {leadTime} minutes before each risk window with your chosen alternative.",
+    "discreetModeTitle": "Discreet mode on lock screen",
+    "discreetModeOn": "Enabled: neutral text shown on lock screen. Nothing about smoking is revealed.",
+    "discreetModeOff": "Disabled: displays your personalized message and chosen alternative directly.",
+    "leadTimeInfo": "Calculated reminder: {minutes} minutes before",
+    "lockscreenPreview": "Lock screen preview:",
+    "appMessagePreview": "Full message upon opening:",
+    "testBtn": "Test a reminder now (notification)",
+    "testing": "Sending test reminder...",
+    "testSuccess": "✓ Test reminder notification sent!",
+    "testDenied": "⚠️ Notifications are blocked or disabled in this browser.",
+    "planBTitle": "Plan B: Native phone clock alarms",
+    "planBSubtitle": "If your PC or connection is unavailable, set these alarms in your phone's native clock app:",
+    "copyLabel": "Copy label",
+    "copied": "Copied!",
+    "noWindows": "No risk windows defined in profile."
   }
 }

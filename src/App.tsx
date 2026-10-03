@@ -8,6 +8,7 @@ import demoProfile from '../demo/profile.demo.json';
 import { CravingSession } from './components/CravingSession.tsx';
 import { FutureSelfMessages } from './components/FutureSelfMessages.tsx';
 import { PersonalGallery } from './components/PersonalGallery.tsx';
+import { RemindersManager } from './components/RemindersManager.tsx';
 import {
   addEvent,
   addImage,
@@ -886,6 +887,12 @@ export default function App() {
 
             {/* Personal Photo Resources Gallery (Step 13) */}
             <PersonalGallery />
+
+            {/* Reminders before Risk Moments & Discreet Mode (Step 14) */}
+            <RemindersManager
+              profile={profile}
+              onProfileUpdated={(updated) => setProfile(updated)}
+            />
 
             {/* Emergency & Support Contacts */}
             <div className="card space-y-2.5 bg-stone-50 dark:bg-stone-800/60 border-stone-200 dark:border-stone-700">

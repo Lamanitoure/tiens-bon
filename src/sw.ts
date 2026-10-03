@@ -28,3 +28,46 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 });
+
+// Handle notification click to bring app to foreground (Step 14)
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if ('focus' in client && typeof client.focus === 'function') {
+          return client.focus();
+        }
+      }
+      if (self.clients.openWindow) {
+        return self.clients.openWindow('/?reminder=1');
+      }
+    }),
+  );
+});
+
+// Web Push event for reminders (Step 5b & Step 14)
+self.addEventListener('push', (event) => {
+  let title = 'Tiens Bon';
+  let body = 'Un petit instant de pause prévu pour toi.';
+
+  if (event.data) {
+    try {
+      const payload = event.data.json();
+      if (payload.title) title = payload.title;
+      if (payload.body) body = payload.body;
+    } catch {
+      const text = event.data.text();
+      if (text) body = text;
+    }
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body,
+      icon: '/icon.svg',
+      badge: '/icon.svg',
+      tag: 'tiens-bon-reminder',
+    }),
+  );
+});
