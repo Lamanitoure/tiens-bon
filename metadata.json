@@ -1,0 +1,6 @@
+{
+  "name": "Tiens Bon",
+  "description": "A local-first, open-weight AI companion to quit smoking at home with personalized messages and craving support.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

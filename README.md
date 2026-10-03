@@ -1,11 +1,3 @@
-<div align="center">
+# Tiens Bon
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-
-  <h1>Built with AI Studio</h2>
-
-  <p>The fastest path from prompt to production with Gemini.</p>
-
-  <a href="https://aistudio.google.com/apps">Start building</a>
-
-</div>
+A local-first, open-weight AI companion for one person who wants to quit smoking at home. It prepares messages in her own voice ahead of time, warns her before her risk moments, shows her own photos and words, and never judges her. Anyone can fork it and make it theirs. The name "Tiens Bon" is French for "hold on".

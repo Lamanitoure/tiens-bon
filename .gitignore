@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+
+# Builds & Outputs
+dist/
+build/
+coverage/
+*.log
+.DS_Store
+
+# Secrets and Local Configurations (Item 16)
+.env
+.env.*
+!.env.example
+server/config.json
+.private-words.local
+*.local.json
+data/
+
+# Private / Personal files
+*.real.*
+profile.real.json
+private/
