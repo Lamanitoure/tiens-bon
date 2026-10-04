@@ -23,15 +23,24 @@ self.addEventListener('activate', (event) => {
 // Security requirement Item 12: Never cache /api responses
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
+
   if (url.pathname.startsWith('/api')) {
     // Let network handle directly without SW caching
     return;
   }
 });
 
+// Resolve app-relative URLs from the actual service worker scope.
+// This keeps the PWA compatible with deployments under a subdirectory
+// such as /tiens-bon/ without hardcoding the deployment path.
+const getAppUrl = (path: string): string => {
+  return new URL(path, self.registration.scope).href;
+};
+
 // Handle notification click to bring app to foreground (Step 14)
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
+
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       for (const client of clientList) {
@@ -39,8 +48,9 @@ self.addEventListener('notificationclick', (event) => {
           return client.focus();
         }
       }
+
       if (self.clients.openWindow) {
-        return self.clients.openWindow('/?reminder=1');
+        return self.clients.openWindow(getAppUrl('?reminder=1'));
       }
     }),
   );
@@ -54,10 +64,12 @@ self.addEventListener('push', (event) => {
   if (event.data) {
     try {
       const payload = event.data.json();
+
       if (payload.title) title = payload.title;
       if (payload.body) body = payload.body;
     } catch {
       const text = event.data.text();
+
       if (text) body = text;
     }
   }
@@ -65,8 +77,8 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(title, {
       body,
-      icon: '/icon.svg',
-      badge: '/icon.svg',
+      icon: getAppUrl('icon.svg'),
+      badge: getAppUrl('icon.svg'),
       tag: 'tiens-bon-reminder',
     }),
   );

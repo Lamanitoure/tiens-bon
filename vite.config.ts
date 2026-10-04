@@ -6,7 +6,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig(() => {
   return {
-    base: process.env.BASE_URL || './',
+    base: process.env.BASE_URL || '/tiens-bon/',
     plugins: [
       react(),
       tailwindcss(),
@@ -17,7 +17,7 @@ export default defineConfig(() => {
         registerType: 'autoUpdate',
         injectRegister: 'auto',
         manifest: {
-          id: '/',
+          id: '/tiens-bon/',
           name: 'Tiens Bon',
           short_name: 'Tiens Bon',
           description: 'Compagnon local et bienveillant pour arrêter de fumer à la maison.',
@@ -25,14 +25,14 @@ export default defineConfig(() => {
           background_color: '#fafaf9',
           display: 'standalone',
           orientation: 'portrait',
-          start_url: '/',
-          scope: '/',
+          start_url: '/tiens-bon/',
+          scope: '/tiens-bon/',
           shortcuts: [
             {
               name: "J'ai une envie",
               short_name: 'Envie',
               description: "Ouvrir immédiatement l'écran d'aide pour surmonter une envie",
-              url: '/?craving=1',
+              url: '/tiens-bon/?craving=1',
               icons: [
                 {
                   src: '/icon.svg',
@@ -44,25 +44,25 @@ export default defineConfig(() => {
           ],
           icons: [
             {
-              src: '/pwa-192x192.png',
+              src: '/tiens-bon/pwa-192x192.png',
               sizes: '192x192',
               type: 'image/png',
               purpose: 'any',
             },
             {
-              src: '/pwa-512x512.png',
+              src: '/tiens-bon/pwa-512x512.png',
               sizes: '512x512',
               type: 'image/png',
               purpose: 'any',
             },
             {
-              src: '/pwa-maskable-512x512.png',
+              src: '/tiens-bon/pwa-maskable-512x512.png',
               sizes: '512x512',
               type: 'image/png',
               purpose: 'maskable',
             },
             {
-              src: '/icon.svg',
+              src: '/tiens-bon/icon.svg',
               sizes: '192x192 512x512',
               type: 'image/svg+xml',
               purpose: 'any',

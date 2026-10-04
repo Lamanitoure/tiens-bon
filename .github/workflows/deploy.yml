@@ -41,6 +41,8 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build production app
+        env:
+          BASE_URL: /tiens-bon/
         run: pnpm run build
 
       - name: Setup Pages
