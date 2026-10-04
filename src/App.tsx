@@ -6,6 +6,7 @@
 import { type ChangeEvent, useCallback, useEffect, useState } from 'react';
 import demoProfile from '../demo/profile.demo.json';
 import { AppPinLockCard, AppPinUnlockOverlay } from './components/AppPinLock.tsx';
+import { BlockPuzzle1010 } from './components/BlockPuzzle1010.tsx';
 import { CravingSession } from './components/CravingSession.tsx';
 import { FutureSelfMessages } from './components/FutureSelfMessages.tsx';
 import {
@@ -18,6 +19,7 @@ import {
   DownloadIcon,
   FlagFrIcon,
   FlagGbIcon,
+  GamepadIcon,
   HeartHandshakeIcon,
   LeafIcon,
   LockIcon,
@@ -85,6 +87,7 @@ export default function App() {
 
   // Active craving session state (Step 10)
   const [isCravingActive, setIsCravingActive] = useState(false);
+  const [showHomePuzzle, setShowHomePuzzle] = useState(false);
 
   // Model connection & testing state
   const [tokenInput, setTokenInput] = useState(getStoredToken());
@@ -739,6 +742,30 @@ export default function App() {
 
             {/* Sourced Health Facts (Step 17 v2) */}
             <SourcedFacts />
+
+            {/* Lightweight 1010! Puzzle Card (Prinzhorn/1010 open-source mechanics) */}
+            <section className="card space-y-3 p-4">
+              <div className="flex items-center justify-between gap-2">
+                <div className="space-y-0.5">
+                  <h3 className="text-xs font-bold text-stone-900 dark:text-stone-50 flex items-center gap-1.5">
+                    <GamepadIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                    <span>{t('game1010.title')}</span>
+                  </h3>
+                  <p className="text-[11px] text-stone-500 dark:text-stone-400 leading-snug">
+                    {t('game1010.subtitle')}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowHomePuzzle(!showHomePuzzle)}
+                  className="btn-secondary !w-auto text-xs py-2 px-3 shrink-0 cursor-pointer whitespace-nowrap"
+                >
+                  {showHomePuzzle ? t('game1010.toggleClose') : t('game1010.toggleOpen')}
+                </button>
+              </div>
+
+              {showHomePuzzle && <BlockPuzzle1010 />}
+            </section>
 
             {/* Quick Note & Test Prompt Section */}
             <section className="card space-y-4">

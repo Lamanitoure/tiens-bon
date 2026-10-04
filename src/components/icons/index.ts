@@ -13,6 +13,7 @@ export * from './EyeIcon.tsx';
 export * from './EyeOffIcon.tsx';
 export * from './FlagFrIcon.tsx';
 export * from './FlagGbIcon.tsx';
+export * from './GamepadIcon.tsx';
 export * from './GlobeIcon.tsx';
 export * from './HeadphonesIcon.tsx';
 export * from './HeartHandshakeIcon.tsx';

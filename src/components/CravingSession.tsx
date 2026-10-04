@@ -10,12 +10,14 @@ import type { Plan } from '../schemas/plans.ts';
 import type { Profile } from '../schemas/profile.ts';
 import type { SelfTalk } from '../schemas/selftalk.ts';
 import { AudioChallengePlayer } from './AudioChallengePlayer.tsx';
+import { BlockPuzzle1010 } from './BlockPuzzle1010.tsx';
 import { BreathingAnchor } from './BreathingAnchor.tsx';
 import {
   AlertTriangleIcon,
   CheckIcon,
   EyeIcon,
   EyeOffIcon,
+  GamepadIcon,
   LeafIcon,
   MailHeartIcon,
   RefreshIcon,
@@ -45,6 +47,7 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
   // Load existing If-Then plans, personal images, and self-talk (Step 11 & Step 13)
   const [activeImage, setActiveImage] = useState<ImageRecord | null>(null);
   const [activeSelfTalk, setActiveSelfTalk] = useState<SelfTalk | null>(null);
+  const [showPuzzle1010, setShowPuzzle1010] = useState(false);
 
   useEffect(() => {
     getAllPlans()
@@ -392,6 +395,24 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
           language={profile.language}
           isDiscreet={isDiscreet}
         />
+      </div>
+
+      {/* Optional 1010! Tactile Puzzle Distraction during the 3-minute craving */}
+      <div className="space-y-2">
+        <button
+          type="button"
+          onClick={() => setShowPuzzle1010(!showPuzzle1010)}
+          className={`w-full py-2.5 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer flex items-center justify-center gap-2 min-h-[40px] ${
+            isDiscreet
+              ? 'bg-stone-900 text-stone-200 border-stone-800 hover:bg-stone-800'
+              : 'bg-stone-50 text-emerald-950 border-emerald-200 hover:bg-emerald-50'
+          }`}
+        >
+          <GamepadIcon className="w-4 h-4" />
+          <span>{showPuzzle1010 ? t('game1010.toggleClose') : t('game1010.toggleOpen')}</span>
+        </button>
+
+        {showPuzzle1010 && <BlockPuzzle1010 forceDiscreet={isDiscreet} compact />}
       </div>
 
       {/* Personal Resource Photo & Caption (Step 13) */}
