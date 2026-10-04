@@ -1,24 +1,41 @@
-import { useId, useState } from 'react';
-import { setStoredProfile } from '../db/index.ts';
+import { useEffect, useId, useState } from 'react';
+import { getAllPregenerated, setStoredProfile } from '../db/index.ts';
 import { t } from '../i18n/index.ts';
 import { activeConfig } from '../lib/config.ts';
-import { getScheduledReminders, sendLocalNotification } from '../lib/reminders.ts';
+import {
+  getScheduledReminders,
+  type ScheduledReminder,
+  sendLocalNotification,
+} from '../lib/reminders.ts';
+import type { PregeneratedMessage } from '../schemas/pregenerated.ts';
 import type { Profile } from '../schemas/profile.ts';
-import { BellIcon, ClockIcon, EyeOffIcon } from './icons/index.ts';
+import { BellIcon, ClockIcon, EyeOffIcon, SparklesIcon } from './icons/index.ts';
 
 interface RemindersManagerProps {
   profile: Profile;
   onProfileUpdated: (updated: Profile) => void;
+  onTriggerReminderBanner?: (reminder: ScheduledReminder) => void;
 }
 
-export function RemindersManager({ profile, onProfileUpdated }: RemindersManagerProps) {
+export function RemindersManager({
+  profile,
+  onProfileUpdated,
+  onTriggerReminderBanner,
+}: RemindersManagerProps) {
   const discreetToggleId = useId();
   const [isDiscreet, setIsDiscreet] = useState(profile.discreetMode ?? true);
   const [testStatus, setTestStatus] = useState<'idle' | 'success' | 'denied'>('idle');
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [pregenBatch, setPregenBatch] = useState<PregeneratedMessage[]>([]);
+
+  useEffect(() => {
+    getAllPregenerated()
+      .then((items) => setPregenBatch(items))
+      .catch(() => {});
+  }, []);
 
   const leadTime = activeConfig.app.reminderLeadTimeMinutes ?? 10;
-  const reminders = getScheduledReminders(profile, leadTime, isDiscreet);
+  const reminders = getScheduledReminders(profile, leadTime, isDiscreet, pregenBatch);
 
   const handleToggleDiscreet = async () => {
     const nextVal = !isDiscreet;
@@ -35,15 +52,19 @@ export function RemindersManager({ profile, onProfileUpdated }: RemindersManager
     }
   };
 
-  const handleTestNotification = async () => {
+  const handleTestNotification = async (targetRem?: ScheduledReminder) => {
     setTestStatus('idle');
-    const firstRem = reminders[0];
-    const title = firstRem ? firstRem.notificationTitle : 'Tiens Bon';
-    const body = firstRem
-      ? firstRem.notificationBody
+    const rem = targetRem || reminders[0];
+    const title = rem ? rem.notificationTitle : 'Tiens Bon';
+    const body = rem
+      ? rem.notificationBody
       : isDiscreet
         ? 'Un petit instant de pause prévu pour toi.'
         : "Dans 10 min : pense à ton verre d'eau fraîche et respire !";
+
+    if (rem && onTriggerReminderBanner) {
+      onTriggerReminderBanner(rem);
+    }
 
     const ok = await sendLocalNotification({
       title,
@@ -101,7 +122,7 @@ export function RemindersManager({ profile, onProfileUpdated }: RemindersManager
       <div className="space-y-2">
         <button
           type="button"
-          onClick={handleTestNotification}
+          onClick={() => handleTestNotification()}
           className="btn-secondary text-xs py-2.5 w-full cursor-pointer flex items-center justify-center gap-2 min-h-[42px]"
         >
           <BellIcon className="w-4 h-4" />
@@ -123,7 +144,7 @@ export function RemindersManager({ profile, onProfileUpdated }: RemindersManager
 
       {/* Computed Scheduled Reminders List */}
       <div className="space-y-3">
-        <h4 className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-stone-400">
+        <h4 className="text-xs font-bold text-stone-600 dark:text-stone-400">
           Moments programmés ({reminders.length})
         </h4>
 
@@ -141,14 +162,14 @@ export function RemindersManager({ profile, onProfileUpdated }: RemindersManager
                   <span className="font-bold text-stone-900 dark:text-stone-100">
                     {rem.riskWindowLabel} ({rem.riskTime})
                   </span>
-                  <span className="font-mono font-bold text-emerald-800 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800">
+                  <span className="font-mono tabular-nums font-bold text-emerald-800 dark:text-emerald-400">
                     Rappel à {rem.reminderTime}
                   </span>
                 </div>
 
                 {/* Lock screen text preview */}
                 <div className="space-y-1">
-                  <span className="text-[10px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider block">
+                  <span className="text-[10px] font-semibold text-stone-500 dark:text-stone-400 block">
                     {t('reminders.lockscreenPreview')}
                   </span>
                   <div className="p-2 rounded-xl bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 font-mono text-[11px] text-stone-800 dark:text-stone-200">
@@ -156,14 +177,25 @@ export function RemindersManager({ profile, onProfileUpdated }: RemindersManager
                   </div>
                 </div>
 
-                {/* Inside app message */}
+                {/* Inside app message (from Gemma pre-generated batch or personalized fallback) */}
                 <div className="space-y-1">
-                  <span className="text-[10px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider block">
-                    {t('reminders.appMessagePreview')}
+                  <span className="text-[10px] font-semibold text-stone-500 dark:text-stone-400 flex items-center gap-1">
+                    <SparklesIcon className="w-3 h-3 text-emerald-700 dark:text-emerald-400" />
+                    <span>{t('reminders.appMessagePreview')}</span>
                   </span>
                   <p className="italic text-stone-700 dark:text-stone-300 pl-2 border-l-2 border-emerald-700 dark:border-emerald-500">
                     « {rem.fullMessage} »
                   </p>
+                </div>
+
+                <div className="pt-1 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => handleTestNotification(rem)}
+                    className="text-[11px] font-semibold text-emerald-800 dark:text-emerald-400 underline cursor-pointer hover:opacity-80"
+                  >
+                    Simuler ce rappel ({rem.reminderTime})
+                  </button>
                 </div>
               </div>
             ))}
@@ -195,7 +227,7 @@ export function RemindersManager({ profile, onProfileUpdated }: RemindersManager
                 className="flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-stone-900 border border-amber-200/60 dark:border-amber-800/40 text-xs"
               >
                 <div>
-                  <span className="font-mono font-bold text-amber-950 dark:text-amber-200 text-sm">
+                  <span className="font-mono tabular-nums font-bold text-amber-950 dark:text-amber-200 text-sm">
                     {rem.reminderTime}
                   </span>
                   <span className="text-[11px] text-stone-500 dark:text-stone-400 ml-2">

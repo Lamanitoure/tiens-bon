@@ -11,6 +11,7 @@ import { CravingSession } from './components/CravingSession.tsx';
 import { FutureSelfMessages } from './components/FutureSelfMessages.tsx';
 import {
   AlertTriangleIcon,
+  BellIcon,
   BoltIcon,
   BookIcon,
   BotIcon,
@@ -48,6 +49,7 @@ import {
   getAllEvents,
   getAllImages,
   getAllPlans,
+  getAllPregenerated,
   getAllSelfTalk,
   getSettings,
   getStoredProfile,
@@ -60,6 +62,11 @@ import { checkModelStatus, generateMotivation, getStoredToken, setStoredToken } 
 import { activeConfig } from './lib/config.ts';
 import { ensureDemoPregeneratedSeeded, isStaticDemoMode } from './lib/demo-mode.ts';
 import { generateDailyBatch, shouldTriggerAutomaticBatch } from './lib/pregeneration.ts';
+import {
+  getScheduledReminders,
+  type ScheduledReminder,
+  sendLocalNotification,
+} from './lib/reminders.ts';
 import { computeUserStats, type UserStats } from './lib/stats.ts';
 import { checkActiveTrigger, consumeActiveTrigger, detectUrlTrigger } from './lib/wearable.ts';
 import type { EventRecord } from './schemas/events.ts';
@@ -92,6 +99,7 @@ export default function App() {
 
   // Active craving session state (Step 10)
   const [isCravingActive, setIsCravingActive] = useState(false);
+  const [activeReminderBanner, setActiveReminderBanner] = useState<ScheduledReminder | null>(null);
 
   // Model connection & testing state
   const [tokenInput, setTokenInput] = useState(getStoredToken());
@@ -235,6 +243,47 @@ export default function App() {
       document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, [refreshEventsAndStats]);
+
+  // Step 14: Automatic clock watcher that fires Gemma notifications at her scheduled riskWindows
+  useEffect(() => {
+    if (!profile) return;
+
+    const checkScheduledTimes = async () => {
+      const now = new Date();
+      const hh = now.getHours().toString().padStart(2, '0');
+      const mm = now.getMinutes().toString().padStart(2, '0');
+      const currentHHMM = `${hh}:${mm}`;
+      const todayKey = now.toISOString().slice(0, 10);
+
+      const batch = await getAllPregenerated().catch(() => []);
+      const leadTime = activeConfig.app.reminderLeadTimeMinutes ?? 10;
+      const scheduled = getScheduledReminders(
+        profile,
+        leadTime,
+        profile.discreetMode ?? true,
+        batch,
+      );
+
+      for (const rem of scheduled) {
+        if (currentHHMM === rem.reminderTime || currentHHMM === rem.riskTime) {
+          const fireKey = `${todayKey}-${rem.riskWindowLabel}-${currentHHMM}`;
+          if (localStorage.getItem('tb_last_fired_reminder') !== fireKey) {
+            localStorage.setItem('tb_last_fired_reminder', fireKey);
+            setActiveReminderBanner(rem);
+            await sendLocalNotification({
+              title: rem.notificationTitle,
+              body: rem.notificationBody,
+              tag: `tiens-bon-${rem.riskTime}`,
+            });
+          }
+        }
+      }
+    };
+
+    checkScheduledTimes();
+    const timer = setInterval(checkScheduledTimes, 20000);
+    return () => clearInterval(timer);
+  }, [profile]);
 
   const handlePrepareDay = async () => {
     if (!profile || isPregenerating) return;
@@ -582,6 +631,49 @@ export default function App() {
           <SparklesIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
           <span>{t('demo.bundledBanner')}</span>
         </div>
+
+        {/* Active Scheduled Gemma Reminder Banner (Step 14) */}
+        {activeReminderBanner && (
+          <div className="card p-4 bg-emerald-50/90 dark:bg-emerald-950/70 border-2 border-emerald-400 dark:border-emerald-700 space-y-2.5 animate-fade-in">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-xs font-bold text-emerald-950 dark:text-emerald-200">
+                <BellIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                <span>
+                  {activeReminderBanner.riskWindowLabel} ({activeReminderBanner.riskTime})
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setActiveReminderBanner(null)}
+                className="p-1 rounded-lg hover:bg-emerald-200/60 dark:hover:bg-emerald-900 cursor-pointer"
+                aria-label="Fermer le rappel"
+              >
+                <XIcon className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className="text-xs italic text-stone-800 dark:text-stone-200 border-l-2 border-emerald-700 dark:border-emerald-400 pl-2.5">
+              « {activeReminderBanner.fullMessage} »
+            </p>
+
+            <div className="flex items-center justify-between gap-2 pt-1">
+              <span className="text-[11px] text-emerald-900 dark:text-emerald-300 font-medium truncate">
+                Alternative : <strong>{activeReminderBanner.alternative}</strong>
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveReminderBanner(null);
+                  setActiveTab('home');
+                  setIsCravingActive(true);
+                }}
+                className="btn-primary !w-auto text-xs py-1.5 px-3 shrink-0 cursor-pointer whitespace-nowrap"
+              >
+                Lancer 3 min
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Immediate Distress Alert Banner */}
         {distressDetected && profile && (
@@ -1170,6 +1262,7 @@ export default function App() {
                 <RemindersManager
                   profile={profile}
                   onProfileUpdated={(updated) => setProfile(updated)}
+                  onTriggerReminderBanner={(rem) => setActiveReminderBanner(rem)}
                 />
 
                 {/* Smartwatch & Wearable Trigger Webhook (Step 18) */}
