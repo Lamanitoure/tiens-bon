@@ -134,5 +134,5 @@ Please read [`docs/security.md`](./docs/security.md) for the full item-by-item a
 
 ## 7. Licenses
 
-- **Application Code**: Released under the [MIT License](./LICENSE).
+- Application Code: Released under the GNU General Public License v3.0 (GPL-3.0)
 - **Gemma Model Weights**: Users download and run Gemma weights themselves via Ollama under Google's [Gemma Terms of Use](https://ai.google.dev/gemma/terms). No model weights are distributed in this repository.

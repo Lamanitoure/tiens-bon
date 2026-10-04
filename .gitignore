@@ -24,6 +24,3 @@ data/
 *.real.*
 profile.real.json
 private/
-
-pnpm-lock.yaml
-pnpm-workspace.yaml
