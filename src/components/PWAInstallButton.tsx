@@ -5,7 +5,7 @@ import { DownloadIcon, XIcon } from './icons/index.ts';
 
 const DISMISS_STORAGE_KEY = 'tb_pwa_install_dismissed';
 
-export function PWAInstallButton() {
+export function PWAInstallButton({ forceShow = false }: { forceShow?: boolean } = {}) {
   const { isInstallable, isInstalled, isIOS, install } = usePWAInstall();
   const [isDismissed, setIsDismissed] = useState(() => {
     try {
@@ -17,7 +17,7 @@ export function PWAInstallButton() {
   const [showGuide, setShowGuide] = useState(false);
   const lang = getLanguage();
 
-  if (isInstalled || isDismissed) {
+  if (isInstalled || (isDismissed && !forceShow)) {
     return null;
   }
 

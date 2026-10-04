@@ -6,6 +6,7 @@ import { CheckIcon } from './icons/CheckIcon.tsx';
 import { PenIcon } from './icons/PenIcon.tsx';
 import { TrashIcon } from './icons/TrashIcon.tsx';
 import { XIcon } from './icons/XIcon.tsx';
+import { PWAInstallButton } from './PWAInstallButton.tsx';
 
 interface ProfileEditorProps {
   profile: Profile;
@@ -97,6 +98,9 @@ export function ProfileEditor({ profile, onProfileUpdated, onDeleteAll }: Profil
 
   return (
     <div className="space-y-4">
+      {/* PWA Install shortcut card */}
+      <PWAInstallButton forceShow={true} />
+
       {/* Customize Profile Card */}
       <section className="card space-y-3 border-stone-200 dark:border-stone-700">
         <div className="flex items-center justify-between">
