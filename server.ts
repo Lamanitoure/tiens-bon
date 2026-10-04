@@ -215,7 +215,7 @@ app.post('/api/generate', verifyToken, checkRateLimit, async (req: Request, res:
   const isCheckin = body.expected_format === 'checkin';
   const isRecap = body.expected_format === 'recap';
 
-  // 1. Try local Ollama if configured
+  // 1. Try local Ollama (open-weight model on user's machine)
   const ollamaUrl = process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
   const ollamaModel = process.env.OLLAMA_MODEL || 'gemma2:2b';
   try {
