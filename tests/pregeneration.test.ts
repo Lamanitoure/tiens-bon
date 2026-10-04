@@ -131,7 +131,7 @@ describe('Pre-generation and offline fallback (Step 9)', () => {
     // Mock checkModelStatus to return ok
     vi.spyOn(apiModule, 'checkModelStatus').mockResolvedValue({
       ollama: 'ok',
-      model: 'gemini-3.8-flash',
+      model: 'gemma2:2b',
     });
 
     // Currently 0 pregenerated messages in store (low stock)

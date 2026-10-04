@@ -1,7 +1,6 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
 import express, { type Request, type Response, type NextFunction } from 'express';
 
@@ -131,11 +130,6 @@ app.get('/api/health', verifyToken, (_req: Request, res: Response) => {
 
 app.get('/api/status', verifyToken, async (_req: Request, res: Response) => {
   const ollamaUrl = process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
-  const modelName = process.env.GEMINI_API_KEY ? 'gemini-3.8-flash' : 'gemma2:2b';
-
-  if (process.env.GEMINI_API_KEY) {
-    return res.json({ ollama: 'ok', model: modelName });
-  }
 
   try {
     const controller = new AbortController();
@@ -156,7 +150,7 @@ app.get('/api/status', verifyToken, async (_req: Request, res: Response) => {
     }
     return res.json({ ollama: 'unreachable', model: 'gemma2:2b' });
   } catch {
-    // If Ollama is not running and no Gemini key is set, return ok with fallback model
+    // If Ollama is not running, return ok with fallback model
     return res.json({ ollama: 'ok', model: 'gemma2:2b' });
   }
 });
@@ -220,90 +214,7 @@ app.post('/api/generate', verifyToken, checkRateLimit, async (req: Request, res:
   const isCheckin = body.expected_format === 'checkin';
   const isRecap = body.expected_format === 'recap';
 
-  // 1. Try Gemini API if key is available
-  if (process.env.GEMINI_API_KEY) {
-    try {
-      const ai = new GoogleGenAI({
-        apiKey: process.env.GEMINI_API_KEY,
-        httpOptions: {
-          headers: {
-            'User-Agent': 'aistudio-build',
-          },
-        },
-      });
-
-      let systemInstruction =
-        'You are Tiens Bon, an empathetic, non-judgmental quit-smoking companion. ' +
-        'You must respond strictly in JSON with exactly two fields: ' +
-        '"challenge" (a 3-minute concrete, safe distraction or grounding task) ' +
-        'and "message" (a warm, encouraging message in 1-3 sentences in the requested language and tone). ' +
-        'Do not wrap in markdown fences or any other text.';
-
-      if (isCheckin) {
-        systemInstruction =
-          'You are an extraction assistant for a quit-smoking journal. ' +
-          'Extract trigger, emotion, and outcome from the user evening check-in. ' +
-          'Return strictly JSON with fields: ' +
-          '"trigger" (short string, e.g. "café", "stress", or "unknown"), ' +
-          '"emotion" (one word string, e.g. "calme", "fatigué", "fier", or "unknown"), ' +
-          '"outcome" (must be strictly one of: "resisted", "smoked", "unknown"). ' +
-          'Do not provide advice, medical commentary, or health statistics.';
-      } else if (isRecap) {
-        systemInstruction =
-          'You are Tiens Bon, an encouraging quit-smoking companion. ' +
-          'Write a warm, uplifting weekly recap (2-3 sentences max) in her requested tone. ' +
-          'Start with what worked. Use the numbers exactly as given and never add or change a number. ' +
-          'No medical advice, no reproach. Return strictly JSON: {"message": "<your text>"}';
-      }
-
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.8-flash',
-        contents: prompt,
-        config: {
-          systemInstruction,
-          responseMimeType: 'application/json',
-        },
-      });
-
-      const raw = response.text || '';
-      const cleaned = stripMarkdownFences(raw);
-      const parsed = JSON.parse(cleaned);
-
-      if (isCheckin) {
-        const validOutcomes = new Set(['resisted', 'smoked', 'unknown']);
-        const outcome = validOutcomes.has(parsed.outcome) ? parsed.outcome : 'unknown';
-        return res.json({
-          trigger: String(parsed.trigger || 'Moment de pause').slice(0, 200),
-          emotion: String(parsed.emotion || 'Calme').slice(0, 100),
-          outcome,
-        });
-      }
-
-      if (isRecap && parsed.message) {
-        return res.json({
-          message: String(parsed.message).slice(0, 1000),
-        });
-      }
-
-      if (
-        typeof parsed.challenge === 'string' &&
-        parsed.challenge.length > 0 &&
-        parsed.challenge.length <= 500 &&
-        typeof parsed.message === 'string' &&
-        parsed.message.length > 0 &&
-        parsed.message.length <= 1000
-      ) {
-        return res.json({
-          challenge: parsed.challenge,
-          message: parsed.message,
-        });
-      }
-    } catch (geminiErr) {
-      console.warn('Gemini generation fallback:', geminiErr);
-    }
-  }
-
-  // 2. Try Ollama if configured
+  // 1. Try local Ollama if configured
   const ollamaUrl = process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
   try {
     const controller = new AbortController();
