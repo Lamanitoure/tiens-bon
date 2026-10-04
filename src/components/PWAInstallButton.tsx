@@ -3,12 +3,21 @@ import { getLanguage } from '../i18n/index.ts';
 import { usePWAInstall } from '../lib/usePWAInstall.ts';
 import { DownloadIcon, XIcon } from './icons/index.ts';
 
+const DISMISS_STORAGE_KEY = 'tb_pwa_install_dismissed';
+
 export function PWAInstallButton() {
   const { isInstallable, isInstalled, isIOS, install } = usePWAInstall();
+  const [isDismissed, setIsDismissed] = useState(() => {
+    try {
+      return localStorage.getItem(DISMISS_STORAGE_KEY) === '1';
+    } catch {
+      return false;
+    }
+  });
   const [showGuide, setShowGuide] = useState(false);
   const lang = getLanguage();
 
-  if (isInstalled) {
+  if (isInstalled || isDismissed) {
     return null;
   }
 
@@ -20,17 +29,46 @@ export function PWAInstallButton() {
     }
   };
 
+  const handleDismiss = () => {
+    setIsDismissed(true);
+    try {
+      localStorage.setItem(DISMISS_STORAGE_KEY, '1');
+    } catch {
+      // ignore
+    }
+  };
+
   return (
     <>
-      <button
-        type="button"
-        onClick={handleClick}
-        className="btn-secondary !w-auto text-xs py-1.5 px-2.5 rounded-full font-semibold border-emerald-300 dark:border-emerald-700 bg-emerald-50/80 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
-        aria-label={lang === 'fr' ? "Installer l'application" : 'Install App'}
-      >
-        <DownloadIcon className="w-3.5 h-3.5 shrink-0" />
-        <span>{lang === 'fr' ? 'Installer' : 'Install'}</span>
-      </button>
+      <div className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-stone-100/90 dark:bg-stone-900/90 border border-stone-200/80 dark:border-stone-800 text-[11px] text-stone-700 dark:text-stone-300">
+        <div className="flex items-center gap-1.5 min-w-0 truncate">
+          <DownloadIcon className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400 shrink-0" />
+          <span className="truncate">
+            {lang === 'fr'
+              ? "Installer l'application hors-ligne sur votre écran"
+              : 'Install offline app on your home screen'}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            type="button"
+            onClick={handleClick}
+            className="px-2.5 py-1 rounded-lg bg-emerald-800 hover:bg-emerald-700 text-white font-semibold text-[11px] cursor-pointer whitespace-nowrap"
+          >
+            {lang === 'fr' ? 'Installer' : 'Install'}
+          </button>
+          <button
+            type="button"
+            onClick={handleDismiss}
+            className="p-1 rounded-md text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-200/60 dark:hover:bg-stone-800 cursor-pointer"
+            aria-label={lang === 'fr' ? 'Masquer ce bandeau' : 'Dismiss install banner'}
+            title={lang === 'fr' ? 'Fermer' : 'Close'}
+          >
+            <XIcon className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
 
       {showGuide && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fade-in">
@@ -120,7 +158,7 @@ export function PWAInstallButton() {
             <button
               type="button"
               onClick={() => setShowGuide(false)}
-              className="btn-primary text-xs py-2.5 w-full cursor-pointer"
+              className="btn-primary text-xs py-2 w-full cursor-pointer"
             >
               {lang === 'fr' ? 'Compris' : 'Got it'}
             </button>

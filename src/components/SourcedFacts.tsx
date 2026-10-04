@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { getLanguage, t } from '../i18n/index.ts';
 import { activeConfig } from '../lib/config.ts';
+import { ExpandableText } from './ExpandableText.tsx';
 import { RefreshIcon } from './icons/RefreshIcon.tsx';
 import { StethoscopeIcon } from './icons/StethoscopeIcon.tsx';
 
@@ -18,27 +19,31 @@ export function SourcedFacts() {
   };
 
   return (
-    <section className="card space-y-3 border-emerald-200/80 dark:border-emerald-800/70 bg-white dark:bg-stone-900 p-4">
-      <div className="flex items-center justify-between gap-2">
-        <div>
-          <h3 className="text-xs font-bold text-stone-900 dark:text-stone-50 flex items-center gap-1.5">
+    <section className="card space-y-2.5 border-emerald-200/80 dark:border-emerald-800/70 bg-white dark:bg-stone-900 p-4">
+      <div className="space-y-1">
+        <div className="flex items-center justify-between gap-2">
+          <h3 className="text-xs font-bold text-stone-900 dark:text-stone-50 flex items-center gap-1.5 min-w-0">
             <StethoscopeIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400 shrink-0" />
-            <span>{t('facts.title')}</span>
+            <span className="truncate">{t('facts.title')}</span>
           </h3>
-          <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">
-            {t('facts.subtitle')}
-          </p>
+
+          {factsForLang.length > 1 && (
+            <button
+              type="button"
+              onClick={handleNext}
+              className="px-2.5 py-1 rounded-lg border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 hover:bg-stone-100 dark:hover:bg-stone-700 text-[11px] font-semibold text-stone-700 dark:text-stone-200 shrink-0 cursor-pointer flex items-center gap-1 whitespace-nowrap"
+            >
+              <RefreshIcon className="w-3 h-3 shrink-0" />
+              <span>{lang === 'fr' ? 'Autre' : 'Next'}</span>
+            </button>
+          )}
         </div>
-        {factsForLang.length > 1 && (
-          <button
-            type="button"
-            onClick={handleNext}
-            className="btn-secondary !w-auto text-[11px] py-1.5 px-2.5 shrink-0 cursor-pointer flex items-center gap-1"
-          >
-            <RefreshIcon className="w-3.5 h-3.5 shrink-0" />
-            <span>{t('facts.nextFact')}</span>
-          </button>
-        )}
+
+        <ExpandableText
+          text={t('facts.subtitle')}
+          maxChars={52}
+          className="text-[11px] text-stone-500 dark:text-stone-400"
+        />
       </div>
 
       <blockquote className="p-3 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200/60 dark:border-emerald-800/60 text-xs text-stone-800 dark:text-stone-200 leading-relaxed font-medium">
@@ -46,7 +51,7 @@ export function SourcedFacts() {
       </blockquote>
 
       <div className="flex items-center justify-between text-[11px] text-stone-500 dark:text-stone-400">
-        <span>
+        <span className="truncate mr-2">
           {t('facts.sourcePrefix')}{' '}
           <a
             href={currentFact.sourceUrl}
@@ -57,7 +62,7 @@ export function SourcedFacts() {
             {currentFact.sourceName}
           </a>
         </span>
-        <span className="font-mono text-[10px]">
+        <span className="font-mono tabular-nums text-[10px] shrink-0">
           {(index % factsForLang.length) + 1}/{factsForLang.length}
         </span>
       </div>

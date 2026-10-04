@@ -7,6 +7,7 @@ import { type ChangeEvent, lazy, Suspense, useCallback, useEffect, useState } fr
 import demoProfile from '../demo/profile.demo.json';
 import { AppPinLockCard, AppPinUnlockOverlay } from './components/AppPinLock.tsx';
 import { CravingSession } from './components/CravingSession.tsx';
+import { ExpandableText } from './components/ExpandableText.tsx';
 import { FutureSelfMessages } from './components/FutureSelfMessages.tsx';
 import {
   AlertTriangleIcon,
@@ -550,96 +551,101 @@ export default function App() {
   return (
     <div className="app-container space-y-4">
       {/* Top Header & Language Switch */}
-      <header className="flex items-center justify-between py-3 border-b border-stone-200 dark:border-stone-800">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-emerald-800 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+      <header className="flex items-start justify-between gap-3 py-2.5 border-b border-stone-200 dark:border-stone-800">
+        <div className="flex items-start gap-2.5 min-w-0 flex-1">
+          <div className="w-9 h-9 rounded-xl bg-emerald-800 text-white flex items-center justify-center font-bold text-xs shadow-xs shrink-0 mt-0.5">
             TB
           </div>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-stone-900 dark:text-stone-50 leading-none">
-              Tiens Bon
-            </h1>
-            <span className="text-[11px] text-stone-500 dark:text-stone-400 font-medium">
-              v0.1.0 • {t('app.tagline')}
-            </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-baseline gap-2">
+              <h1 className="text-base font-bold tracking-tight text-stone-900 dark:text-stone-50 leading-tight truncate">
+                Tiens Bon
+              </h1>
+              <span className="text-[10px] font-mono text-stone-400 shrink-0">v0.1.0</span>
+            </div>
+            <ExpandableText
+              text={t('app.tagline')}
+              maxChars={40}
+              className="text-[11px] text-stone-500 dark:text-stone-400"
+            />
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <PWAInstallButton />
-          <button
-            type="button"
-            onClick={toggleLanguage}
-            className="btn-secondary !w-auto text-xs py-1.5 px-3 rounded-full font-semibold border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100 flex items-center gap-1.5"
-            aria-label="Switch language"
-          >
-            {lang === 'fr' ? (
-              <>
-                <FlagGbIcon className="w-4 h-3" />
-                <span>English</span>
-              </>
-            ) : (
-              <>
-                <FlagFrIcon className="w-4 h-3" />
-                <span>Français</span>
-              </>
-            )}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={toggleLanguage}
+          className="px-2.5 py-1.5 rounded-full text-xs font-semibold border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100 flex items-center gap-1.5 shrink-0 cursor-pointer hover:bg-stone-100 dark:hover:bg-stone-700"
+          aria-label="Switch language"
+        >
+          {lang === 'fr' ? (
+            <>
+              <FlagGbIcon className="w-3.5 h-2.5 shrink-0" />
+              <span>EN</span>
+            </>
+          ) : (
+            <>
+              <FlagFrIcon className="w-3.5 h-2.5 shrink-0" />
+              <span>FR</span>
+            </>
+          )}
+        </button>
       </header>
 
-      {/* Navigation Tabs */}
-      <nav className="bg-stone-200/80 dark:bg-stone-800/80 p-1.5 rounded-2xl grid grid-cols-4 gap-1 border border-stone-300/40 dark:border-stone-700/60 shadow-xs">
+      {/* Discreet, dismissible PWA install strip */}
+      <PWAInstallButton />
+
+      {/* Navigation Tabs (Icon stacked above label so text never truncates on mobile) */}
+      <nav className="bg-stone-200/80 dark:bg-stone-800/80 p-1 rounded-2xl grid grid-cols-4 gap-1 border border-stone-300/40 dark:border-stone-700/60 shadow-xs">
         <button
           type="button"
           onClick={() => setActiveTab('home')}
-          className={`py-2.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer min-h-[44px] whitespace-nowrap truncate ${
+          className={`py-2 px-1 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer min-h-[48px] ${
             activeTab === 'home'
               ? 'bg-white dark:bg-stone-900 text-emerald-800 dark:text-emerald-400 shadow-xs'
               : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
           }`}
         >
           <BoltIcon className="w-4 h-4 shrink-0" />
-          <span className="truncate">{t('nav.home')}</span>
+          <span className="leading-none">{t('nav.home')}</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('journal')}
-          className={`py-2.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer min-h-[44px] whitespace-nowrap truncate ${
+          className={`py-2 px-1 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer min-h-[48px] ${
             activeTab === 'journal'
               ? 'bg-white dark:bg-stone-900 text-emerald-800 dark:text-emerald-400 shadow-xs'
               : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
           }`}
         >
           <BookIcon className="w-4 h-4 shrink-0" />
-          <span className="truncate">{t('nav.journal')}</span>
+          <span className="leading-none">{t('nav.journal')}</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('game')}
-          className={`py-2.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer min-h-[44px] whitespace-nowrap truncate ${
+          className={`py-2 px-1 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer min-h-[48px] ${
             activeTab === 'game'
               ? 'bg-white dark:bg-stone-900 text-emerald-800 dark:text-emerald-400 shadow-xs'
               : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
           }`}
         >
           <GamepadIcon className="w-4 h-4 shrink-0" />
-          <span className="truncate">{t('nav.game')}</span>
+          <span className="leading-none">{t('nav.game')}</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('profile')}
-          className={`py-2.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer min-h-[44px] whitespace-nowrap truncate ${
+          className={`py-2 px-1 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer min-h-[48px] ${
             activeTab === 'profile'
               ? 'bg-white dark:bg-stone-900 text-emerald-800 dark:text-emerald-400 shadow-xs'
               : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
           }`}
         >
           <UserIcon className="w-4 h-4 shrink-0" />
-          <span className="truncate">{t('nav.profile')}</span>
+          <span className="leading-none">{t('nav.profile')}</span>
         </button>
       </nav>
 
@@ -822,38 +828,36 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setHomeDrawer(homeDrawer === 'pregen' ? 'none' : 'pregen')}
-                className={`py-2.5 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer flex items-center justify-center gap-1.5 min-h-[44px] whitespace-nowrap truncate ${
+                className={`py-2.5 px-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer flex items-center justify-center gap-1.5 min-h-[42px] whitespace-nowrap ${
                   homeDrawer === 'pregen' || isPregenerating
                     ? 'bg-emerald-800 text-white border-emerald-800 shadow-xs'
                     : 'bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-200 border-stone-200 dark:border-stone-800 hover:border-emerald-400'
                 }`}
               >
                 <SunriseIcon className="w-4 h-4 shrink-0" />
-                <span className="truncate">
-                  {t('pregen.title')} ({pregenCount})
+                <span>
+                  {lang === 'fr' ? `Ma journée (${pregenCount})` : `My day (${pregenCount})`}
                 </span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setHomeDrawer(homeDrawer === 'note' ? 'none' : 'note')}
-                className={`py-2.5 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer flex items-center justify-center gap-1.5 min-h-[44px] whitespace-nowrap truncate ${
+                className={`py-2.5 px-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer flex items-center justify-center gap-1.5 min-h-[42px] whitespace-nowrap ${
                   homeDrawer === 'note' || userInputNote
                     ? 'bg-emerald-800 text-white border-emerald-800 shadow-xs'
                     : 'bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-200 border-stone-200 dark:border-stone-800 hover:border-emerald-400'
                 }`}
               >
                 <PenIcon className="w-4 h-4 shrink-0" />
-                <span className="truncate">
-                  {lang === 'fr' ? 'Exprimer mon ressenti' : 'Express how I feel'}
-                </span>
+                <span>{lang === 'fr' ? 'Mon ressenti' : 'How I feel'}</span>
               </button>
             </div>
 
             {/* Progressive Drawer 1: Offline Batch Pregeneration Card (Step 9) */}
             {profile &&
               (homeDrawer === 'pregen' || isPregenerating || Boolean(pregenSuccessMessage)) && (
-                <section className="card space-y-3.5 border-emerald-200 dark:border-emerald-800 bg-emerald-50/40 dark:bg-emerald-950/20 p-4 animate-fade-in">
+                <section className="card space-y-3 border-emerald-200 dark:border-emerald-800 bg-emerald-50/40 dark:bg-emerald-950/20 p-4 animate-fade-in">
                   <div className="flex items-center justify-between">
                     <h3 className="text-xs font-bold text-emerald-950 dark:text-emerald-200 flex items-center gap-1.5">
                       <SunriseIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
@@ -864,9 +868,11 @@ export default function App() {
                     </span>
                   </div>
 
-                  <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed">
-                    {t('pregen.desc')}
-                  </p>
+                  <ExpandableText
+                    text={t('pregen.desc')}
+                    maxChars={60}
+                    className="text-xs text-stone-600 dark:text-stone-300"
+                  />
 
                   {isPregenerating && pregenProgress && (
                     <div className="space-y-1.5">
@@ -1109,14 +1115,16 @@ export default function App() {
             }
           >
             <div key="tab-game" className="space-y-4 stagger-reveal">
-              <section className="card p-4 bg-emerald-50/60 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/80 space-y-2">
+              <section className="card p-4 bg-emerald-50/60 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/80 space-y-1.5">
                 <h2 className="text-sm font-bold text-emerald-950 dark:text-emerald-200 flex items-center gap-2">
                   <GamepadIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                   <span>{t('game1010.title')}</span>
                 </h2>
-                <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed">
-                  {t('game1010.subtitle')}
-                </p>
+                <ExpandableText
+                  text={t('game1010.subtitle')}
+                  maxChars={58}
+                  className="text-xs text-stone-600 dark:text-stone-300"
+                />
               </section>
 
               <BlockPuzzle1010 />

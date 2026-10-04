@@ -4,7 +4,7 @@
 @keyframes fadeSlideUp {
   from {
     opacity: 0;
-    transform: translateY(12px) scale(0.99);
+    transform: translateY(10px) scale(0.99);
   }
   to {
     opacity: 1;
@@ -24,121 +24,117 @@
 }
 
 .animate-fade-in {
-  animation: softScaleIn 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: softScaleIn 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* Progressive staggered cascade for tab and sub-tab children */
 .stagger-reveal > * {
-  animation: fadeSlideUp 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: fadeSlideUp 340ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .stagger-reveal > *:nth-child(1) {
   animation-delay: 0ms;
 }
 .stagger-reveal > *:nth-child(2) {
-  animation-delay: 55ms;
+  animation-delay: 50ms;
 }
 .stagger-reveal > *:nth-child(3) {
-  animation-delay: 110ms;
+  animation-delay: 100ms;
 }
 .stagger-reveal > *:nth-child(4) {
-  animation-delay: 165ms;
+  animation-delay: 150ms;
 }
 .stagger-reveal > *:nth-child(5) {
-  animation-delay: 220ms;
+  animation-delay: 200ms;
 }
 .stagger-reveal > *:nth-child(6) {
-  animation-delay: 275ms;
-}
-.stagger-reveal > *:nth-child(7) {
-  animation-delay: 330ms;
-}
-.stagger-reveal > *:nth-child(8) {
-  animation-delay: 385ms;
+  animation-delay: 250ms;
 }
 
-/* Primary and secondary buttons */
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  width: 100%;
-  padding: var(--space-3) var(--space-5);
-  background-color: var(--color-primary);
-  color: var(--color-primary-text);
-  font-weight: 600;
-  border-radius: var(--radius-md);
-  border: none;
-  cursor: pointer;
-  min-height: var(--min-touch-target);
-  transition:
-    background-color 180ms cubic-bezier(0.16, 1, 0.3, 1),
-    transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 180ms cubic-bezier(0.16, 1, 0.3, 1);
-}
+@layer components {
+  /* Primary and secondary buttons inside @layer components so Tailwind utilities can override padding/width */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.625rem 1rem;
+    background-color: var(--color-primary);
+    color: var(--color-primary-text);
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    border: none;
+    cursor: pointer;
+    min-height: 42px;
+    transition:
+      background-color 180ms cubic-bezier(0.16, 1, 0.3, 1),
+      transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
 
-.btn-primary:hover {
-  background-color: var(--color-primary-hover);
-  box-shadow: 0 4px 12px -2px rgba(6, 95, 70, 0.25);
-}
+  .btn-primary:hover {
+    background-color: var(--color-primary-hover);
+    box-shadow: 0 4px 12px -2px rgba(6, 95, 70, 0.25);
+  }
 
-.btn-primary:active {
-  transform: scale(0.98);
-}
+  .btn-primary:active {
+    transform: scale(0.98);
+  }
 
-.btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  width: 100%;
-  padding: var(--space-3) var(--space-5);
-  background-color: var(--color-surface-subtle);
-  color: var(--color-text-main);
-  font-weight: 500;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
-  cursor: pointer;
-  min-height: var(--min-touch-target);
-  transition:
-    background-color 180ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 180ms cubic-bezier(0.16, 1, 0.3, 1),
-    transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
-}
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    width: 100%;
+    padding: 0.5rem 0.875rem;
+    background-color: var(--color-surface-subtle);
+    color: var(--color-text-main);
+    font-weight: 500;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+    min-height: 38px;
+    transition:
+      background-color 180ms cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 180ms cubic-bezier(0.16, 1, 0.3, 1),
+      transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
 
-.btn-secondary:hover {
-  background-color: var(--color-border);
-}
+  .btn-secondary:hover {
+    background-color: var(--color-border);
+  }
 
-.btn-secondary:active {
-  transform: scale(0.98);
-}
+  .btn-secondary:active {
+    transform: scale(0.98);
+  }
 
-/* Card Container with subtle hover elevation */
-.card {
-  background-color: var(--color-surface);
-  color: var(--color-text-main);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-5);
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06);
-  transition:
-    transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 220ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 220ms cubic-bezier(0.16, 1, 0.3, 1);
-}
+  /* Card Container */
+  .card {
+    background-color: var(--color-surface);
+    color: var(--color-text-main);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 1rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06);
+    transition:
+      transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 220ms cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
 
-/* Status and info badge */
-.badge-status {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-1) var(--space-3);
-  font-size: var(--text-xs);
-  font-weight: 600;
-  border-radius: var(--radius-full);
-  background-color: var(--color-primary-light);
-  color: var(--color-primary);
-  border: 1px solid var(--color-border);
+  /* Status and info badge */
+  .badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: 0.125rem 0.625rem;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    border-radius: var(--radius-full);
+    background-color: var(--color-primary-light);
+    color: var(--color-primary);
+    border: 1px solid var(--color-border);
+  }
 }
