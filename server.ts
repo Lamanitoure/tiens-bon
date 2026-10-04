@@ -150,8 +150,7 @@ app.get('/api/status', verifyToken, async (_req: Request, res: Response) => {
     }
     return res.json({ ollama: 'unreachable', model: 'gemma2:2b' });
   } catch {
-    // If Ollama is not running, return ok with fallback model
-    return res.json({ ollama: 'ok', model: 'gemma2:2b' });
+    return res.json({ ollama: 'unreachable', model: 'gemma2:2b' });
   }
 });
 
@@ -218,7 +217,7 @@ app.post('/api/generate', verifyToken, checkRateLimit, async (req: Request, res:
   const ollamaUrl = process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 4000);
+    const timeout = setTimeout(() => controller.abort(), 15000);
     const ollamaResp = await fetch(`${ollamaUrl}/api/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -236,6 +235,8 @@ app.post('/api/generate', verifyToken, checkRateLimit, async (req: Request, res:
       const data = (await ollamaResp.json()) as { response?: string };
       const cleaned = stripMarkdownFences(data.response || '');
       const parsed = JSON.parse(cleaned);
+      res.setHeader('X-Model-Source', 'ollama-gemma2:2b');
+      console.log('[Tiens Bon] ✓ Réponse générée en direct par Ollama (gemma2:2b)');
 
       if (isCheckin) {
         const validOutcomes = new Set(['resisted', 'smoked', 'unknown']);
@@ -263,6 +264,9 @@ app.post('/api/generate', verifyToken, checkRateLimit, async (req: Request, res:
   } catch {
     // Continue to fallback
   }
+
+  res.setHeader('X-Model-Source', 'local-fallback');
+  console.log('[Tiens Bon] ℹ Ollama non disponible -> réponse de secours locale utilisée');
 
   // 3. Fallback generator
   if (isCheckin) {
