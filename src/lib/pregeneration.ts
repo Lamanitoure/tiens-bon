@@ -79,6 +79,7 @@ export function buildBatchPlans(profile: Profile): BatchItemPlan[] {
   const tone = profile.tone;
   const reasons = profile.reasons.join(', ');
   const alts = profile.alternatives;
+  const personName = profile.userName || 'Camille';
   const contextsList = activeConfig.app.contextsList || [
     'morning_coffee',
     'after_meal',
@@ -102,7 +103,7 @@ export function buildBatchPlans(profile: Profile): BatchItemPlan[] {
   plans.push({
     category: 'morning',
     context: 'morning',
-    prompt: `You are helping Camille wake up and start her smoke-free day with calm confidence. Her core reasons: ${reasons}. Tone: ${tone}. Write in ${lang}. Return JSON: {"challenge": "...", "message": "..."}`,
+    prompt: `You are helping ${personName} wake up and start her smoke-free day with calm confidence. Her core reasons: ${reasons}. Tone: ${tone}. Write in ${lang}. Return JSON: {"challenge": "...", "message": "..."}`,
     fallbackChallenge: defaultMorningChallenge,
     fallbackMessage:
       profile.phrases.length > 0
@@ -117,7 +118,7 @@ export function buildBatchPlans(profile: Profile): BatchItemPlan[] {
     plans.push({
       category: 'risk_window',
       context: `risk_window:${rw.time}_${rw.label}`,
-      prompt: `Camille approaches her usual risk window: ${rw.time} (${rw.label}). Suggest an alternative activity like: ${alts.join(', ')}. Tone: ${tone}. Write in ${lang}. Return JSON: {"challenge": "...", "message": "..."}`,
+      prompt: `${personName} approaches her usual risk window: ${rw.time} (${rw.label}). Suggest an alternative activity like: ${alts.join(', ')}. Tone: ${tone}. Write in ${lang}. Return JSON: {"challenge": "...", "message": "..."}`,
       fallbackChallenge: `${randomAlt} (${rw.label})`,
       fallbackMessage:
         lang === 'fr'
@@ -132,7 +133,7 @@ export function buildBatchPlans(profile: Profile): BatchItemPlan[] {
     plans.push({
       category: 'craving',
       context: `craving:${ctx}`,
-      prompt: `Camille is experiencing a craving in context "${ctx}". Alternatives she enjoys: ${alts.join(', ')}. Tone: ${tone}. Write in ${lang}. Return JSON: {"challenge": "...", "message": "..."}`,
+      prompt: `${personName} is experiencing a craving in context "${ctx}". Alternatives she enjoys: ${alts.join(', ')}. Tone: ${tone}. Write in ${lang}. Return JSON: {"challenge": "...", "message": "..."}`,
       fallbackChallenge: fallback.challenge,
       fallbackMessage: fallback.message,
     });
@@ -142,7 +143,7 @@ export function buildBatchPlans(profile: Profile): BatchItemPlan[] {
   plans.push({
     category: 'evening',
     context: 'evening:reflection',
-    prompt: `Camille reaches the evening after holding on all day. Tone: ${tone}. Write in ${lang}. Return JSON: {"challenge": "...", "message": "..."}`,
+    prompt: `${personName} reaches the evening after holding on all day. Tone: ${tone}. Write in ${lang}. Return JSON: {"challenge": "...", "message": "..."}`,
     fallbackChallenge:
       lang === 'fr'
         ? 'Prendre un instant pour te féliciter de chaque vague traversée aujourd hui.'
@@ -156,7 +157,7 @@ export function buildBatchPlans(profile: Profile): BatchItemPlan[] {
   plans.push({
     category: 'evening',
     context: 'evening:gratitude',
-    prompt: `Camille prepares for rest. Encourage restful sleep and self-compassion. Tone: ${tone}. Write in ${lang}. Return JSON: {"challenge": "...", "message": "..."}`,
+    prompt: `${personName} prepares for rest. Encourage restful sleep and self-compassion. Tone: ${tone}. Write in ${lang}. Return JSON: {"challenge": "...", "message": "..."}`,
     fallbackChallenge:
       lang === 'fr'
         ? 'Poser les mains sur le ventre et écouter 5 respirations calmes.'
@@ -175,7 +176,7 @@ export function buildBatchPlans(profile: Profile): BatchItemPlan[] {
     plans.push({
       category: 'craving',
       context: `craving:extra_${extraIndex}`,
-      prompt: `Camille needs immediate craving support. Focus on quick distraction. Tone: ${tone}. Write in ${lang}. Return JSON: {"challenge": "...", "message": "..."}`,
+      prompt: `${personName} needs immediate craving support. Focus on quick distraction. Tone: ${tone}. Write in ${lang}. Return JSON: {"challenge": "...", "message": "..."}`,
       fallbackChallenge: fallback.challenge,
       fallbackMessage: fallback.message,
     });

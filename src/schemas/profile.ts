@@ -23,6 +23,7 @@ export const SavingsGoalSchema = z
 
 export const ProfileSchema = z
   .object({
+    userName: z.string().min(1).max(50).optional(),
     language: z.enum(['fr', 'en']),
     tone: z.string().min(1).max(50),
     reasons: z.array(z.string().min(1).max(200)).min(1),

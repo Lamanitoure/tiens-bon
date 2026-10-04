@@ -4,11 +4,11 @@
  */
 
 import { type ChangeEvent, lazy, Suspense, useCallback, useEffect, useState } from 'react';
-import demoProfile from '../demo/profile.demo.json';
 import { AppPinLockCard, AppPinUnlockOverlay } from './components/AppPinLock.tsx';
 import { CravingSession } from './components/CravingSession.tsx';
 import { ExpandableText } from './components/ExpandableText.tsx';
 import { FutureSelfMessages } from './components/FutureSelfMessages.tsx';
+import { InitialProfileModal } from './components/InitialProfileModal.tsx';
 import {
   AlertTriangleIcon,
   BellIcon,
@@ -79,6 +79,7 @@ import { checkModelStatus, generateMotivation, getStoredToken, setStoredToken } 
 import { activeConfig } from './lib/config.ts';
 import { ensureDemoPregeneratedSeeded, isStaticDemoMode } from './lib/demo-mode.ts';
 import { generateDailyBatch, shouldTriggerAutomaticBatch } from './lib/pregeneration.ts';
+import { createInitialUserProfile, getDemoProfile, isDemoProfile } from './lib/profile.ts';
 import {
   getScheduledReminders,
   type ScheduledReminder,
@@ -89,7 +90,7 @@ import { checkActiveTrigger, consumeActiveTrigger, detectUrlTrigger } from './li
 import type { EventRecord } from './schemas/events.ts';
 import type { CravingOutput } from './schemas/model.ts';
 import type { Plan } from './schemas/plans.ts';
-import { type Profile, ProfileSchema } from './schemas/profile.ts';
+import type { Profile } from './schemas/profile.ts';
 import type { LockSettings } from './schemas/settings.ts';
 import {
   type BackupData,
@@ -191,13 +192,32 @@ export default function App() {
     // Initialize from IndexedDB or seed demo profile
     (async () => {
       try {
-        let current = await getStoredProfile();
-        if (!current) {
-          const parsed = ProfileSchema.parse(demoProfile);
-          await setStoredProfile(parsed);
-          current = parsed;
+        let current: Profile | null = null;
+        if (isDemo) {
+          // DEMO MODE: load and seed demo profile
+          current = await getStoredProfile();
+          if (!current || !isDemoProfile(current)) {
+            const demo = getDemoProfile();
+            await setStoredProfile(demo);
+            current = demo;
+          }
+          setProfile(current);
+          await ensureDemoPregeneratedSeeded();
+          await refreshEventsAndStats(current);
+        } else {
+          // NORMAL MODE: only use real user profile (with userName)
+          const stored = await getStoredProfile();
+          if (stored && !isDemoProfile(stored) && stored.userName) {
+            current = stored;
+            setProfile(current);
+            await refreshEventsAndStats(current);
+          } else {
+            // First run or reset in normal mode: do NOT use demo profile
+            setProfile(null);
+            setStats(null);
+            return;
+          }
         }
-        setProfile(current);
 
         // Load optional PIN lock settings (Step 19)
         const storedSettings = await getSettings();
@@ -206,14 +226,10 @@ export default function App() {
           setIsLocked(true);
         }
 
-        // Seed bundled Gemma messages if cache is empty (Step 20)
-        await ensureDemoPregeneratedSeeded();
-        await refreshEventsAndStats(current);
-
         // Check for automatic batch generation (older than 20 hours and model online)
         const storedTs = localStorage.getItem('tb_last_batch_ts');
         const lastBatchTs = storedTs ? Number(storedTs) : null;
-        if (shouldTriggerAutomaticBatch(lastBatchTs)) {
+        if (shouldTriggerAutomaticBatch(lastBatchTs) && current) {
           checkModelStatus()
             .then(async (status) => {
               if (status.ollama === 'ok' && current) {
@@ -225,9 +241,13 @@ export default function App() {
             .catch(() => {});
         }
       } catch (_err) {
-        const fallback = ProfileSchema.parse(demoProfile);
-        setProfile(fallback);
-        setStats(computeUserStats(fallback, []));
+        if (isDemo) {
+          const fallback = getDemoProfile();
+          setProfile(fallback);
+          setStats(computeUserStats(fallback, []));
+        } else {
+          setProfile(null);
+        }
       }
     })();
 
@@ -259,7 +279,7 @@ export default function App() {
       clearInterval(wearableInterval);
       document.removeEventListener('visibilitychange', handleVisibility);
     };
-  }, [refreshEventsAndStats]);
+  }, [refreshEventsAndStats, isDemo]);
 
   // Step 14: Automatic clock watcher that fires Gemma notifications at her scheduled riskWindows
   useEffect(() => {
@@ -366,13 +386,44 @@ export default function App() {
     } catch {
       // ignore
     }
-    const freshProfile = ProfileSchema.parse(demoProfile);
-    await setStoredProfile(freshProfile);
-    await ensureDemoPregeneratedSeeded();
-    setProfile(freshProfile);
+
     setLockSettings({ enabled: false });
     setIsLocked(false);
-    await refreshEventsAndStats(freshProfile);
+    setEvents([]);
+    setPlans([]);
+    setStats(null);
+    setPregenCount(0);
+    setActiveTab('home');
+
+    if (isDemo) {
+      const freshProfile = getDemoProfile();
+      await setStoredProfile(freshProfile);
+      await ensureDemoPregeneratedSeeded();
+      setProfile(freshProfile);
+      await refreshEventsAndStats(freshProfile);
+    } else {
+      // NORMAL MODE: return to initial user state where name is requested
+      // Absolutely NO demo profile data is injected
+      setProfile(null);
+    }
+  };
+
+  const toggleLanguage = () => {
+    const nextLang = lang === 'fr' ? 'en' : 'fr';
+    setLanguage(nextLang);
+  };
+
+  const handleCreateInitialProfile = async (userName: string) => {
+    const newProfile = createInitialUserProfile(userName, lang === 'en' ? 'en' : 'fr');
+    await setStoredProfile(newProfile);
+    setProfile(newProfile);
+    try {
+      const batch = await generateDailyBatch(newProfile);
+      setPregenCount(batch.length);
+    } catch {
+      // Fallback is always available immediately
+    }
+    await refreshEventsAndStats(newProfile);
   };
 
   if (isLocked && lockSettings?.enabled) {
@@ -385,10 +436,15 @@ export default function App() {
     );
   }
 
-  const toggleLanguage = () => {
-    const nextLang = lang === 'fr' ? 'en' : 'fr';
-    setLanguage(nextLang);
-  };
+  if (!profile && !isDemo) {
+    return (
+      <InitialProfileModal
+        onProfileCreated={handleCreateInitialProfile}
+        currentLang={lang}
+        onToggleLang={toggleLanguage}
+      />
+    );
+  }
 
   const handleSaveToken = () => {
     setStoredToken(tokenInput);
@@ -431,7 +487,8 @@ export default function App() {
     setGeneratedResult(null);
     setWasSafetyFiltered(false);
 
-    const testPrompt = `You help ${profile?.reasons[0] ? 'Camille' : 'the user'} resist an urge. Context: ${userInputNote || 'after coffee'}. Write a 3-minute concrete challenge and a warm 2-sentence message in her voice. Return JSON: {"challenge": "...", "message": "..."}`;
+    const personName = profile?.userName || (isDemo ? 'Camille' : 'the user');
+    const testPrompt = `You help ${personName} resist an urge. Context: ${userInputNote || 'after coffee'}. Write a 3-minute concrete challenge and a warm 2-sentence message in her voice. Return JSON: {"challenge": "...", "message": "..."}`;
 
     try {
       const output = await generateMotivation(testPrompt);
@@ -652,10 +709,12 @@ export default function App() {
       {/* Main Content Area */}
       <main className="flex-1 py-2 space-y-5">
         {/* Bundled Gemma Demo Banner (Step 20) */}
-        <div className="px-3.5 py-2 rounded-xl bg-emerald-50/90 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/80 text-[11px] text-emerald-900 dark:text-emerald-200 flex items-center gap-2 font-medium">
-          <SparklesIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
-          <span>{t('demo.bundledBanner')}</span>
-        </div>
+        {isDemo && (
+          <div className="px-3.5 py-2 rounded-xl bg-emerald-50/90 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/80 text-[11px] text-emerald-900 dark:text-emerald-200 flex items-center gap-2 font-medium">
+            <SparklesIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+            <span>{t('demo.bundledBanner')}</span>
+          </div>
+        )}
 
         {/* Active Scheduled Gemma Reminder Banner (Step 14) */}
         {activeReminderBanner && (
@@ -1193,18 +1252,34 @@ export default function App() {
               {/* SUB-TAB 1: MA VOIX, MOTIVATIONS & PLANS */}
               {profileSubTab === 'mantras' && (
                 <div key="profile-mantras" className="space-y-4 stagger-reveal">
-                  {/* Demo Profile Badge */}
-                  <div className="card bg-emerald-50/50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/80 p-3.5 flex items-start gap-3">
-                    <LeafIcon className="w-5 h-5 text-emerald-700 dark:text-emerald-400 mt-0.5" />
-                    <div className="space-y-0.5">
-                      <div className="text-xs font-bold text-emerald-950 dark:text-emerald-200">
-                        {t('demo.badge')}
-                      </div>
-                      <div className="text-xs text-stone-600 dark:text-stone-300">
-                        {t('demo.description')}
+                  {/* Demo Profile Badge or Normal Profile Badge */}
+                  {isDemo ? (
+                    <div className="card bg-emerald-50/50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/80 p-3.5 flex items-start gap-3">
+                      <LeafIcon className="w-5 h-5 text-emerald-700 dark:text-emerald-400 mt-0.5" />
+                      <div className="space-y-0.5">
+                        <div className="text-xs font-bold text-emerald-950 dark:text-emerald-200">
+                          {t('demo.badge')}
+                        </div>
+                        <div className="text-xs text-stone-600 dark:text-stone-300">
+                          {t('demo.description')}
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="card bg-emerald-50/50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/80 p-3.5 flex items-start gap-3">
+                      <UserIcon className="w-5 h-5 text-emerald-700 dark:text-emerald-400 mt-0.5" />
+                      <div className="space-y-0.5">
+                        <div className="text-xs font-bold text-emerald-950 dark:text-emerald-200">
+                          {profile.userName
+                            ? `${t('profile.title')} — ${profile.userName}`
+                            : t('profile.title')}
+                        </div>
+                        <div className="text-xs text-stone-600 dark:text-stone-300">
+                          {t('profile.userSubtitle')}
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Reasons */}
                   <div className="card space-y-3">

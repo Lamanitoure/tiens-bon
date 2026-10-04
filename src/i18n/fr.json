@@ -103,7 +103,8 @@
     "helpline": "Ligne d'aide & écoute",
     "support": "Personne de confiance",
     "savingsGoal": "Mon projet d'économies",
-    "myPlans": "Mes plans Si / Alors"
+    "myPlans": "Mes plans Si / Alors",
+    "userSubtitle": "Ton espace personnalisé, tes phrases et tes motivations pour tenir bon."
   },
   "demo": {
     "badge": "Profil de démonstration fictif",
@@ -296,7 +297,17 @@
     "disabledSuccess": "Verrouillage par code PIN désactivé.",
     "forgotResetPrompt": "Code PIN oublié ? Réinitialiser et tout effacer"
   },
+  "welcome": {
+    "title": "Bienvenue sur Tiens Bon",
+    "subtitle": "Ton compagnon local et bienveillant pour arrêter de fumer à ton rythme.",
+    "namePrompt": "Comment t'appelles-tu ?",
+    "namePlaceholder": "Ton prénom ou surnom (ex: Camille, Alex...)",
+    "nameRequired": "Merci d'indiquer ton prénom ou nom pour continuer.",
+    "startBtn": "Commencer mon parcours",
+    "privacyNote": "Tes données restent 100% privées et stockées uniquement sur cet appareil."
+  },
   "profileEditor": {
+    "userNameLabel": "Mon prénom / nom :",
     "editBtn": "Personnaliser mon profil",
     "wizardTitle": "Configuration de mon profil personnel",
     "toneLabel": "Mon ton préféré :",

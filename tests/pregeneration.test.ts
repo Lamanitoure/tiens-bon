@@ -103,7 +103,6 @@ describe('Pre-generation and offline fallback (Step 9)', () => {
   });
 
   it('returns a personalized message in her voice even with network off and airplane mode (cache empty)', async () => {
-
     const result = await getNextPregeneratedMessage('craving', profile);
 
     // Cache was empty, so result is not from cache

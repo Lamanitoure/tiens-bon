@@ -16,6 +16,7 @@ interface ProfileEditorProps {
 
 export function ProfileEditor({ profile, onProfileUpdated, onDeleteAll }: ProfileEditorProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [userName, setUserName] = useState(profile.userName || '');
   const [tone, setTone] = useState(profile.tone);
   const [unitsPerDay, setUnitsPerDay] = useState(profile.unitsPerDay.toString());
   const [unitPrice, setUnitPrice] = useState(profile.unitPrice.toString());
@@ -54,6 +55,7 @@ export function ProfileEditor({ profile, onProfileUpdated, onDeleteAll }: Profil
 
     const candidate: Profile = {
       ...profile,
+      userName: userName.trim() || undefined,
       tone: tone.trim(),
       unitsPerDay: Number(unitsPerDay),
       unitPrice: Number(unitPrice),
@@ -132,6 +134,16 @@ export function ProfileEditor({ profile, onProfileUpdated, onDeleteAll }: Profil
 
         {isOpen && (
           <div className="space-y-3 pt-2 border-t border-stone-200 dark:border-stone-800 text-xs">
+            <label className="block space-y-1">
+              <span className="font-semibold">{t('profileEditor.userNameLabel')}</span>
+              <input
+                type="text"
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800"
+              />
+            </label>
+
             <label className="block space-y-1">
               <span className="font-semibold">{t('profileEditor.toneLabel')}</span>
               <input

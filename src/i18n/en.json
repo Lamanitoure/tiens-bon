@@ -103,7 +103,8 @@
     "helpline": "Helpline & support",
     "support": "Support person",
     "savingsGoal": "My savings goal",
-    "myPlans": "My If / Then plans"
+    "myPlans": "My If / Then plans",
+    "userSubtitle": "Your personalized space, your phrases and your motivations to hold on."
   },
   "demo": {
     "badge": "Fictional demo profile",
@@ -296,7 +297,17 @@
     "disabledSuccess": "App PIN lock disabled.",
     "forgotResetPrompt": "Forgot PIN? Reset and delete all data"
   },
+  "welcome": {
+    "title": "Welcome to Tiens Bon",
+    "subtitle": "Your local, compassionate companion to quit smoking at your own pace.",
+    "namePrompt": "What is your name?",
+    "namePlaceholder": "Your first name or nickname (e.g. Alex, Sam...)",
+    "nameRequired": "Please enter your name to continue.",
+    "startBtn": "Start my journey",
+    "privacyNote": "Your data remains 100% private and stored only on this device."
+  },
   "profileEditor": {
+    "userNameLabel": "My first / last name:",
     "editBtn": "Customize my profile",
     "wizardTitle": "Personal Profile Setup",
     "toneLabel": "My preferred tone:",

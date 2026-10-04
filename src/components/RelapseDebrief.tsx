@@ -50,7 +50,8 @@ export function RelapseDebrief({ profile, onFinish }: RelapseDebriefProps) {
 
     (async () => {
       try {
-        const prompt = `Camille had a slip and smoked. Write a warm 2-sentence non-guilt message encouraging her to restart gently. Tone: ${profile.tone}. Return JSON: {"challenge": "Take a deep breath and drink water", "message": "..."}`;
+        const personName = profile.userName || 'Camille';
+        const prompt = `${personName} had a slip and smoked. Write a warm 2-sentence non-guilt message encouraging her to restart gently. Tone: ${profile.tone}. Return JSON: {"challenge": "Take a deep breath and drink water", "message": "..."}`;
         const output = await generateMotivation(prompt);
         const validated = validateModelOutput(output, profile.language);
         if (validated.sanitized?.message) {
