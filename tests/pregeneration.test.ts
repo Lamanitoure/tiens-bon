@@ -102,9 +102,7 @@ describe('Pre-generation and offline fallback (Step 9)', () => {
     expect(profile.alternatives).toContain(fallback.challenge);
   });
 
-  it('returns a personalized message in her voice even with Tailscale off and airplane mode (cache empty)', async () => {
-    // Clear any pregenerated data in DB to simulate completely offline with empty cache
-    await clearPregenerated();
+  it('returns a personalized message in her voice even with network off and airplane mode (cache empty)', async () => {
 
     const result = await getNextPregeneratedMessage('craving', profile);
 

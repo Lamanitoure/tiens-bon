@@ -16,8 +16,7 @@ Evaluate how reliably a Progressive Web App (PWA) installed on Android (Chrome) 
 - **Test**: Tested delayed notifications after 1 minute, 5 minutes, and 30 minutes with the screen off and Android Battery Saver enabled.
 - **Honest Observation**:
   1. Browser-only scheduled timers (`setTimeout` in service workers) are suspended by Android OS after a few minutes when the screen is off.
-  2. Web Push requires the home PC and Tailscale connection to be online at the exact minute of every risk window. If the laptop is asleep or the user is away from home without Tailscale running, push delivery is delayed or missed.
-
+  2. Web Push requires the server and network connection to be online at the exact minute of every risk window. If the server is offline or the user is away without network access, push delivery is delayed or missed.
 ---
 
 ## 3. Architectural Decision (5c): Dual-Mode Reminders (Service Worker + Plan B Native Clock Alarms)

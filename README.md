@@ -42,7 +42,6 @@ The open-weight **Gemma** model (`gemma2:2b` via **Ollama**) performs four bound
 ### Prerequisites
 - **Node.js** (v22 LTS recommended) & **pnpm**
 - **Ollama** ([ollama.com](https://ollama.com)) running locally on `127.0.0.1:11434`
-- **Tailscale** ([tailscale.com](https://tailscale.com)) for private HTTPS access between your PC and phone
 
 ### Step-by-Step Setup
 
@@ -74,11 +73,9 @@ The open-weight **Gemma** model (`gemma2:2b` via **Ollama**) performs four bound
    pnpm dev
    ```
 
-5. **Connect your phone privately over Tailscale HTTPS**:
-   On both your PC and Android phone, sign in to the same private Tailscale tailnet (with 2FA enabled), then expose port `3000` inside your tailnet only:
-   ```bash
-   tailscale serve --bg 3000
-   ```
+5. 5. **Open the web app or install the PWA**:
+   Open `http://localhost:3000` (or your local IP address / deployed URL) in your browser. On Android Chrome or iOS Safari, tap **"Add to Home screen"** (or use the in-app install button) to install the PWA. Enter your `ACCESS_TOKEN` in **Profile > Local Gemma Model Connection**.
+
    Open your `https://<machine>.<tailnet>.ts.net` URL in Chrome on Android, paste your `ACCESS_TOKEN` once in **Profile > Local Gemma Model Connection**, and tap **"Add to Home screen"** to install the PWA.
 
 ---
@@ -125,7 +122,7 @@ Please read [`docs/security.md`](./docs/security.md) for the full item-by-item a
    - IndexedDB is not encrypted at rest by the browser so that the Service Worker can read pre-generated reminders offline. Physical device security relies on Android's screen lock and device encryption.
    - The optional **Web Crypto PIN Lock** (`PBKDF2` + `AES-GCM`) blocks casual snooping if someone picks up your unlocked phone, not a determined forensic attacker. If you forget your PIN, you must reset local data—export an encrypted backup first.
 3. **Reminders require the PC on (or Plan B)**:
-   - Live model pre-generation requires your PC running Ollama on the same Tailscale network. When offline, the app falls back seamlessly to cached batches and **Plan B** copyable alarm labels for your phone's native Clock app (`docs/feasibility.md`).
+   - Live model pre-generation requires the server or Ollama to be reachable. When offline, the app falls back seamlessly to cached batches and **Plan B** copyable alarm labels for your phone's native Clock app (`docs/feasibility.md`).
 4. **Small model & keyword limits**:
    - Small open-weight models (`gemma2:2b`) can occasionally produce imperfect phrasing; our Zod schemas and regex safety filter (`src/security/safety.ts`) catch prohibited patterns and fall back to your own written phrases.
    - Keyword distress detection (`config/distress.defaults.json`) is deterministic and fast, but cannot detect every nuanced expression of distress.

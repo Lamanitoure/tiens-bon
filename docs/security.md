@@ -8,13 +8,13 @@ This document audits the codebase against every requirement in **Section 5** of 
 
 ### Network (Items 1–3)
 1. **No public exposure / private network**:
-   - **Status**: Satisfied for home deployment.
-   - **Evidence**: In local home deployment, the server runs on the user's PC and is reached from the phone exclusively over Tailscale HTTPS (`tailscale serve`), never `tailscale funnel` and never router port-forwarding. (Note: In the cloud preview/demo container, the server binds to port `3000` so the preview proxy can reach it.)
+   - **Status**: Satisfied for local deployment.
+   - **Evidence**: In local home deployment, the server runs on the user's PC or secure local network (port `3000`), never router port-forwarding.
 2. **Ollama listens on `127.0.0.1` only**:
    - **Status**: Satisfied.
    - **Evidence**: `server.ts` connects to `process.env.OLLAMA_URL || 'http://127.0.0.1:11434'` (`server.ts`, lines 126 and 300). Ollama is never exposed directly to the network; only the backend proxy talks to it.
-3. **Private tailnet with 2FA**:
-   - **Status**: Operational requirement documented in `README.md`.
+3. **Private network / Localhost isolation**:
+   - **Status**: All local API routes are protected by Bearer token authentication and strict same-origin policies.
 
 ### Server (Items 4–9)
 4. **Access token (`Authorization: Bearer ...` with constant-time comparison)**:
@@ -93,7 +93,7 @@ This document audits the codebase against every requirement in **Section 5** of 
 
 ## 2. Manual Security Verification Checklist
 
-1. **Unauthenticated network test**: From a phone not connected to the private Tailscale network, opening the local Tailscale URL fails to connect.
+1. **Unauthenticated network test**: Requests without a valid Bearer token return `401 Unauthorized`.
 2. **Unauthorized API call**:
    ```bash
    curl -i -X POST http://127.0.0.1:3000/api/generate -H "Content-Type: application/json" -d '{"prompt":"test"}'
