@@ -130,6 +130,7 @@ app.get('/api/health', verifyToken, (_req: Request, res: Response) => {
 
 app.get('/api/status', verifyToken, async (_req: Request, res: Response) => {
   const ollamaUrl = process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
+  const preferredModel = process.env.OLLAMA_MODEL || 'gemma2:2b';
 
   try {
     const controller = new AbortController();
@@ -140,17 +141,18 @@ app.get('/api/status', verifyToken, async (_req: Request, res: Response) => {
     if (resp.ok) {
       const data = (await resp.json()) as { models?: Array<{ name?: string }> };
       const models = (data.models || []).map((m) => m.name || '');
-      const hasModel = models.some(
-        (m) => m === 'gemma2:2b' || m.startsWith('gemma2:2b:') || m.startsWith('gemma2'),
-      );
-      if (!hasModel) {
-        return res.json({ ollama: 'model_missing', model: 'gemma2:2b' });
+      const matchedModel =
+        models.find((m) => m === preferredModel || m.startsWith(`${preferredModel}:`)) ||
+        models.find((m) => m.startsWith('gemma2') || m.startsWith('gemma3') || m.startsWith('gemma'));
+
+      if (!matchedModel) {
+        return res.json({ ollama: 'model_missing', model: preferredModel });
       }
-      return res.json({ ollama: 'ok', model: 'gemma2:2b' });
+      return res.json({ ollama: 'ok', model: matchedModel });
     }
-    return res.json({ ollama: 'unreachable', model: 'gemma2:2b' });
+    return res.json({ ollama: 'unreachable', model: preferredModel });
   } catch {
-    return res.json({ ollama: 'unreachable', model: 'gemma2:2b' });
+    return res.json({ ollama: 'unreachable', model: preferredModel });
   }
 });
 
@@ -215,6 +217,7 @@ app.post('/api/generate', verifyToken, checkRateLimit, async (req: Request, res:
 
   // 1. Try local Ollama if configured
   const ollamaUrl = process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
+  const ollamaModel = process.env.OLLAMA_MODEL || 'gemma2:2b';
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15000);
@@ -222,7 +225,7 @@ app.post('/api/generate', verifyToken, checkRateLimit, async (req: Request, res:
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'gemma2:2b',
+        model: ollamaModel,
         prompt,
         format: 'json',
         stream: false,
@@ -235,8 +238,8 @@ app.post('/api/generate', verifyToken, checkRateLimit, async (req: Request, res:
       const data = (await ollamaResp.json()) as { response?: string };
       const cleaned = stripMarkdownFences(data.response || '');
       const parsed = JSON.parse(cleaned);
-      res.setHeader('X-Model-Source', 'ollama-gemma2:2b');
-      console.log('[Tiens Bon] ✓ Réponse générée en direct par Ollama (gemma2:2b)');
+      res.setHeader('X-Model-Source', `ollama-${ollamaModel}`);
+      console.log(`[Tiens Bon] ✓ Réponse générée en direct par Ollama (${ollamaModel})`);
 
       if (isCheckin) {
         const validOutcomes = new Set(['resisted', 'smoked', 'unknown']);
