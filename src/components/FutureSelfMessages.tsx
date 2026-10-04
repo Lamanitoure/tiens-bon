@@ -50,7 +50,13 @@ export function FutureSelfMessages({ onMessagesUpdated }: FutureSelfMessagesProp
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm(t('selftalk.deleteConfirm'))) return;
+    try {
+      if (typeof window !== 'undefined' && typeof window.confirm === 'function') {
+        if (!window.confirm(t('selftalk.deleteConfirm'))) return;
+      }
+    } catch {
+      // Ignore if confirm() is blocked in sandbox iframe
+    }
     try {
       await deleteSelfTalk(id);
       await refreshMessages();

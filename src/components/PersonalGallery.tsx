@@ -33,7 +33,13 @@ export function PersonalGallery({ onImagesUpdated }: PersonalGalleryProps) {
   }, [refreshImages]);
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm(t('gallery.deleteConfirm'))) return;
+    try {
+      if (typeof window !== 'undefined' && typeof window.confirm === 'function') {
+        if (!window.confirm(t('gallery.deleteConfirm'))) return;
+      }
+    } catch {
+      // Ignore if confirm() is blocked in sandbox iframe
+    }
     try {
       await deleteImage(id);
       await refreshImages();

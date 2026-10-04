@@ -330,6 +330,7 @@ async function setupFrontend() {
         host,
         port,
         allowedHosts: true,
+        hmr: false,
       },
       appType: 'spa',
     });
