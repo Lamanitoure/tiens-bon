@@ -82,8 +82,13 @@ export default function App() {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [stats, setStats] = useState<UserStats | null>(null);
 
-  // Active navigation tab
+  // Active navigation tab & progressive sub-sections
   const [activeTab, setActiveTab] = useState<'home' | 'journal' | 'game' | 'profile'>('home');
+  const [homeDrawer, setHomeDrawer] = useState<'none' | 'pregen' | 'note'>('none');
+  const [journalSubTab, setJournalSubTab] = useState<'entries' | 'recap' | 'backup'>('entries');
+  const [profileSubTab, setProfileSubTab] = useState<
+    'mantras' | 'photos' | 'reminders' | 'settings'
+  >('mantras');
 
   // Active craving session state (Step 10)
   const [isCravingActive, setIsCravingActive] = useState(false);
@@ -615,15 +620,15 @@ export default function App() {
 
         {/* TAB 1: ACCUEIL */}
         {activeTab === 'home' && (
-          <div className="space-y-5">
+          <div key="tab-home" className="space-y-4 stagger-reveal">
             {/* Live Counters & Stats Card (Step 7) */}
             {stats && profile && (
               <section className="grid grid-cols-2 gap-3">
                 <div className="card p-4 space-y-1">
-                  <div className="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">
+                  <div className="text-[11px] font-semibold text-stone-500 dark:text-stone-400">
                     {t('counters.streak')}
                   </div>
-                  <div className="text-2xl font-bold text-emerald-800 dark:text-emerald-400">
+                  <div className="text-2xl font-bold font-mono tabular-nums text-emerald-800 dark:text-emerald-400">
                     {stats.streakDays > 0 ? (
                       <span>
                         {stats.streakDays} {t('counters.days')}
@@ -634,19 +639,19 @@ export default function App() {
                       </span>
                     )}
                   </div>
-                  <div className="text-[11px] text-stone-500 dark:text-stone-400">
+                  <div className="text-[11px] text-stone-500 dark:text-stone-400 tabular-nums">
                     {t('counters.bestStreak')}: {stats.bestStreakDays} {t('counters.days')}
                   </div>
                 </div>
 
                 <div className="card p-4 space-y-1">
-                  <div className="text-[11px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wide">
+                  <div className="text-[11px] font-semibold text-stone-500 dark:text-stone-400">
                     {t('counters.avoided')}
                   </div>
-                  <div className="text-2xl font-bold text-emerald-800 dark:text-emerald-400">
+                  <div className="text-2xl font-bold font-mono tabular-nums text-emerald-800 dark:text-emerald-400">
                     {stats.avoidedCigarettes}
                   </div>
-                  <div className="text-[11px] text-stone-500 dark:text-stone-400">
+                  <div className="text-[11px] text-stone-500 dark:text-stone-400 tabular-nums">
                     {stats.resistedCount} {t('craving.resisted').toLowerCase()}
                   </div>
                 </div>
@@ -658,14 +663,14 @@ export default function App() {
                       <CoinsIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                       <span>{profile.savingsGoal.label}</span>
                     </span>
-                    <span className="font-semibold text-emerald-900 dark:text-emerald-300">
+                    <span className="font-semibold font-mono tabular-nums text-emerald-900 dark:text-emerald-300">
                       {stats.moneySaved} {profile.currency} / {profile.savingsGoal.amount}{' '}
                       {profile.currency}
                     </span>
                   </div>
                   <div className="w-full bg-emerald-200/70 dark:bg-emerald-900 rounded-full h-2.5 overflow-hidden">
                     <div
-                      className="bg-emerald-700 dark:bg-emerald-400 h-2.5 rounded-full transition-all duration-500"
+                      className="bg-emerald-700 dark:bg-emerald-400 h-2.5 rounded-full transition-all duration-700"
                       style={{ width: `${stats.savingsGoalProgress}%` }}
                     />
                   </div>
@@ -698,204 +703,286 @@ export default function App() {
               </div>
             )}
 
-            {/* Offline Batch Pregeneration Card (Step 9) */}
-            {profile && (
-              <section className="card space-y-3.5 border-emerald-200 dark:border-emerald-800 bg-emerald-50/40 dark:bg-emerald-950/20 p-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-bold text-emerald-950 dark:text-emerald-200 flex items-center gap-1.5">
-                    <SunriseIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
-                    <span>{t('pregen.title')}</span>
-                  </h3>
-                  <span className="text-[11px] font-semibold bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
-                    {pregenCount} {t('pregen.cacheStatus')}
-                  </span>
-                </div>
-
-                <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed">
-                  {t('pregen.desc')}
-                </p>
-
-                {isPregenerating && pregenProgress && (
-                  <div className="space-y-1.5">
-                    <div className="text-[11px] font-medium text-emerald-900 dark:text-emerald-300">
-                      {t('pregen.generating', {
-                        current: pregenProgress.current.toString(),
-                        total: pregenProgress.total.toString(),
-                      })}
-                    </div>
-                    <div className="w-full bg-emerald-200 dark:bg-emerald-900 rounded-full h-2 overflow-hidden">
-                      <div
-                        className="bg-emerald-800 dark:bg-emerald-400 h-2 rounded-full transition-all duration-300"
-                        style={{
-                          width: `${Math.round((pregenProgress.current / pregenProgress.total) * 100)}%`,
-                        }}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {pregenSuccessMessage && (
-                  <div className="p-2.5 bg-white dark:bg-stone-900 text-emerald-900 dark:text-emerald-300 text-xs rounded-lg border border-emerald-300 dark:border-emerald-700 font-medium">
-                    {pregenSuccessMessage}
-                  </div>
-                )}
-
-                <button
-                  type="button"
-                  onClick={handlePrepareDay}
-                  disabled={isPregenerating}
-                  className="btn-primary text-xs py-3 w-full flex justify-center items-center gap-2 cursor-pointer disabled:opacity-50 min-h-[44px]"
-                >
-                  <BoltIcon className="w-4 h-4" />
-                  <span>{t('pregen.button')}</span>
-                </button>
-              </section>
-            )}
-
             {/* Sourced Health Facts (Step 17 v2) */}
             <SourcedFacts />
 
-            {/* Quick Note & Test Prompt Section */}
-            <section className="card space-y-4">
-              <h3 className="text-sm font-bold text-stone-900 dark:text-stone-50 flex items-center gap-2">
-                <PenIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
-                <span>Qu'est-ce qui se passe maintenant ?</span>
-              </h3>
-
-              <div className="space-y-1.5">
-                <input
-                  type="text"
-                  value={userInputNote}
-                  onChange={(e) => handleNoteChange(e.target.value)}
-                  placeholder="Ex: envie après le repas, pause café..."
-                  className="w-full px-3 py-2.5 text-xs rounded-lg border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-900"
-                />
-                <p className="text-[11px] text-stone-500 dark:text-stone-400">
-                  Tapez vos ressentis. Si un mot de détresse est détecté, l'aide s'affiche
-                  immédiatement.
-                </p>
-              </div>
+            {/* Progressive Action Pills for Offline Day Prep & Express Note */}
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setHomeDrawer(homeDrawer === 'pregen' ? 'none' : 'pregen')}
+                className={`py-2.5 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer flex items-center justify-center gap-1.5 min-h-[44px] whitespace-nowrap truncate ${
+                  homeDrawer === 'pregen' || isPregenerating
+                    ? 'bg-emerald-800 text-white border-emerald-800 shadow-xs'
+                    : 'bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-200 border-stone-200 dark:border-stone-800 hover:border-emerald-400'
+                }`}
+              >
+                <SunriseIcon className="w-4 h-4 shrink-0" />
+                <span className="truncate">
+                  {t('pregen.title')} ({pregenCount})
+                </span>
+              </button>
 
               <button
                 type="button"
-                onClick={handleTestGenerate}
-                disabled={isGenerating || distressDetected}
-                className="btn-primary text-xs py-3 w-full flex justify-center items-center gap-2 cursor-pointer disabled:opacity-50 min-h-[44px]"
+                onClick={() => setHomeDrawer(homeDrawer === 'note' ? 'none' : 'note')}
+                className={`py-2.5 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer flex items-center justify-center gap-1.5 min-h-[44px] whitespace-nowrap truncate ${
+                  homeDrawer === 'note' || userInputNote
+                    ? 'bg-emerald-800 text-white border-emerald-800 shadow-xs'
+                    : 'bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-200 border-stone-200 dark:border-stone-800 hover:border-emerald-400'
+                }`}
               >
-                {isGenerating ? t('model.generating') : t('model.generateTest')}
+                <PenIcon className="w-4 h-4 shrink-0" />
+                <span className="truncate">
+                  {lang === 'fr' ? 'Exprimer mon ressenti' : 'Express how I feel'}
+                </span>
               </button>
+            </div>
 
-              {generationError && (
-                <div className="p-3 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 rounded-lg text-xs text-rose-800 dark:text-rose-200 flex items-center gap-1.5">
-                  <XIcon className="w-4 h-4 shrink-0" />
-                  <span>{generationError}</span>
-                </div>
-              )}
+            {/* Progressive Drawer 1: Offline Batch Pregeneration Card (Step 9) */}
+            {profile &&
+              (homeDrawer === 'pregen' || isPregenerating || Boolean(pregenSuccessMessage)) && (
+                <section className="card space-y-3.5 border-emerald-200 dark:border-emerald-800 bg-emerald-50/40 dark:bg-emerald-950/20 p-4 animate-fade-in">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xs font-bold text-emerald-950 dark:text-emerald-200 flex items-center gap-1.5">
+                      <SunriseIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                      <span>{t('pregen.title')}</span>
+                    </h3>
+                    <span className="text-[11px] font-mono tabular-nums text-emerald-800 dark:text-emerald-300">
+                      {pregenCount} {t('pregen.cacheStatus')}
+                    </span>
+                  </div>
 
-              {generatedResult && (
-                <div className="p-4 bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800 rounded-xl space-y-3">
-                  <div>
-                    <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-900 dark:text-emerald-300">
-                      {t('model.challengeLabel')}
-                    </div>
-                    <p className="text-xs font-semibold text-stone-800 dark:text-stone-200 mt-0.5">
-                      {generatedResult.challenge}
-                    </p>
-                  </div>
-                  <div>
-                    <div className="text-[11px] font-bold uppercase tracking-wider text-emerald-900 dark:text-emerald-300">
-                      {t('model.messageLabel')}
-                    </div>
-                    <p className="text-xs text-stone-700 dark:text-stone-300 italic mt-0.5">
-                      « {generatedResult.message} »
-                    </p>
-                  </div>
-                  {wasSafetyFiltered && (
-                    <div className="p-2 bg-stone-100 dark:bg-stone-800 rounded text-[11px] text-stone-600 dark:text-stone-300 italic flex items-center gap-1.5">
-                      <ShieldIcon className="w-3.5 h-3.5 shrink-0" />
-                      <span>{t('safety.filtered')}</span>
+                  <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed">
+                    {t('pregen.desc')}
+                  </p>
+
+                  {isPregenerating && pregenProgress && (
+                    <div className="space-y-1.5">
+                      <div className="text-[11px] font-medium text-emerald-900 dark:text-emerald-300">
+                        {t('pregen.generating', {
+                          current: pregenProgress.current.toString(),
+                          total: pregenProgress.total.toString(),
+                        })}
+                      </div>
+                      <div className="w-full bg-emerald-200 dark:bg-emerald-900 rounded-full h-2 overflow-hidden">
+                        <div
+                          className="bg-emerald-800 dark:bg-emerald-400 h-2 rounded-full transition-all duration-300"
+                          style={{
+                            width: `${Math.round((pregenProgress.current / pregenProgress.total) * 100)}%`,
+                          }}
+                        />
+                      </div>
                     </div>
                   )}
-                </div>
+
+                  {pregenSuccessMessage && (
+                    <div className="p-2.5 bg-white dark:bg-stone-900 text-emerald-900 dark:text-emerald-300 text-xs rounded-lg border border-emerald-300 dark:border-emerald-700 font-medium">
+                      {pregenSuccessMessage}
+                    </div>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={handlePrepareDay}
+                    disabled={isPregenerating}
+                    className="btn-primary text-xs py-3 w-full flex justify-center items-center gap-2 cursor-pointer disabled:opacity-50 min-h-[44px]"
+                  >
+                    <BoltIcon className="w-4 h-4" />
+                    <span>{t('pregen.button')}</span>
+                  </button>
+                </section>
               )}
-            </section>
+
+            {/* Progressive Drawer 2: Quick Note & Test Prompt Section */}
+            {(homeDrawer === 'note' || Boolean(userInputNote) || Boolean(generatedResult)) && (
+              <section className="card space-y-4 animate-fade-in">
+                <h3 className="text-sm font-bold text-stone-900 dark:text-stone-50 flex items-center gap-2">
+                  <PenIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                  <span>Qu'est-ce qui se passe maintenant ?</span>
+                </h3>
+
+                <div className="space-y-1.5">
+                  <input
+                    type="text"
+                    value={userInputNote}
+                    onChange={(e) => handleNoteChange(e.target.value)}
+                    placeholder="Ex: envie après le repas, pause café..."
+                    className="w-full px-3 py-2.5 text-xs rounded-lg border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-900"
+                  />
+                  <p className="text-[11px] text-stone-500 dark:text-stone-400">
+                    Tapez vos ressentis. Si un mot de détresse est détecté, l'aide s'affiche
+                    immédiatement.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleTestGenerate}
+                  disabled={isGenerating || distressDetected}
+                  className="btn-primary text-xs py-3 w-full flex justify-center items-center gap-2 cursor-pointer disabled:opacity-50 min-h-[44px]"
+                >
+                  {isGenerating ? t('model.generating') : t('model.generateTest')}
+                </button>
+
+                {generationError && (
+                  <div className="p-3 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 rounded-lg text-xs text-rose-800 dark:text-rose-200 flex items-center gap-1.5">
+                    <XIcon className="w-4 h-4 shrink-0" />
+                    <span>{generationError}</span>
+                  </div>
+                )}
+
+                {generatedResult && (
+                  <div className="p-4 bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-800 rounded-xl space-y-3 animate-fade-in">
+                    <div>
+                      <div className="text-[11px] font-bold text-emerald-900 dark:text-emerald-300">
+                        {t('model.challengeLabel')}
+                      </div>
+                      <p className="text-xs font-semibold text-stone-800 dark:text-stone-200 mt-0.5">
+                        {generatedResult.challenge}
+                      </p>
+                    </div>
+                    <div>
+                      <div className="text-[11px] font-bold text-emerald-900 dark:text-emerald-300">
+                        {t('model.messageLabel')}
+                      </div>
+                      <p className="text-xs text-stone-700 dark:text-stone-300 italic mt-0.5">
+                        « {generatedResult.message} »
+                      </p>
+                    </div>
+                    {wasSafetyFiltered && (
+                      <div className="p-2 bg-stone-100 dark:bg-stone-800 rounded text-[11px] text-stone-600 dark:text-stone-300 italic flex items-center gap-1.5">
+                        <ShieldIcon className="w-3.5 h-3.5 shrink-0" />
+                        <span>{t('safety.filtered')}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </section>
+            )}
           </div>
         )}
 
-        {/* TAB 2: JOURNAL & ÉVÉNEMENTS */}
+        {/* TAB 2: JOURNAL & ÉVÉNEMENTS (Progressive Sub-Navigation) */}
         {activeTab === 'journal' && profile && (
-          <div className="space-y-4">
-            {/* Weekly Recap & Learned Risk Windows (Step 16) */}
-            <WeeklyRecap
-              events={events}
-              profile={profile}
-              onProfileUpdated={(updated) => setProfile(updated)}
-            />
+          <div key="tab-journal" className="space-y-4 stagger-reveal">
+            {/* Segmented Sub-Navigation for Journal */}
+            <div className="flex items-center gap-1 p-1 bg-stone-200/70 dark:bg-stone-800/70 rounded-xl border border-stone-300/40 dark:border-stone-700/50">
+              <button
+                type="button"
+                onClick={() => setJournalSubTab('entries')}
+                className={`flex-1 py-2 px-2.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap truncate min-h-[38px] ${
+                  journalSubTab === 'entries'
+                    ? 'bg-white dark:bg-stone-900 text-emerald-800 dark:text-emerald-400 shadow-2xs'
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+                }`}
+              >
+                {lang === 'fr' ? 'Carnet & Bilan' : 'Journal & Check-in'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setJournalSubTab('recap')}
+                className={`flex-1 py-2 px-2.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap truncate min-h-[38px] ${
+                  journalSubTab === 'recap'
+                    ? 'bg-white dark:bg-stone-900 text-emerald-800 dark:text-emerald-400 shadow-2xs'
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+                }`}
+              >
+                {lang === 'fr' ? 'Semaine' : 'Weekly Recap'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setJournalSubTab('backup')}
+                className={`flex-1 py-2 px-2.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap truncate min-h-[38px] ${
+                  journalSubTab === 'backup'
+                    ? 'bg-white dark:bg-stone-900 text-emerald-800 dark:text-emerald-400 shadow-2xs'
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+                }`}
+              >
+                {lang === 'fr' ? 'Sauvegarde' : 'Backup'}
+              </button>
+            </div>
 
-            {/* Journal View with Evening Check-in (Step 15) */}
-            <JournalView
-              profile={profile}
-              events={events}
-              onEventAdded={() => refreshEventsAndStats(profile)}
-            />
-
-            {/* Encrypted Web Crypto Backup Card */}
-            <section className="card space-y-3">
-              <h4 className="text-xs font-bold text-stone-900 dark:text-stone-50 flex items-center gap-1.5">
-                <LockIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
-                <span>{t('backup.title')}</span>
-              </h4>
-              <p className="text-[11px] text-stone-500 dark:text-stone-400 leading-normal">
-                {t('backup.description')}
-              </p>
-
-              <input
-                type="password"
-                value={backupPassword}
-                onChange={(e) => setBackupPassword(e.target.value)}
-                placeholder={t('backup.passwordPlaceholder')}
-                className="w-full px-3 py-2 text-xs rounded-lg border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-900"
-              />
-
-              <div className="grid grid-cols-2 gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={handleExportBackup}
-                  className="btn-secondary text-xs py-2 min-h-[40px] flex items-center justify-center gap-1.5"
-                >
-                  <UploadIcon className="w-3.5 h-3.5" />
-                  <span>{t('backup.exportBtn')}</span>
-                </button>
-
-                <label className="btn-secondary text-xs py-2 cursor-pointer text-center truncate min-h-[40px] flex items-center justify-center gap-1.5">
-                  <DownloadIcon className="w-3.5 h-3.5" />
-                  <span>{t('backup.importBtn')}</span>
-                  <input
-                    type="file"
-                    accept=".json,application/json"
-                    onChange={handleImportBackup}
-                    className="hidden"
-                  />
-                </label>
+            {journalSubTab === 'entries' && (
+              <div key="journal-entries" className="stagger-reveal space-y-4">
+                <JournalView
+                  profile={profile}
+                  events={events}
+                  onEventAdded={() => refreshEventsAndStats(profile)}
+                />
               </div>
+            )}
 
-              {backupStatusMessage && (
-                <div className="p-2 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200 text-xs rounded border border-emerald-200 dark:border-emerald-800">
-                  {backupStatusMessage}
-                </div>
-              )}
-              {backupErrorMessage && (
-                <div className="p-2 bg-rose-50 dark:bg-rose-950/60 text-rose-900 dark:text-rose-200 text-xs rounded border border-rose-200 dark:border-rose-800">
-                  {backupErrorMessage}
-                </div>
-              )}
-            </section>
+            {journalSubTab === 'recap' && (
+              <div key="journal-recap" className="stagger-reveal space-y-4">
+                <WeeklyRecap
+                  events={events}
+                  profile={profile}
+                  onProfileUpdated={(updated) => setProfile(updated)}
+                />
+              </div>
+            )}
+
+            {journalSubTab === 'backup' && (
+              <div key="journal-backup" className="stagger-reveal space-y-4">
+                <section className="card space-y-3">
+                  <h4 className="text-xs font-bold text-stone-900 dark:text-stone-50 flex items-center gap-1.5">
+                    <LockIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                    <span>{t('backup.title')}</span>
+                  </h4>
+                  <p className="text-[11px] text-stone-500 dark:text-stone-400 leading-normal">
+                    {t('backup.description')}
+                  </p>
+
+                  <input
+                    type="password"
+                    value={backupPassword}
+                    onChange={(e) => setBackupPassword(e.target.value)}
+                    placeholder={t('backup.passwordPlaceholder')}
+                    className="w-full px-3 py-2 text-xs rounded-lg border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-900"
+                  />
+
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={handleExportBackup}
+                      className="btn-secondary text-xs py-2 min-h-[40px] flex items-center justify-center gap-1.5"
+                    >
+                      <UploadIcon className="w-3.5 h-3.5" />
+                      <span>{t('backup.exportBtn')}</span>
+                    </button>
+
+                    <label className="btn-secondary text-xs py-2 cursor-pointer text-center truncate min-h-[40px] flex items-center justify-center gap-1.5">
+                      <DownloadIcon className="w-3.5 h-3.5" />
+                      <span>{t('backup.importBtn')}</span>
+                      <input
+                        type="file"
+                        accept=".json,application/json"
+                        onChange={handleImportBackup}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+
+                  {backupStatusMessage && (
+                    <div className="p-2 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200 text-xs rounded border border-emerald-200 dark:border-emerald-800">
+                      {backupStatusMessage}
+                    </div>
+                  )}
+                  {backupErrorMessage && (
+                    <div className="p-2 bg-rose-50 dark:bg-rose-950/60 text-rose-900 dark:text-rose-200 text-xs rounded border border-rose-200 dark:border-rose-800">
+                      {backupErrorMessage}
+                    </div>
+                  )}
+                </section>
+              </div>
+            )}
           </div>
         )}
 
         {/* TAB: JEU 1010 (Dedicated Navbar Tab) */}
         {activeTab === 'game' && (
-          <div className="space-y-4">
+          <div key="tab-game" className="space-y-4 stagger-reveal">
             <section className="card p-4 bg-emerald-50/60 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/80 space-y-2">
               <h2 className="text-sm font-bold text-emerald-950 dark:text-emerald-200 flex items-center gap-2">
                 <GamepadIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
@@ -910,198 +997,267 @@ export default function App() {
           </div>
         )}
 
-        {/* TAB 3: PROFIL & MANTRAS */}
+        {/* TAB 3: PROFIL & MANTRAS (Progressive Sub-Navigation) */}
         {activeTab === 'profile' && profile && (
-          <div className="space-y-4">
-            {/* Demo Profile Badge */}
-            <div className="card bg-emerald-50/50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/80 p-3.5 flex items-start gap-3">
-              <LeafIcon className="w-5 h-5 text-emerald-700 dark:text-emerald-400 mt-0.5" />
-              <div className="space-y-0.5">
-                <div className="text-xs font-bold text-emerald-950 dark:text-emerald-200">
-                  {t('demo.badge')}
-                </div>
-                <div className="text-xs text-stone-600 dark:text-stone-300">
-                  {t('demo.description')}
-                </div>
-              </div>
+          <div key="tab-profile" className="space-y-4 stagger-reveal">
+            {/* Segmented Sub-Navigation for Profile (4 progressive sections instead of 11 cards at once) */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 p-1 bg-stone-200/70 dark:bg-stone-800/70 rounded-xl border border-stone-300/40 dark:border-stone-700/50">
+              <button
+                type="button"
+                onClick={() => setProfileSubTab('mantras')}
+                className={`py-2 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap truncate min-h-[38px] ${
+                  profileSubTab === 'mantras'
+                    ? 'bg-white dark:bg-stone-900 text-emerald-800 dark:text-emerald-400 shadow-2xs'
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+                }`}
+              >
+                {lang === 'fr' ? 'Ma Voix & Plans' : 'My Voice & Plans'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setProfileSubTab('photos')}
+                className={`py-2 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap truncate min-h-[38px] ${
+                  profileSubTab === 'photos'
+                    ? 'bg-white dark:bg-stone-900 text-emerald-800 dark:text-emerald-400 shadow-2xs'
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+                }`}
+              >
+                {lang === 'fr' ? 'Photos' : 'Photos'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setProfileSubTab('reminders')}
+                className={`py-2 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap truncate min-h-[38px] ${
+                  profileSubTab === 'reminders'
+                    ? 'bg-white dark:bg-stone-900 text-emerald-800 dark:text-emerald-400 shadow-2xs'
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+                }`}
+              >
+                {lang === 'fr' ? 'Rappels & Montre' : 'Reminders & Watch'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setProfileSubTab('settings')}
+                className={`py-2 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap truncate min-h-[38px] ${
+                  profileSubTab === 'settings'
+                    ? 'bg-white dark:bg-stone-900 text-emerald-800 dark:text-emerald-400 shadow-2xs'
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+                }`}
+              >
+                {lang === 'fr' ? 'Réglages & PIN' : 'Settings & PIN'}
+              </button>
             </div>
 
-            {/* Reasons */}
-            <div className="card space-y-3">
-              <h4 className="text-sm font-bold text-stone-900 dark:text-stone-50 flex items-center gap-2">
-                <TargetIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
-                <span>{t('profile.reasons')}</span>
-              </h4>
-              <ul className="text-xs text-stone-700 dark:text-stone-200 space-y-2 pl-5 list-disc marker:text-emerald-700 dark:marker:text-emerald-400">
-                {profile.reasons.map((reason) => (
-                  <li key={reason} className="leading-relaxed">
-                    {reason}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Risk Windows */}
-            <div className="card space-y-3">
-              <h4 className="text-sm font-bold text-stone-900 dark:text-stone-50 flex items-center gap-2">
-                <ClockIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
-                <span>{t('profile.riskWindows')}</span>
-              </h4>
-              <div className="grid grid-cols-2 gap-2">
-                {profile.riskWindows.map((rw) => (
-                  <div
-                    key={rw.label}
-                    className="p-3 bg-stone-50 dark:bg-stone-800 rounded-xl border border-stone-200 dark:border-stone-700 text-xs space-y-0.5"
-                  >
-                    <div className="font-bold text-emerald-800 dark:text-emerald-400">
-                      {rw.time}
+            {/* SUB-TAB 1: MA VOIX, MOTIVATIONS & PLANS */}
+            {profileSubTab === 'mantras' && (
+              <div key="profile-mantras" className="space-y-4 stagger-reveal">
+                {/* Demo Profile Badge */}
+                <div className="card bg-emerald-50/50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/80 p-3.5 flex items-start gap-3">
+                  <LeafIcon className="w-5 h-5 text-emerald-700 dark:text-emerald-400 mt-0.5" />
+                  <div className="space-y-0.5">
+                    <div className="text-xs font-bold text-emerald-950 dark:text-emerald-200">
+                      {t('demo.badge')}
                     </div>
-                    <div className="text-stone-700 dark:text-stone-300 truncate font-medium">
-                      {rw.label}
+                    <div className="text-xs text-stone-600 dark:text-stone-300">
+                      {t('demo.description')}
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Plans */}
-            {plans.length > 0 && (
-              <div className="card space-y-3 border-emerald-200/70 dark:border-emerald-800 bg-emerald-50/30 dark:bg-emerald-950/20">
-                <h4 className="text-sm font-bold text-emerald-950 dark:text-emerald-200 flex items-center gap-2">
-                  <ShieldIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
-                  <span>{t('profile.myPlans')}</span>
-                </h4>
-                <div className="space-y-2">
-                  {plans.map((p) => (
-                    <div
-                      key={p.id}
-                      className="p-3 bg-white dark:bg-stone-900 rounded-xl border border-emerald-200/60 dark:border-emerald-800 text-xs space-y-1"
-                    >
-                      <div className="text-stone-700 dark:text-stone-300 font-medium">
-                        <span className="font-bold text-emerald-900 dark:text-emerald-400">
-                          Si :
-                        </span>{' '}
-                        {p.ifText}
-                      </div>
-                      <div className="text-emerald-950 dark:text-emerald-200 font-semibold">
-                        <span className="font-bold text-emerald-900 dark:text-emerald-400">
-                          Alors :
-                        </span>{' '}
-                        {p.thenText}
-                      </div>
-                    </div>
-                  ))}
                 </div>
+
+                {/* Reasons */}
+                <div className="card space-y-3">
+                  <h4 className="text-sm font-bold text-stone-900 dark:text-stone-50 flex items-center gap-2">
+                    <TargetIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                    <span>{t('profile.reasons')}</span>
+                  </h4>
+                  <ul className="text-xs text-stone-700 dark:text-stone-200 space-y-2 pl-5 list-disc marker:text-emerald-700 dark:marker:text-emerald-400">
+                    {profile.reasons.map((reason) => (
+                      <li key={reason} className="leading-relaxed">
+                        {reason}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Phrases in her voice */}
+                <div className="card space-y-3">
+                  <h4 className="text-sm font-bold text-stone-900 dark:text-stone-50 flex items-center gap-2">
+                    <MessageCircleIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                    <span>{t('profile.phrases')}</span>
+                  </h4>
+                  <div className="space-y-2">
+                    {profile.phrases.slice(0, 5).map((phrase) => (
+                      <blockquote
+                        key={phrase}
+                        className="italic text-xs text-stone-700 dark:text-stone-200 border-l-2 border-emerald-700 dark:border-emerald-400 pl-3 py-1 bg-stone-50/50 dark:bg-stone-800/40 rounded-r-lg"
+                      >
+                        « {phrase} »
+                      </blockquote>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Plans */}
+                {plans.length > 0 && (
+                  <div className="card space-y-3 border-emerald-200/70 dark:border-emerald-800 bg-emerald-50/30 dark:bg-emerald-950/20">
+                    <h4 className="text-sm font-bold text-emerald-950 dark:text-emerald-200 flex items-center gap-2">
+                      <ShieldIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                      <span>{t('profile.myPlans')}</span>
+                    </h4>
+                    <div className="space-y-2">
+                      {plans.map((p) => (
+                        <div
+                          key={p.id}
+                          className="p-3 bg-white dark:bg-stone-900 rounded-xl border border-emerald-200/60 dark:border-emerald-800 text-xs space-y-1"
+                        >
+                          <div className="text-stone-700 dark:text-stone-300 font-medium">
+                            <span className="font-bold text-emerald-900 dark:text-emerald-400">
+                              Si :
+                            </span>{' '}
+                            {p.ifText}
+                          </div>
+                          <div className="text-emerald-950 dark:text-emerald-200 font-semibold">
+                            <span className="font-bold text-emerald-900 dark:text-emerald-400">
+                              Alors :
+                            </span>{' '}
+                            {p.thenText}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Messages to future self (Step 13) */}
+                <FutureSelfMessages />
               </div>
             )}
 
-            {/* Phrases in her voice */}
-            <div className="card space-y-3">
-              <h4 className="text-sm font-bold text-stone-900 dark:text-stone-50 flex items-center gap-2">
-                <MessageCircleIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
-                <span>{t('profile.phrases')}</span>
-              </h4>
-              <div className="space-y-2">
-                {profile.phrases.slice(0, 5).map((phrase) => (
-                  <blockquote
-                    key={phrase}
-                    className="italic text-xs text-stone-700 dark:text-stone-200 border-l-2 border-emerald-700 dark:border-emerald-400 pl-3 py-1 bg-stone-50/50 dark:bg-stone-800/40 rounded-r-lg"
-                  >
-                    « {phrase} »
-                  </blockquote>
-                ))}
+            {/* SUB-TAB 2: GALERIE PHOTOS RESSOURCES */}
+            {profileSubTab === 'photos' && (
+              <div key="profile-photos" className="space-y-4 stagger-reveal">
+                <PersonalGallery />
               </div>
-            </div>
+            )}
 
-            {/* Messages to future self (Step 13) */}
-            <FutureSelfMessages />
-
-            {/* Personal Photo Resources Gallery (Step 13) */}
-            <PersonalGallery />
-
-            {/* Reminders before Risk Moments & Discreet Mode (Step 14) */}
-            <RemindersManager
-              profile={profile}
-              onProfileUpdated={(updated) => setProfile(updated)}
-            />
-
-            {/* Smartwatch & Wearable Trigger Webhook (Step 18) */}
-            <WearableManager onTriggered={() => setIsCravingActive(true)} />
-
-            {/* Emergency & Support Contacts */}
-            <div className="card space-y-2.5 bg-stone-50 dark:bg-stone-800/60 border-stone-200 dark:border-stone-700">
-              <h4 className="text-xs font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">
-                <PhoneIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
-                <span>{t('profile.helpline')}</span>
-              </h4>
-              <div className="text-sm font-bold text-stone-900 dark:text-stone-100">
-                {profile.helpline.label} :{' '}
-                <span className="text-emerald-800 dark:text-emerald-400 font-extrabold">
-                  {profile.helpline.contact}
-                </span>
-              </div>
-            </div>
-
-            {/* Optional App PIN Lock (Step 19) */}
-            <AppPinLockCard
-              lockSettings={lockSettings}
-              onLockSettingsChanged={(next) => setLockSettings(next)}
-              onLockNow={() => setIsLocked(true)}
-            />
-
-            {/* Personal Profile Editor & Delete Everything (Step 6 & Item 20) */}
-            <ProfileEditor
-              profile={profile}
-              onProfileUpdated={(updated) => {
-                setProfile(updated);
-                refreshEventsAndStats(updated);
-              }}
-              onDeleteAll={handleDeleteAllData}
-            />
-
-            {/* Model Connection Settings Card (hidden in static demo mode) */}
-            {!isDemo && (
-              <section className="card space-y-3 border-stone-200 dark:border-stone-700">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">
-                    <BotIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
-                    <span>{t('model.title')}</span>
+            {/* SUB-TAB 3: RAPPELS, FENÊTRES À RISQUE & MONTRE */}
+            {profileSubTab === 'reminders' && (
+              <div key="profile-reminders" className="space-y-4 stagger-reveal">
+                {/* Risk Windows */}
+                <div className="card space-y-3">
+                  <h4 className="text-sm font-bold text-stone-900 dark:text-stone-50 flex items-center gap-2">
+                    <ClockIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                    <span>{t('profile.riskWindows')}</span>
                   </h4>
-                  <span className="badge-status">Gemma 2:2b</span>
-                </div>
-
-                <div className="flex gap-2">
-                  <input
-                    type="password"
-                    value={tokenInput}
-                    onChange={(e) => setTokenInput(e.target.value)}
-                    placeholder={t('model.tokenPlaceholder')}
-                    className="flex-1 px-3 py-2 text-xs rounded-lg border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-900"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleSaveToken}
-                    className="btn-secondary !w-auto text-xs py-2 px-3 shrink-0 min-h-[38px]"
-                  >
-                    {t('model.saveToken')}
-                  </button>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleCheckModelStatus}
-                  disabled={isCheckingStatus}
-                  className="btn-secondary text-xs py-2.5 w-full flex justify-center items-center gap-2 min-h-[40px]"
-                >
-                  {isCheckingStatus ? t('common.loading') : t('model.checkStatus')}
-                </button>
-
-                {modelStatus && (
-                  <div className="p-2.5 bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 text-xs text-stone-800 dark:text-stone-200 font-medium">
-                    {modelStatus}
+                  <div className="grid grid-cols-2 gap-2">
+                    {profile.riskWindows.map((rw) => (
+                      <div
+                        key={rw.label}
+                        className="p-3 bg-stone-50 dark:bg-stone-800 rounded-xl border border-stone-200 dark:border-stone-700 text-xs space-y-0.5"
+                      >
+                        <div className="font-bold font-mono tabular-nums text-emerald-800 dark:text-emerald-400">
+                          {rw.time}
+                        </div>
+                        <div className="text-stone-700 dark:text-stone-300 truncate font-medium">
+                          {rw.label}
+                        </div>
+                      </div>
+                    ))}
                   </div>
+                </div>
+
+                {/* Reminders before Risk Moments & Discreet Mode (Step 14) */}
+                <RemindersManager
+                  profile={profile}
+                  onProfileUpdated={(updated) => setProfile(updated)}
+                />
+
+                {/* Smartwatch & Wearable Trigger Webhook (Step 18) */}
+                <WearableManager onTriggered={() => setIsCravingActive(true)} />
+              </div>
+            )}
+
+            {/* SUB-TAB 4: RÉGLAGES, CODE PIN, MODÈLE LOCAL & SUPPRESSION */}
+            {profileSubTab === 'settings' && (
+              <div key="profile-settings" className="space-y-4 stagger-reveal">
+                {/* Personal Profile Editor & Delete Everything (Step 6 & Item 20) */}
+                <ProfileEditor
+                  profile={profile}
+                  onProfileUpdated={(updated) => {
+                    setProfile(updated);
+                    refreshEventsAndStats(updated);
+                  }}
+                  onDeleteAll={handleDeleteAllData}
+                />
+
+                {/* Optional App PIN Lock (Step 19) */}
+                <AppPinLockCard
+                  lockSettings={lockSettings}
+                  onLockSettingsChanged={(next) => setLockSettings(next)}
+                  onLockNow={() => setIsLocked(true)}
+                />
+
+                {/* Model Connection Settings Card (hidden in static demo mode) */}
+                {!isDemo && (
+                  <section className="card space-y-3 border-stone-200 dark:border-stone-700">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-xs font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">
+                        <BotIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                        <span>{t('model.title')}</span>
+                      </h4>
+                      <span className="text-xs font-mono text-emerald-800 dark:text-emerald-400">
+                        gemma2:2b
+                      </span>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <input
+                        type="password"
+                        value={tokenInput}
+                        onChange={(e) => setTokenInput(e.target.value)}
+                        placeholder={t('model.tokenPlaceholder')}
+                        className="flex-1 px-3 py-2 text-xs rounded-lg border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-900"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleSaveToken}
+                        className="btn-secondary !w-auto text-xs py-2 px-3 shrink-0 min-h-[38px]"
+                      >
+                        {t('model.saveToken')}
+                      </button>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleCheckModelStatus}
+                      disabled={isCheckingStatus}
+                      className="btn-secondary text-xs py-2.5 w-full flex justify-center items-center gap-2 min-h-[40px]"
+                    >
+                      {isCheckingStatus ? t('common.loading') : t('model.checkStatus')}
+                    </button>
+
+                    {modelStatus && (
+                      <div className="p-2.5 bg-stone-50 dark:bg-stone-800 rounded-lg border border-stone-200 dark:border-stone-700 text-xs text-stone-800 dark:text-stone-200 font-medium animate-fade-in">
+                        {modelStatus}
+                      </div>
+                    )}
+                  </section>
                 )}
-              </section>
+
+                {/* Emergency & Support Contacts */}
+                <div className="card space-y-2.5 bg-stone-50 dark:bg-stone-800/60 border-stone-200 dark:border-stone-700">
+                  <h4 className="text-xs font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">
+                    <PhoneIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                    <span>{t('profile.helpline')}</span>
+                  </h4>
+                  <div className="text-sm font-bold text-stone-900 dark:text-stone-100">
+                    {profile.helpline.label} :{' '}
+                    <span className="text-emerald-800 dark:text-emerald-400 font-extrabold tabular-nums">
+                      {profile.helpline.contact}
+                    </span>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         )}
