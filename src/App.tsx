@@ -83,11 +83,10 @@ export default function App() {
   const [stats, setStats] = useState<UserStats | null>(null);
 
   // Active navigation tab
-  const [activeTab, setActiveTab] = useState<'home' | 'journal' | 'profile'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'journal' | 'game' | 'profile'>('home');
 
   // Active craving session state (Step 10)
   const [isCravingActive, setIsCravingActive] = useState(false);
-  const [showHomePuzzle, setShowHomePuzzle] = useState(false);
 
   // Model connection & testing state
   const [tokenInput, setTokenInput] = useState(getStoredToken());
@@ -516,45 +515,58 @@ export default function App() {
         </button>
       </header>
 
-      {/* 3 Navigation Tabs */}
-      <nav className="bg-stone-200/80 dark:bg-stone-800/80 p-1.5 rounded-2xl flex gap-1.5 border border-stone-300/40 dark:border-stone-700/60 shadow-xs">
+      {/* Navigation Tabs */}
+      <nav className="bg-stone-200/80 dark:bg-stone-800/80 p-1.5 rounded-2xl grid grid-cols-4 gap-1 border border-stone-300/40 dark:border-stone-700/60 shadow-xs">
         <button
           type="button"
           onClick={() => setActiveTab('home')}
-          className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer min-h-[44px] ${
+          className={`py-2.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer min-h-[44px] whitespace-nowrap truncate ${
             activeTab === 'home'
               ? 'bg-white dark:bg-stone-900 text-emerald-800 dark:text-emerald-400 shadow-xs'
               : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
           }`}
         >
-          <BoltIcon className="w-4 h-4" />
-          <span>{t('nav.home')}</span>
+          <BoltIcon className="w-4 h-4 shrink-0" />
+          <span className="truncate">{t('nav.home')}</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('journal')}
-          className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer min-h-[44px] ${
+          className={`py-2.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer min-h-[44px] whitespace-nowrap truncate ${
             activeTab === 'journal'
               ? 'bg-white dark:bg-stone-900 text-emerald-800 dark:text-emerald-400 shadow-xs'
               : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
           }`}
         >
-          <BookIcon className="w-4 h-4" />
-          <span>{lang === 'fr' ? 'Journal & Événements' : 'Journal & Events'}</span>
+          <BookIcon className="w-4 h-4 shrink-0" />
+          <span className="truncate">{t('nav.journal')}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('game')}
+          className={`py-2.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer min-h-[44px] whitespace-nowrap truncate ${
+            activeTab === 'game'
+              ? 'bg-white dark:bg-stone-900 text-emerald-800 dark:text-emerald-400 shadow-xs'
+              : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+          }`}
+        >
+          <GamepadIcon className="w-4 h-4 shrink-0" />
+          <span className="truncate">{t('nav.game')}</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab('profile')}
-          className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer min-h-[44px] ${
+          className={`py-2.5 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer min-h-[44px] whitespace-nowrap truncate ${
             activeTab === 'profile'
               ? 'bg-white dark:bg-stone-900 text-emerald-800 dark:text-emerald-400 shadow-xs'
               : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
           }`}
         >
-          <UserIcon className="w-4 h-4" />
-          <span>{lang === 'fr' ? 'Profil & Mantras' : 'Profile & Mantras'}</span>
+          <UserIcon className="w-4 h-4 shrink-0" />
+          <span className="truncate">{t('nav.profile')}</span>
         </button>
       </nav>
 
@@ -743,30 +755,6 @@ export default function App() {
             {/* Sourced Health Facts (Step 17 v2) */}
             <SourcedFacts />
 
-            {/* Lightweight 1010! Puzzle Card (Prinzhorn/1010 open-source mechanics) */}
-            <section className="card space-y-3 p-4">
-              <div className="flex items-center justify-between gap-2">
-                <div className="space-y-0.5">
-                  <h3 className="text-xs font-bold text-stone-900 dark:text-stone-50 flex items-center gap-1.5">
-                    <GamepadIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
-                    <span>{t('game1010.title')}</span>
-                  </h3>
-                  <p className="text-[11px] text-stone-500 dark:text-stone-400 leading-snug">
-                    {t('game1010.subtitle')}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowHomePuzzle(!showHomePuzzle)}
-                  className="btn-secondary !w-auto text-xs py-2 px-3 shrink-0 cursor-pointer whitespace-nowrap"
-                >
-                  {showHomePuzzle ? t('game1010.toggleClose') : t('game1010.toggleOpen')}
-                </button>
-              </div>
-
-              {showHomePuzzle && <BlockPuzzle1010 />}
-            </section>
-
             {/* Quick Note & Test Prompt Section */}
             <section className="card space-y-4">
               <h3 className="text-sm font-bold text-stone-900 dark:text-stone-50 flex items-center gap-2">
@@ -902,6 +890,23 @@ export default function App() {
                 </div>
               )}
             </section>
+          </div>
+        )}
+
+        {/* TAB: JEU 1010 (Dedicated Navbar Tab) */}
+        {activeTab === 'game' && (
+          <div className="space-y-4">
+            <section className="card p-4 bg-emerald-50/60 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/80 space-y-2">
+              <h2 className="text-sm font-bold text-emerald-950 dark:text-emerald-200 flex items-center gap-2">
+                <GamepadIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                <span>{t('game1010.title')}</span>
+              </h2>
+              <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed">
+                {t('game1010.subtitle')}
+              </p>
+            </section>
+
+            <BlockPuzzle1010 />
           </div>
         )}
 
