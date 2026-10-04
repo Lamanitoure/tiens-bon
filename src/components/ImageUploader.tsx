@@ -3,6 +3,9 @@ import { addImage } from '../db/index.ts';
 import { t } from '../i18n/index.ts';
 import { sanitizeAndEncodeImage } from '../lib/images.ts';
 import type { ImageKind, ImageRecord } from '../schemas/images.ts';
+import { CameraIcon } from './icons/CameraIcon.tsx';
+import { CheckIcon } from './icons/CheckIcon.tsx';
+import { XIcon } from './icons/XIcon.tsx';
 
 interface ImageUploaderProps {
   onImageAdded: (newImage: ImageRecord) => void;
@@ -72,15 +75,16 @@ export function ImageUploader({ onImageAdded, onCancel }: ImageUploaderProps) {
     <div className="p-4 bg-stone-50 dark:bg-stone-800/80 rounded-2xl border border-stone-200 dark:border-stone-700 space-y-4 animate-fade-in text-xs">
       <div className="flex items-center justify-between pb-2 border-b border-stone-200 dark:border-stone-700">
         <h4 className="font-bold text-stone-900 dark:text-stone-100 flex items-center gap-1.5">
-          <span>📷</span>
+          <CameraIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400 shrink-0" />
           <span>{t('gallery.addPhoto')}</span>
         </h4>
         <button
           type="button"
           onClick={onCancel}
-          className="text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 cursor-pointer font-bold px-2 py-1"
+          aria-label={t('common.cancel')}
+          className="text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 cursor-pointer font-bold p-1"
         >
-          ✕
+          <XIcon className="w-4 h-4" />
         </button>
       </div>
 
@@ -188,7 +192,7 @@ export function ImageUploader({ onImageAdded, onCancel }: ImageUploaderProps) {
           disabled={isProcessing || !previewUrl || !caption.trim()}
           className="btn-primary text-xs py-2.5 flex-1 cursor-pointer disabled:opacity-50 min-h-[40px] flex items-center justify-center gap-1.5"
         >
-          <span>✓</span>
+          <CheckIcon className="w-3.5 h-3.5 shrink-0" />
           <span>{isProcessing ? t('common.loading') : t('common.save')}</span>
         </button>
         <button

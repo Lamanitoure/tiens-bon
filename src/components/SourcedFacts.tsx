@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { getLanguage, t } from '../i18n/index.ts';
 import { activeConfig } from '../lib/config.ts';
+import { RefreshIcon } from './icons/RefreshIcon.tsx';
+import { StethoscopeIcon } from './icons/StethoscopeIcon.tsx';
 
 export function SourcedFacts() {
   const lang = getLanguage();
@@ -20,7 +22,7 @@ export function SourcedFacts() {
       <div className="flex items-center justify-between gap-2">
         <div>
           <h3 className="text-xs font-bold text-stone-900 dark:text-stone-50 flex items-center gap-1.5">
-            <span>🩺</span>
+            <StethoscopeIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400 shrink-0" />
             <span>{t('facts.title')}</span>
           </h3>
           <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">
@@ -31,9 +33,10 @@ export function SourcedFacts() {
           <button
             type="button"
             onClick={handleNext}
-            className="btn-secondary !w-auto text-[11px] py-1.5 px-2.5 shrink-0 cursor-pointer"
+            className="btn-secondary !w-auto text-[11px] py-1.5 px-2.5 shrink-0 cursor-pointer flex items-center gap-1"
           >
-            ↻ {t('facts.nextFact')}
+            <RefreshIcon className="w-3.5 h-3.5 shrink-0" />
+            <span>{t('facts.nextFact')}</span>
           </button>
         )}
       </div>

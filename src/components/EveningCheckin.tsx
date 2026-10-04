@@ -5,6 +5,15 @@ import { extractCheckin } from '../lib/checkin.ts';
 import type { EventRecord } from '../schemas/events.ts';
 import type { Profile } from '../schemas/profile.ts';
 import { checkDistress } from '../security/safety.ts';
+import {
+  BotIcon,
+  CheckIcon,
+  ClockIcon,
+  HeartHandshakeIcon,
+  LeafIcon,
+  MoonIcon,
+  PenIcon,
+} from './icons/index.ts';
 
 interface EveningCheckinProps {
   profile: Profile;
@@ -91,7 +100,7 @@ export function EveningCheckin({ profile, onSaved, onCancel }: EveningCheckinPro
     return (
       <div className="card space-y-4 p-5 bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-800 text-stone-900 dark:text-stone-100 animate-fade-in">
         <div className="flex items-center gap-2.5 text-amber-900 dark:text-amber-300 font-bold">
-          <span className="text-2xl">🤝</span>
+          <HeartHandshakeIcon className="w-6 h-6" />
           <span>{t('checkin.distressTitle')}</span>
         </div>
         <p className="text-xs text-amber-950 dark:text-amber-200 leading-relaxed">
@@ -152,7 +161,9 @@ export function EveningCheckin({ profile, onSaved, onCancel }: EveningCheckinPro
   if (isSaved) {
     return (
       <div className="card space-y-4 p-5 bg-emerald-50 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800 text-center animate-fade-in text-xs">
-        <div className="text-3xl">🌱</div>
+        <div className="flex justify-center">
+          <LeafIcon className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+        </div>
         <div className="space-y-1">
           <h4 className="font-bold text-emerald-950 dark:text-emerald-200 text-sm">
             {t('checkin.savedSuccess')}
@@ -178,7 +189,7 @@ export function EveningCheckin({ profile, onSaved, onCancel }: EveningCheckinPro
       <div className="card space-y-4 p-5 bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 animate-fade-in text-xs">
         <div className="space-y-1 pb-2 border-b border-stone-200 dark:border-stone-800">
           <h4 className="font-bold text-stone-900 dark:text-stone-50 flex items-center gap-1.5 text-sm">
-            <span>✏️</span>
+            <PenIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
             <span>{t('checkin.reviewTitle')}</span>
           </h4>
           <p className="text-[11px] text-stone-500 dark:text-stone-400">
@@ -286,7 +297,7 @@ export function EveningCheckin({ profile, onSaved, onCancel }: EveningCheckinPro
             onClick={handleSaveToJournal}
             className="btn-primary text-xs py-3 flex-1 cursor-pointer flex justify-center items-center gap-1.5 min-h-[44px]"
           >
-            <span>✓</span>
+            <CheckIcon className="w-4 h-4" />
             <span>{t('checkin.saveBtn')}</span>
           </button>
           <button
@@ -306,7 +317,7 @@ export function EveningCheckin({ profile, onSaved, onCancel }: EveningCheckinPro
     <div className="card space-y-4 p-5 bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 text-xs">
       <div className="space-y-1">
         <h3 className="text-sm font-bold text-stone-900 dark:text-stone-50 flex items-center gap-1.5">
-          <span>🌙</span>
+          <MoonIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
           <span>{t('checkin.title')}</span>
         </h3>
         <p className="text-[11px] text-stone-500 dark:text-stone-400 font-medium leading-relaxed">
@@ -336,7 +347,7 @@ export function EveningCheckin({ profile, onSaved, onCancel }: EveningCheckinPro
           disabled={isAnalyzing || !userText.trim()}
           className="btn-primary text-xs py-3 flex-1 cursor-pointer flex items-center justify-center gap-2 min-h-[44px] disabled:opacity-50"
         >
-          <span>{isAnalyzing ? '⏳' : '🤖'}</span>
+          {isAnalyzing ? <ClockIcon className="w-4 h-4" /> : <BotIcon className="w-4 h-4" />}
           <span>{isAnalyzing ? t('checkin.analyzing') : t('checkin.extractBtn')}</span>
         </button>
 

@@ -152,7 +152,7 @@ function main() {
   }
 
   if (violations.length > 0) {
-    console.error('\n❌ [SECURITY ERROR] Secrets or forbidden files detected:');
+    console.error('\n[SECURITY ERROR] Secrets or forbidden files detected:');
     for (const v of violations) {
       console.error(`  - ${v}`);
     }

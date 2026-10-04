@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { t } from '../i18n/index.ts';
 import { getStoredToken } from '../lib/api.ts';
 import { getWearableWebhookUrl, triggerWearableCraving } from '../lib/wearable.ts';
+import { CheckIcon, ClockIcon, WatchIcon } from './icons/index.ts';
 
 interface WearableManagerProps {
   onTriggered: () => void;
@@ -39,7 +40,7 @@ export function WearableManager({ onTriggered }: WearableManagerProps) {
           onTriggered();
         }, 500);
       } else {
-        setTestResult(`❌ ${res.error || 'Erreur de déclenchement'}`);
+        setTestResult(res.error || 'Erreur de déclenchement');
       }
     } finally {
       setIsTesting(false);
@@ -50,7 +51,7 @@ export function WearableManager({ onTriggered }: WearableManagerProps) {
     <div className="card space-y-4 p-5 bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 text-xs">
       <div className="space-y-1">
         <h3 className="text-sm font-bold text-stone-900 dark:text-stone-50 flex items-center gap-2">
-          <span>⌚</span>
+          <WatchIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
           <span>{t('wearable.title')}</span>
         </h3>
         <p className="text-[11px] text-stone-500 dark:text-stone-400 font-medium leading-relaxed">
@@ -73,9 +74,16 @@ export function WearableManager({ onTriggered }: WearableManagerProps) {
           <button
             type="button"
             onClick={handleCopy}
-            className="btn-secondary text-xs px-3.5 py-2 cursor-pointer shrink-0 min-h-[38px]"
+            className="btn-secondary text-xs px-3.5 py-2 cursor-pointer shrink-0 min-h-[38px] flex items-center gap-1.5"
           >
-            {copied ? `✓ ${t('wearable.copied')}` : t('wearable.copyUrl')}
+            {copied ? (
+              <>
+                <CheckIcon className="w-3.5 h-3.5" />
+                <span>{t('wearable.copied')}</span>
+              </>
+            ) : (
+              t('wearable.copyUrl')
+            )}
           </button>
         </div>
       </div>
@@ -88,7 +96,7 @@ export function WearableManager({ onTriggered }: WearableManagerProps) {
           disabled={isTesting}
           className="btn-primary text-xs py-2.5 px-4 w-full cursor-pointer flex items-center justify-center gap-2 min-h-[42px] disabled:opacity-50"
         >
-          <span>{isTesting ? '⏳' : '⌚'}</span>
+          {isTesting ? <ClockIcon className="w-4 h-4" /> : <WatchIcon className="w-4 h-4" />}
           <span>{isTesting ? t('wearable.testing') : t('wearable.testBtn')}</span>
         </button>
       </div>

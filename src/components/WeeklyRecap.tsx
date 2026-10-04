@@ -9,6 +9,14 @@ import {
 import { generateWeeklyRecap } from '../lib/recap-model.ts';
 import type { EventRecord } from '../schemas/events.ts';
 import { type Profile, ProfileSchema, type RiskWindow } from '../schemas/profile.ts';
+import {
+  BarChartIcon,
+  CheckIcon,
+  ClockIcon,
+  LightbulbIcon,
+  MapPinIcon,
+  SparklesIcon,
+} from './icons/index.ts';
 
 interface WeeklyRecapProps {
   events: EventRecord[];
@@ -74,7 +82,7 @@ export function WeeklyRecap({ events, profile, onProfileUpdated }: WeeklyRecapPr
       {/* Header */}
       <div className="space-y-1 pb-2 border-b border-stone-200 dark:border-stone-800">
         <h3 className="text-sm font-bold text-stone-900 dark:text-stone-50 flex items-center gap-2">
-          <span>📊</span>
+          <BarChartIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
           <span>{t('recap.title')}</span>
         </h3>
         <p className="text-[11px] text-stone-500 dark:text-stone-400 font-medium">
@@ -139,7 +147,8 @@ export function WeeklyRecap({ events, profile, onProfileUpdated }: WeeklyRecapPr
                 key={trig.trigger}
                 className="px-2.5 py-1 rounded-xl bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-200 font-medium text-[11px] flex items-center gap-1.5"
               >
-                <span>📍 {trig.trigger}</span>
+                <MapPinIcon className="w-3 h-3 text-emerald-700 dark:text-emerald-400" />
+                <span>{trig.trigger}</span>
                 <span className="font-bold text-emerald-800 dark:text-emerald-400">
                   ×{trig.count}
                 </span>
@@ -159,7 +168,7 @@ export function WeeklyRecap({ events, profile, onProfileUpdated }: WeeklyRecapPr
       {activeProposals.length > 0 && (
         <div className="space-y-2.5 pt-1 border-t border-stone-200 dark:border-stone-800">
           <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900 dark:text-amber-300">
-            <span>💡</span>
+            <LightbulbIcon className="w-4 h-4" />
             <span>{t('recap.learnedWindowsTitle')}</span>
           </div>
 
@@ -178,7 +187,7 @@ export function WeeklyRecap({ events, profile, onProfileUpdated }: WeeklyRecapPr
                   onClick={() => handleAcceptProposal(prop)}
                   className="btn-primary text-xs py-2 px-3 flex-1 cursor-pointer flex items-center justify-center gap-1.5 min-h-[38px]"
                 >
-                  <span>✓</span>
+                  <CheckIcon className="w-3.5 h-3.5" />
                   <span>{t('recap.acceptBtn')}</span>
                 </button>
                 <button
@@ -203,7 +212,11 @@ export function WeeklyRecap({ events, profile, onProfileUpdated }: WeeklyRecapPr
             disabled={isGeneratingNote}
             className="btn-secondary text-xs py-2.5 w-full cursor-pointer flex items-center justify-center gap-2 min-h-[42px] disabled:opacity-50"
           >
-            <span>{isGeneratingNote ? '⏳' : '✨'}</span>
+            {isGeneratingNote ? (
+              <ClockIcon className="w-4 h-4" />
+            ) : (
+              <SparklesIcon className="w-4 h-4" />
+            )}
             <span>{isGeneratingNote ? t('recap.generating') : t('recap.generateRecapBtn')}</span>
           </button>
         ) : (

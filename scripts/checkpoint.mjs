@@ -5,7 +5,7 @@ import readline from 'node:readline';
 const message = process.argv[2];
 
 if (!message || message.trim().length === 0) {
-  console.error('\n❌ Error: Checkpoint message is required.');
+  console.error('\n[ERROR] Checkpoint message is required.');
   console.error('Usage: pnpm checkpoint "feat: description of changes"\n');
   process.exit(1);
 }
@@ -15,7 +15,7 @@ const pkgCmd = hasPnpm ? 'pnpm' : 'npm';
 
 function runStep(label, command, args = []) {
   const displayCmd = command === pkgCmd ? 'pnpm' : command;
-  console.log(`\n⏳ Running: ${label} (${displayCmd} ${args.join(' ')})...`);
+  console.log(`\n[RUN] Running: ${label} (${displayCmd} ${args.join(' ')})...`);
   const result = spawnSync(command, args, {
     stdio: 'inherit',
     shell: true,
@@ -23,7 +23,7 @@ function runStep(label, command, args = []) {
   });
 
   if (result.status !== 0) {
-    console.error(`\n❌ Step failed: ${label}`);
+    console.error(`\n[ERROR] Step failed: ${label}`);
     console.error(`Command exited with status code ${result.status}. Aborting checkpoint.\n`);
     process.exit(result.status || 1);
   }
@@ -31,7 +31,7 @@ function runStep(label, command, args = []) {
 }
 
 console.log('========================================');
-console.log(`🚀 Starting Tiens Bon Checkpoint: "${message.trim()}"`);
+console.log(`Starting Tiens Bon Checkpoint: "${message.trim()}"`);
 console.log('========================================');
 
 // 1. Typecheck
@@ -58,7 +58,7 @@ let gitStatus = '';
 try {
   gitStatus = execSync('git status --short', { encoding: 'utf-8' });
 } catch (_err) {
-  console.error('⚠️ Could not run "git status". Ensure git is initialized in this repository.');
+  console.error('[WARN] Could not run "git status". Ensure git is initialized in this repository.');
   process.exit(1);
 }
 
@@ -89,9 +89,9 @@ rl.question('Commit and push these files? [y/N] ', (answer) => {
       console.log('Pushing to remote (git push)...');
       execSync('git push', { stdio: 'inherit' });
 
-      console.log('\n🎉 Successfully committed and pushed to GitHub!');
+      console.log('\n[OK] Successfully committed and pushed to GitHub!');
     } catch (_err) {
-      console.error('\n❌ git push failed.');
+      console.error('\n[ERROR] git push failed.');
       console.error('\nPlain-language troubleshooting hints:');
       console.error('1. GitHub Login: run `gh auth login` or verify your Personal Access Token.');
       console.error('2. Internet connection: verify that you can reach github.com.');

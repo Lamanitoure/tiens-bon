@@ -3,6 +3,16 @@ import { t } from '../i18n/index.ts';
 import type { EventRecord } from '../schemas/events.ts';
 import type { Profile } from '../schemas/profile.ts';
 import { EveningCheckin } from './EveningCheckin.tsx';
+import {
+  AlertTriangleIcon,
+  BookIcon,
+  HelpCircleIcon,
+  LeafIcon,
+  MapPinIcon,
+  MoonIcon,
+  PenIcon,
+  SmileIcon,
+} from './icons/index.ts';
 
 interface JournalViewProps {
   profile: Profile;
@@ -34,24 +44,28 @@ export function JournalView({ profile, events, onEventAdded }: JournalViewProps)
     switch (evt.type) {
       case 'checkin':
         return {
-          label: '🌙 Bilan de soirée',
+          icon: <MoonIcon className="w-3 h-3" />,
+          label: 'Bilan de soirée',
           className:
             'bg-indigo-100 dark:bg-indigo-950/60 text-indigo-900 dark:text-indigo-200 border-indigo-200 dark:border-indigo-800',
         };
       case 'resisted':
         return {
-          label: '🌱 Envie surmontée',
+          icon: <LeafIcon className="w-3 h-3" />,
+          label: 'Envie surmontée',
           className:
             'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200 border-emerald-200 dark:border-emerald-800',
         };
       case 'relapse':
         return {
-          label: '⚠️ Rechute passagère',
+          icon: <AlertTriangleIcon className="w-3 h-3" />,
+          label: 'Rechute passagère',
           className:
             'bg-stone-200 dark:bg-stone-800 text-stone-900 dark:text-stone-300 border-stone-300 dark:border-stone-700',
         };
       default:
         return {
+          icon: null,
           label: 'Événement',
           className: 'bg-stone-100 text-stone-800 border-stone-200',
         };
@@ -65,7 +79,7 @@ export function JournalView({ profile, events, onEventAdded }: JournalViewProps)
         <div className="card p-5 bg-gradient-to-r from-emerald-800 to-teal-900 text-white space-y-3 shadow-md">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold flex items-center gap-2">
-              <span>🌙</span>
+              <MoonIcon className="w-4 h-4 text-emerald-200" />
               <span>{t('checkin.title')}</span>
             </h3>
             <span className="text-[10px] font-semibold bg-white/20 px-2 py-0.5 rounded-full backdrop-blur-xs">
@@ -78,7 +92,7 @@ export function JournalView({ profile, events, onEventAdded }: JournalViewProps)
             onClick={() => setShowCheckinForm(true)}
             className="w-full py-3 px-4 rounded-xl bg-white text-emerald-950 font-bold text-xs shadow-xs hover:bg-emerald-50 active:scale-95 transition-all cursor-pointer min-h-[44px] flex items-center justify-center gap-1.5"
           >
-            <span>✍️</span>
+            <PenIcon className="w-3.5 h-3.5" />
             <span>{t('journalView.newCheckin')}</span>
           </button>
         </div>
@@ -94,7 +108,7 @@ export function JournalView({ profile, events, onEventAdded }: JournalViewProps)
       <div className="card space-y-4 p-5 bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800">
         <div className="flex items-center justify-between border-b border-stone-200 dark:border-stone-800 pb-2">
           <h3 className="text-sm font-bold text-stone-900 dark:text-stone-50 flex items-center gap-2">
-            <span>📖</span>
+            <BookIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
             <span>{t('journalView.title')}</span>
           </h3>
           <span className="badge-status">
@@ -130,7 +144,9 @@ export function JournalView({ profile, events, onEventAdded }: JournalViewProps)
         {/* Event List */}
         {filteredEvents.length === 0 ? (
           <div className="py-8 text-center space-y-2 border border-dashed border-stone-200 dark:border-stone-800 rounded-2xl">
-            <div className="text-3xl">🌱</div>
+            <div className="flex justify-center">
+              <LeafIcon className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+            </div>
             <p className="text-xs text-stone-500 dark:text-stone-400 font-medium">
               {t('journalView.empty')}
             </p>
@@ -148,9 +164,10 @@ export function JournalView({ profile, events, onEventAdded }: JournalViewProps)
                 >
                   <div className="flex items-center justify-between">
                     <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${badge.className}`}
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-md border flex items-center gap-1 ${badge.className}`}
                     >
-                      {badge.label}
+                      {badge.icon}
+                      <span>{badge.label}</span>
                     </span>
                     <span className="text-[10px] text-stone-500 dark:text-stone-400">
                       {new Date(evt.ts).toLocaleString(
@@ -171,7 +188,7 @@ export function JournalView({ profile, events, onEventAdded }: JournalViewProps)
                       <div className="flex flex-wrap items-center gap-2 text-[11px]">
                         {outcome && (
                           <span
-                            className={`px-2 py-0.5 rounded font-bold ${
+                            className={`px-2 py-0.5 rounded font-bold inline-flex items-center gap-1 ${
                               outcome === 'resisted'
                                 ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300'
                                 : outcome === 'smoked'
@@ -179,21 +196,34 @@ export function JournalView({ profile, events, onEventAdded }: JournalViewProps)
                                   : 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300'
                             }`}
                           >
-                            {outcome === 'resisted'
-                              ? '🌱 Résisté'
-                              : outcome === 'smoked'
-                                ? '⚠️ Fumé'
-                                : '❓ Partagé'}
+                            {outcome === 'resisted' ? (
+                              <>
+                                <LeafIcon className="w-3 h-3" />
+                                <span>Résisté</span>
+                              </>
+                            ) : outcome === 'smoked' ? (
+                              <>
+                                <AlertTriangleIcon className="w-3 h-3" />
+                                <span>Fumé</span>
+                              </>
+                            ) : (
+                              <>
+                                <HelpCircleIcon className="w-3 h-3" />
+                                <span>Partagé</span>
+                              </>
+                            )}
                           </span>
                         )}
                         {evt.trigger && (
-                          <span className="text-stone-700 dark:text-stone-300 font-semibold">
-                            📍 {evt.trigger}
+                          <span className="text-stone-700 dark:text-stone-300 font-semibold inline-flex items-center gap-1">
+                            <MapPinIcon className="w-3 h-3 text-emerald-700 dark:text-emerald-400" />
+                            <span>{evt.trigger}</span>
                           </span>
                         )}
                         {evt.emotion && (
-                          <span className="text-stone-600 dark:text-stone-400 italic">
-                            🎭 {evt.emotion}
+                          <span className="text-stone-600 dark:text-stone-400 italic inline-flex items-center gap-1">
+                            <SmileIcon className="w-3 h-3" />
+                            <span>{evt.emotion}</span>
                           </span>
                         )}
                       </div>

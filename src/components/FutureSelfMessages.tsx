@@ -2,6 +2,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { addSelfTalk, deleteSelfTalk, getAllSelfTalk } from '../db/index.ts';
 import { t } from '../i18n/index.ts';
 import type { SelfTalk } from '../schemas/selftalk.ts';
+import { MailHeartIcon } from './icons/MailHeartIcon.tsx';
+import { PenIcon } from './icons/PenIcon.tsx';
+import { XIcon } from './icons/XIcon.tsx';
 
 interface FutureSelfMessagesProps {
   onMessagesUpdated?: (messages: SelfTalk[]) => void;
@@ -61,7 +64,7 @@ export function FutureSelfMessages({ onMessagesUpdated }: FutureSelfMessagesProp
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="text-sm font-bold text-stone-900 dark:text-stone-50 flex items-center gap-1.5">
-            <span>💌</span>
+            <MailHeartIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400 shrink-0" />
             <span>{t('selftalk.title')}</span>
           </h3>
           <p className="text-[11px] text-stone-500 dark:text-stone-400 font-medium">
@@ -80,7 +83,7 @@ export function FutureSelfMessages({ onMessagesUpdated }: FutureSelfMessagesProp
           onClick={() => setIsAdding(true)}
           className="btn-secondary text-xs py-2.5 w-full cursor-pointer flex items-center justify-center gap-2 min-h-[42px]"
         >
-          <span>✍️</span>
+          <PenIcon className="w-4 h-4 shrink-0" />
           <span>{t('selftalk.addMessage')}</span>
         </button>
       ) : (
@@ -142,10 +145,10 @@ export function FutureSelfMessages({ onMessagesUpdated }: FutureSelfMessagesProp
               <button
                 type="button"
                 onClick={() => handleDelete(item.id)}
-                className="text-[11px] text-stone-400 hover:text-red-600 dark:hover:text-red-400 cursor-pointer shrink-0 p-1"
+                className="text-stone-400 hover:text-red-600 dark:hover:text-red-400 cursor-pointer shrink-0 p-1"
                 aria-label={t('common.delete')}
               >
-                ✕
+                <XIcon className="w-3.5 h-3.5" />
               </button>
             </div>
           ))}

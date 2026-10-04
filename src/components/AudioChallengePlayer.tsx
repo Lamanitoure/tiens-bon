@@ -7,6 +7,10 @@ import {
   speakChallenge,
   stopSpeech,
 } from '../lib/audio.ts';
+import { HeadphonesIcon } from './icons/HeadphonesIcon.tsx';
+import { PauseIcon } from './icons/PauseIcon.tsx';
+import { PlayIcon } from './icons/PlayIcon.tsx';
+import { StopIcon } from './icons/StopIcon.tsx';
 
 interface AudioChallengePlayerProps {
   text: string;
@@ -89,7 +93,7 @@ export function AudioChallengePlayer({
             : 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100'
         }`}
       >
-        <span>🎧</span>
+        <HeadphonesIcon className="w-4 h-4 shrink-0" />
         <span>{t('audio.listenBtn')}</span>
       </button>
     );
@@ -156,7 +160,8 @@ export function AudioChallengePlayer({
             onClick={handlePause}
             className="flex-1 py-1.5 px-3 rounded-lg bg-white/20 hover:bg-white/30 text-white text-xs font-bold cursor-pointer transition-all flex items-center justify-center gap-1.5 min-h-[34px]"
           >
-            {t('audio.pauseBtn')}
+            <PauseIcon className="w-3.5 h-3.5 shrink-0" />
+            <span>{t('audio.pauseBtn')}</span>
           </button>
         ) : (
           <button
@@ -164,16 +169,18 @@ export function AudioChallengePlayer({
             onClick={handleResume}
             className="flex-1 py-1.5 px-3 rounded-lg bg-white text-emerald-950 text-xs font-bold cursor-pointer transition-all flex items-center justify-center gap-1.5 min-h-[34px]"
           >
-            {t('audio.resumeBtn')}
+            <PlayIcon className="w-3.5 h-3.5 shrink-0" />
+            <span>{t('audio.resumeBtn')}</span>
           </button>
         )}
 
         <button
           type="button"
           onClick={handleStop}
-          className="py-1.5 px-3 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-semibold cursor-pointer transition-all min-h-[34px]"
+          className="py-1.5 px-3 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-semibold cursor-pointer transition-all min-h-[34px] flex items-center gap-1.5"
         >
-          {t('audio.stopBtn')}
+          <StopIcon className="w-3.5 h-3.5 shrink-0" />
+          <span>{t('audio.stopBtn')}</span>
         </button>
       </div>
     </div>

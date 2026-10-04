@@ -11,6 +11,16 @@ import type { Profile } from '../schemas/profile.ts';
 import type { SelfTalk } from '../schemas/selftalk.ts';
 import { AudioChallengePlayer } from './AudioChallengePlayer.tsx';
 import { BreathingAnchor } from './BreathingAnchor.tsx';
+import {
+  AlertTriangleIcon,
+  CheckIcon,
+  EyeIcon,
+  EyeOffIcon,
+  LeafIcon,
+  MailHeartIcon,
+  RefreshIcon,
+  ShieldIcon,
+} from './icons/index.ts';
 import { RelapseDebrief } from './RelapseDebrief.tsx';
 
 interface CravingSessionProps {
@@ -162,7 +172,9 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
   if (sessionStatus === 'resisted') {
     return (
       <div className="card space-y-5 text-center p-6 bg-emerald-900 text-white border-none shadow-md animate-fade-in">
-        <div className="text-4xl">🌱</div>
+        <div className="flex justify-center">
+          <LeafIcon className="w-10 h-10 text-emerald-300" />
+        </div>
         <div className="space-y-2">
           <h3 className="text-xl font-bold">{t('craving.heldSuccess')}</h3>
           <p className="text-xs text-emerald-100/90 leading-relaxed">
@@ -209,14 +221,24 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
         <button
           type="button"
           onClick={() => setIsDiscreet(!isDiscreet)}
-          className={`text-[11px] px-3 py-1.5 rounded-full font-medium transition-all cursor-pointer min-h-[36px] ${
+          className={`text-[11px] px-3 py-1.5 rounded-full font-medium transition-all cursor-pointer min-h-[36px] flex items-center gap-1.5 ${
             isDiscreet
               ? 'bg-stone-800 text-stone-200 border border-stone-700'
               : 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100'
           }`}
           aria-label="Toggle discreet mode"
         >
-          {isDiscreet ? '🕶️ Discret' : '👁️ Standard'}
+          {isDiscreet ? (
+            <>
+              <EyeOffIcon className="w-3.5 h-3.5" />
+              <span>Discret</span>
+            </>
+          ) : (
+            <>
+              <EyeIcon className="w-3.5 h-3.5" />
+              <span>Standard</span>
+            </>
+          )}
         </button>
       </div>
 
@@ -328,7 +350,7 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
         >
           <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider">
             <span className="flex items-center gap-1.5">
-              <span>🛡️</span>
+              <ShieldIcon className="w-3.5 h-3.5" />
               <span>{isDiscreet ? 'Plan préparé' : 'Ton plan d’action prévu'}</span>
             </span>
             <button
@@ -356,9 +378,10 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
           <button
             type="button"
             onClick={handleNextChallenge}
-            className="hover:underline opacity-80 cursor-pointer text-[10px] p-1"
+            className="hover:underline opacity-80 cursor-pointer text-[10px] p-1 flex items-center gap-1"
           >
-            🔄 {t('craving.anotherChallenge')}
+            <RefreshIcon className="w-3 h-3" />
+            <span>{t('craving.anotherChallenge')}</span>
           </button>
         </div>
         <p className="text-xs font-semibold leading-relaxed">{activeChallenge}</p>
@@ -394,7 +417,7 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
       {activeSelfTalk && !isDiscreet && (
         <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200/90 text-amber-950 space-y-1">
           <div className="text-[10px] font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1">
-            <span>💌</span>
+            <MailHeartIcon className="w-3.5 h-3.5" />
             <span>Message de toi à toi-même</span>
           </div>
           <p className="text-xs italic leading-relaxed">« {activeSelfTalk.text} »</p>
@@ -419,7 +442,8 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
               : 'bg-emerald-800 text-white hover:bg-emerald-900 active:scale-[0.98]'
           }`}
         >
-          <span>✓</span> {isDiscreet ? t('craving.discreetHeld') : t('craving.resisted')}
+          <CheckIcon className="w-4 h-4" />
+          <span>{isDiscreet ? t('craving.discreetHeld') : t('craving.resisted')}</span>
         </button>
 
         <button
@@ -431,7 +455,8 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
               : 'text-stone-600 hover:text-stone-900 bg-stone-100 border border-stone-200 hover:bg-stone-200'
           }`}
         >
-          <span>⚠️</span> {isDiscreet ? t('craving.discreetSmoked') : t('craving.smoked')}
+          <AlertTriangleIcon className="w-3.5 h-3.5" />
+          <span>{isDiscreet ? t('craving.discreetSmoked') : t('craving.smoked')}</span>
         </button>
       </div>
     </div>

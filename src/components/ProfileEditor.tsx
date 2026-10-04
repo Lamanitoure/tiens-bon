@@ -2,6 +2,10 @@ import { useState } from 'react';
 import { setStoredProfile } from '../db/index.ts';
 import { t } from '../i18n/index.ts';
 import { type Profile, ProfileSchema } from '../schemas/profile.ts';
+import { CheckIcon } from './icons/CheckIcon.tsx';
+import { PenIcon } from './icons/PenIcon.tsx';
+import { TrashIcon } from './icons/TrashIcon.tsx';
+import { XIcon } from './icons/XIcon.tsx';
 
 interface ProfileEditorProps {
   profile: Profile;
@@ -102,15 +106,23 @@ export function ProfileEditor({ profile, onProfileUpdated, onDeleteAll }: Profil
           <button
             type="button"
             onClick={() => setIsOpen((prev) => !prev)}
-            className="btn-secondary !w-auto text-xs py-1.5 px-3 cursor-pointer"
+            className="btn-secondary !w-auto text-xs py-1.5 px-3 cursor-pointer flex items-center gap-1.5"
           >
-            {isOpen ? t('common.cancel') : t('profileEditor.editBtn')}
+            {isOpen ? (
+              <span>{t('common.cancel')}</span>
+            ) : (
+              <>
+                <PenIcon className="w-3.5 h-3.5 shrink-0" />
+                <span>{t('profileEditor.editBtn')}</span>
+              </>
+            )}
           </button>
         </div>
 
         {savedNotice && (
-          <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200 text-xs border border-emerald-200 dark:border-emerald-800">
-            {savedNotice}
+          <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200 text-xs border border-emerald-200 dark:border-emerald-800 flex items-center gap-1.5">
+            <CheckIcon className="w-3.5 h-3.5 shrink-0" />
+            <span>{savedNotice}</span>
           </div>
         )}
 
@@ -251,8 +263,9 @@ export function ProfileEditor({ profile, onProfileUpdated, onDeleteAll }: Profil
             </label>
 
             {validationError && (
-              <div className="p-2 rounded-lg bg-rose-50 dark:bg-rose-950/60 text-rose-800 dark:text-rose-200 text-xs border border-rose-200 dark:border-rose-800">
-                ❌ {validationError}
+              <div className="p-2 rounded-lg bg-rose-50 dark:bg-rose-950/60 text-rose-800 dark:text-rose-200 text-xs border border-rose-200 dark:border-rose-800 flex items-center gap-1.5">
+                <XIcon className="w-3.5 h-3.5 shrink-0" />
+                <span>{validationError}</span>
               </div>
             )}
 
@@ -279,8 +292,9 @@ export function ProfileEditor({ profile, onProfileUpdated, onDeleteAll }: Profil
         </div>
 
         {deleteSuccessMsg && (
-          <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200 text-xs border border-emerald-200 dark:border-emerald-800">
-            {deleteSuccessMsg}
+          <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200 text-xs border border-emerald-200 dark:border-emerald-800 flex items-center gap-1.5">
+            <CheckIcon className="w-3.5 h-3.5 shrink-0" />
+            <span>{deleteSuccessMsg}</span>
           </div>
         )}
 
@@ -288,9 +302,10 @@ export function ProfileEditor({ profile, onProfileUpdated, onDeleteAll }: Profil
           <button
             type="button"
             onClick={() => setConfirmDelete(true)}
-            className="btn-secondary text-xs py-2.5 w-full text-rose-800 dark:text-rose-300 border-rose-200 dark:border-rose-900 cursor-pointer min-h-[42px]"
+            className="btn-secondary text-xs py-2.5 w-full text-rose-800 dark:text-rose-300 border-rose-200 dark:border-rose-900 cursor-pointer min-h-[42px] flex items-center justify-center gap-1.5"
           >
-            {t('deleteAll.deleteBtn')}
+            <TrashIcon className="w-4 h-4 shrink-0" />
+            <span>{t('deleteAll.deleteBtn')}</span>
           </button>
         ) : (
           <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 space-y-2.5">

@@ -8,6 +8,30 @@ import demoProfile from '../demo/profile.demo.json';
 import { AppPinLockCard, AppPinUnlockOverlay } from './components/AppPinLock.tsx';
 import { CravingSession } from './components/CravingSession.tsx';
 import { FutureSelfMessages } from './components/FutureSelfMessages.tsx';
+import {
+  AlertTriangleIcon,
+  BoltIcon,
+  BookIcon,
+  BotIcon,
+  ClockIcon,
+  CoinsIcon,
+  DownloadIcon,
+  FlagFrIcon,
+  FlagGbIcon,
+  HeartHandshakeIcon,
+  LeafIcon,
+  LockIcon,
+  MessageCircleIcon,
+  PenIcon,
+  PhoneIcon,
+  ShieldIcon,
+  SparklesIcon,
+  SunriseIcon,
+  TargetIcon,
+  UploadIcon,
+  UserIcon,
+  XIcon,
+} from './components/icons/index.ts';
 import { JournalView } from './components/JournalView.tsx';
 import { PersonalGallery } from './components/PersonalGallery.tsx';
 import { ProfileEditor } from './components/ProfileEditor.tsx';
@@ -229,7 +253,8 @@ export default function App() {
       <main className="min-h-screen bg-stone-100 flex items-center justify-center p-6 text-stone-900">
         <div className="card max-w-md w-full border-red-200 bg-white p-6 space-y-4 shadow-sm">
           <div className="text-red-700 font-bold text-lg flex items-center gap-2">
-            <span>⚠️</span> {t('common.configError')}
+            <AlertTriangleIcon className="w-5 h-5" />
+            <span>{t('common.configError')}</span>
           </div>
           <p className="text-sm text-stone-600">{t('common.configErrorDesc')}</p>
           <ul className="text-xs bg-red-50 p-3 rounded-lg text-red-800 space-y-1 font-mono">
@@ -471,10 +496,20 @@ export default function App() {
         <button
           type="button"
           onClick={toggleLanguage}
-          className="btn-secondary !w-auto text-xs py-1.5 px-3 rounded-full font-semibold border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100"
+          className="btn-secondary !w-auto text-xs py-1.5 px-3 rounded-full font-semibold border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-800 dark:text-stone-100 flex items-center gap-1.5"
           aria-label="Switch language"
         >
-          {lang === 'fr' ? '🇬🇧 English' : '🇫🇷 Français'}
+          {lang === 'fr' ? (
+            <>
+              <FlagGbIcon className="w-4 h-3" />
+              <span>English</span>
+            </>
+          ) : (
+            <>
+              <FlagFrIcon className="w-4 h-3" />
+              <span>Français</span>
+            </>
+          )}
         </button>
       </header>
 
@@ -489,7 +524,7 @@ export default function App() {
               : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
           }`}
         >
-          <span>⚡</span>
+          <BoltIcon className="w-4 h-4" />
           <span>{t('nav.home')}</span>
         </button>
 
@@ -502,7 +537,7 @@ export default function App() {
               : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
           }`}
         >
-          <span>📖</span>
+          <BookIcon className="w-4 h-4" />
           <span>{lang === 'fr' ? 'Journal & Événements' : 'Journal & Events'}</span>
         </button>
 
@@ -515,7 +550,7 @@ export default function App() {
               : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
           }`}
         >
-          <span>👤</span>
+          <UserIcon className="w-4 h-4" />
           <span>{lang === 'fr' ? 'Profil & Mantras' : 'Profile & Mantras'}</span>
         </button>
       </nav>
@@ -524,7 +559,7 @@ export default function App() {
       <main className="flex-1 py-2 space-y-5">
         {/* Bundled Gemma Demo Banner (Step 20) */}
         <div className="px-3.5 py-2 rounded-xl bg-emerald-50/90 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/80 text-[11px] text-emerald-900 dark:text-emerald-200 flex items-center gap-2 font-medium">
-          <span>✨</span>
+          <SparklesIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
           <span>{t('demo.bundledBanner')}</span>
         </div>
 
@@ -532,7 +567,8 @@ export default function App() {
         {distressDetected && profile && (
           <div className="p-4 bg-rose-50 dark:bg-rose-950/70 border-2 border-rose-300 dark:border-rose-800 rounded-2xl space-y-3 shadow-sm">
             <div className="flex items-center gap-2 text-rose-900 dark:text-rose-200 font-bold text-sm">
-              <span className="text-lg">🤝</span> {t('distress.alert')}
+              <HeartHandshakeIcon className="w-5 h-5" />
+              <span>{t('distress.alert')}</span>
             </div>
             <p className="text-xs text-rose-800 dark:text-rose-300 leading-relaxed">
               {t('distress.message')}
@@ -542,14 +578,20 @@ export default function App() {
                 href={`tel:${profile.helpline.contact}`}
                 className="btn-primary !bg-rose-800 hover:!bg-rose-900 text-xs py-2.5 flex items-center justify-center gap-2"
               >
-                <span>☎️</span> {profile.helpline.label} ({profile.helpline.contact})
+                <PhoneIcon className="w-4 h-4" />
+                <span>
+                  {profile.helpline.label} ({profile.helpline.contact})
+                </span>
               </a>
               {profile.supportPerson && (
                 <a
                   href={`tel:${profile.supportPerson.contact}`}
                   className="btn-secondary text-xs py-2 flex items-center justify-center gap-2 border-rose-200 dark:border-rose-900 text-rose-900 dark:text-rose-200"
                 >
-                  <span>💬</span> {profile.supportPerson.label} ({profile.supportPerson.contact})
+                  <MessageCircleIcon className="w-4 h-4" />
+                  <span>
+                    {profile.supportPerson.label} ({profile.supportPerson.contact})
+                  </span>
                 </a>
               )}
             </div>
@@ -598,7 +640,8 @@ export default function App() {
                 <div className="col-span-2 card p-4 space-y-2 bg-emerald-50/70 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800">
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-bold text-emerald-950 dark:text-emerald-200 flex items-center gap-1.5">
-                      <span>💰</span> {profile.savingsGoal.label}
+                      <CoinsIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                      <span>{profile.savingsGoal.label}</span>
                     </span>
                     <span className="font-semibold text-emerald-900 dark:text-emerald-300">
                       {stats.moneySaved} {profile.currency} / {profile.savingsGoal.amount}{' '}
@@ -634,7 +677,7 @@ export default function App() {
                   onClick={() => setIsCravingActive(true)}
                   className="w-full py-4 px-6 rounded-2xl bg-white text-emerald-950 font-extrabold text-base shadow-md hover:bg-emerald-50 active:scale-[0.98] transition-all cursor-pointer min-h-[52px] flex items-center justify-center gap-2"
                 >
-                  <span className="text-xl">⚡</span>
+                  <BoltIcon className="w-5 h-5" />
                   <span>{t('craving.button')} (3 min)</span>
                 </button>
               </div>
@@ -645,7 +688,8 @@ export default function App() {
               <section className="card space-y-3.5 border-emerald-200 dark:border-emerald-800 bg-emerald-50/40 dark:bg-emerald-950/20 p-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xs font-bold text-emerald-950 dark:text-emerald-200 flex items-center gap-1.5">
-                    <span>🌅</span> {t('pregen.title')}
+                    <SunriseIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                    <span>{t('pregen.title')}</span>
                   </h3>
                   <span className="text-[11px] font-semibold bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
                     {pregenCount} {t('pregen.cacheStatus')}
@@ -687,7 +731,8 @@ export default function App() {
                   disabled={isPregenerating}
                   className="btn-primary text-xs py-3 w-full flex justify-center items-center gap-2 cursor-pointer disabled:opacity-50 min-h-[44px]"
                 >
-                  <span>⚡</span> {t('pregen.button')}
+                  <BoltIcon className="w-4 h-4" />
+                  <span>{t('pregen.button')}</span>
                 </button>
               </section>
             )}
@@ -698,7 +743,8 @@ export default function App() {
             {/* Quick Note & Test Prompt Section */}
             <section className="card space-y-4">
               <h3 className="text-sm font-bold text-stone-900 dark:text-stone-50 flex items-center gap-2">
-                <span>✍️</span> Qu'est-ce qui se passe maintenant ?
+                <PenIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                <span>Qu'est-ce qui se passe maintenant ?</span>
               </h3>
 
               <div className="space-y-1.5">
@@ -725,8 +771,9 @@ export default function App() {
               </button>
 
               {generationError && (
-                <div className="p-3 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 rounded-lg text-xs text-rose-800 dark:text-rose-200">
-                  ❌ {generationError}
+                <div className="p-3 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800 rounded-lg text-xs text-rose-800 dark:text-rose-200 flex items-center gap-1.5">
+                  <XIcon className="w-4 h-4 shrink-0" />
+                  <span>{generationError}</span>
                 </div>
               )}
 
@@ -749,8 +796,9 @@ export default function App() {
                     </p>
                   </div>
                   {wasSafetyFiltered && (
-                    <div className="p-2 bg-stone-100 dark:bg-stone-800 rounded text-[11px] text-stone-600 dark:text-stone-300 italic">
-                      🛡️ {t('safety.filtered')}
+                    <div className="p-2 bg-stone-100 dark:bg-stone-800 rounded text-[11px] text-stone-600 dark:text-stone-300 italic flex items-center gap-1.5">
+                      <ShieldIcon className="w-3.5 h-3.5 shrink-0" />
+                      <span>{t('safety.filtered')}</span>
                     </div>
                   )}
                 </div>
@@ -779,7 +827,8 @@ export default function App() {
             {/* Encrypted Web Crypto Backup Card */}
             <section className="card space-y-3">
               <h4 className="text-xs font-bold text-stone-900 dark:text-stone-50 flex items-center gap-1.5">
-                <span>🔐</span> {t('backup.title')}
+                <LockIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                <span>{t('backup.title')}</span>
               </h4>
               <p className="text-[11px] text-stone-500 dark:text-stone-400 leading-normal">
                 {t('backup.description')}
@@ -797,13 +846,15 @@ export default function App() {
                 <button
                   type="button"
                   onClick={handleExportBackup}
-                  className="btn-secondary text-xs py-2 min-h-[40px]"
+                  className="btn-secondary text-xs py-2 min-h-[40px] flex items-center justify-center gap-1.5"
                 >
-                  📤 {t('backup.exportBtn')}
+                  <UploadIcon className="w-3.5 h-3.5" />
+                  <span>{t('backup.exportBtn')}</span>
                 </button>
 
-                <label className="btn-secondary text-xs py-2 cursor-pointer text-center truncate min-h-[40px] flex items-center justify-center">
-                  📥 {t('backup.importBtn')}
+                <label className="btn-secondary text-xs py-2 cursor-pointer text-center truncate min-h-[40px] flex items-center justify-center gap-1.5">
+                  <DownloadIcon className="w-3.5 h-3.5" />
+                  <span>{t('backup.importBtn')}</span>
                   <input
                     type="file"
                     accept=".json,application/json"
@@ -832,7 +883,7 @@ export default function App() {
           <div className="space-y-4">
             {/* Demo Profile Badge */}
             <div className="card bg-emerald-50/50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800/80 p-3.5 flex items-start gap-3">
-              <span className="text-xl">🌿</span>
+              <LeafIcon className="w-5 h-5 text-emerald-700 dark:text-emerald-400 mt-0.5" />
               <div className="space-y-0.5">
                 <div className="text-xs font-bold text-emerald-950 dark:text-emerald-200">
                   {t('demo.badge')}
@@ -846,7 +897,8 @@ export default function App() {
             {/* Reasons */}
             <div className="card space-y-3">
               <h4 className="text-sm font-bold text-stone-900 dark:text-stone-50 flex items-center gap-2">
-                <span>🎯</span> {t('profile.reasons')}
+                <TargetIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                <span>{t('profile.reasons')}</span>
               </h4>
               <ul className="text-xs text-stone-700 dark:text-stone-200 space-y-2 pl-5 list-disc marker:text-emerald-700 dark:marker:text-emerald-400">
                 {profile.reasons.map((reason) => (
@@ -860,7 +912,8 @@ export default function App() {
             {/* Risk Windows */}
             <div className="card space-y-3">
               <h4 className="text-sm font-bold text-stone-900 dark:text-stone-50 flex items-center gap-2">
-                <span>⏰</span> {t('profile.riskWindows')}
+                <ClockIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                <span>{t('profile.riskWindows')}</span>
               </h4>
               <div className="grid grid-cols-2 gap-2">
                 {profile.riskWindows.map((rw) => (
@@ -883,7 +936,8 @@ export default function App() {
             {plans.length > 0 && (
               <div className="card space-y-3 border-emerald-200/70 dark:border-emerald-800 bg-emerald-50/30 dark:bg-emerald-950/20">
                 <h4 className="text-sm font-bold text-emerald-950 dark:text-emerald-200 flex items-center gap-2">
-                  <span>🛡️</span> {t('profile.myPlans')}
+                  <ShieldIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                  <span>{t('profile.myPlans')}</span>
                 </h4>
                 <div className="space-y-2">
                   {plans.map((p) => (
@@ -912,7 +966,8 @@ export default function App() {
             {/* Phrases in her voice */}
             <div className="card space-y-3">
               <h4 className="text-sm font-bold text-stone-900 dark:text-stone-50 flex items-center gap-2">
-                <span>💬</span> {t('profile.phrases')}
+                <MessageCircleIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                <span>{t('profile.phrases')}</span>
               </h4>
               <div className="space-y-2">
                 {profile.phrases.slice(0, 5).map((phrase) => (
@@ -944,7 +999,8 @@ export default function App() {
             {/* Emergency & Support Contacts */}
             <div className="card space-y-2.5 bg-stone-50 dark:bg-stone-800/60 border-stone-200 dark:border-stone-700">
               <h4 className="text-xs font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">
-                <span>☎️</span> {t('profile.helpline')}
+                <PhoneIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                <span>{t('profile.helpline')}</span>
               </h4>
               <div className="text-sm font-bold text-stone-900 dark:text-stone-100">
                 {profile.helpline.label} :{' '}
@@ -976,7 +1032,8 @@ export default function App() {
               <section className="card space-y-3 border-stone-200 dark:border-stone-700">
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">
-                    <span>🤖</span> {t('model.title')}
+                    <BotIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
+                    <span>{t('model.title')}</span>
                   </h4>
                   <span className="badge-status">Gemma 2:2b</span>
                 </div>

@@ -4,6 +4,7 @@ import { t } from '../i18n/index.ts';
 import { activeConfig } from '../lib/config.ts';
 import type { ImageRecord } from '../schemas/images.ts';
 import { ImageUploader } from './ImageUploader.tsx';
+import { CameraIcon, HeartIcon, ImageIcon, PlusIcon, TrashIcon } from './icons/index.ts';
 
 interface PersonalGalleryProps {
   onImagesUpdated?: (images: ImageRecord[]) => void;
@@ -67,7 +68,7 @@ export function PersonalGallery({ onImagesUpdated }: PersonalGalleryProps) {
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="text-sm font-bold text-stone-900 dark:text-stone-50 flex items-center gap-1.5">
-            <span>🖼️</span>
+            <ImageIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
             <span>{t('gallery.title')}</span>
           </h3>
           <p className="text-[11px] text-stone-500 dark:text-stone-400 font-medium">
@@ -88,7 +89,7 @@ export function PersonalGallery({ onImagesUpdated }: PersonalGalleryProps) {
           disabled={images.length >= maxCount}
           className="btn-primary text-xs py-2.5 w-full cursor-pointer flex items-center justify-center gap-2 min-h-[42px] disabled:opacity-50"
         >
-          <span>➕</span>
+          <PlusIcon className="w-4 h-4" />
           <span>{t('gallery.addPhoto')}</span>
         </button>
       ) : (
@@ -102,7 +103,9 @@ export function PersonalGallery({ onImagesUpdated }: PersonalGalleryProps) {
         </div>
       ) : images.length === 0 ? (
         <div className="text-center py-6 border border-dashed border-stone-200 dark:border-stone-800 rounded-2xl text-xs text-stone-500 dark:text-stone-400 space-y-1">
-          <p className="text-2xl">📷</p>
+          <div className="flex justify-center">
+            <CameraIcon className="w-6 h-6 text-stone-400" />
+          </div>
           <p className="font-semibold">{t('gallery.noImages')}</p>
         </div>
       ) : (
@@ -132,10 +135,11 @@ export function PersonalGallery({ onImagesUpdated }: PersonalGalleryProps) {
                 {/* Loved one indicator */}
                 {img.isLovedOne && (
                   <span
-                    className="absolute top-2 right-2 text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/90 text-white backdrop-blur-xs shadow-xs"
+                    className="absolute top-2 right-2 text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/90 text-white backdrop-blur-xs shadow-xs flex items-center gap-1"
                     title={t('gallery.lovedOneNote')}
                   >
-                    ❤️ Proche
+                    <HeartIcon className="w-3 h-3" />
+                    <span>Proche</span>
                   </span>
                 )}
               </div>
@@ -150,9 +154,10 @@ export function PersonalGallery({ onImagesUpdated }: PersonalGalleryProps) {
                   <button
                     type="button"
                     onClick={() => handleDelete(img.id)}
-                    className="text-[11px] text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 font-semibold cursor-pointer p-1"
+                    className="text-[11px] text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 font-semibold cursor-pointer p-1 flex items-center gap-1"
                   >
-                    🗑️ {t('common.delete')}
+                    <TrashIcon className="w-3.5 h-3.5" />
+                    <span>{t('common.delete')}</span>
                   </button>
                 </div>
               </div>

@@ -7,6 +7,9 @@ import {
   PIN_REGEX,
   verifyPinAgainstSettings,
 } from '../security/pin-lock.ts';
+import { AlertTriangleIcon } from './icons/AlertTriangleIcon.tsx';
+import { CheckIcon } from './icons/CheckIcon.tsx';
+import { LockIcon } from './icons/LockIcon.tsx';
 
 interface AppPinLockCardProps {
   lockSettings: LockSettings | undefined;
@@ -54,7 +57,7 @@ export function AppPinLockCard({
     <section className="card space-y-3 border-stone-200 dark:border-stone-700">
       <div className="space-y-1">
         <h4 className="text-xs font-bold text-stone-900 dark:text-stone-50 flex items-center gap-1.5">
-          <span>🔒</span>
+          <LockIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400 shrink-0" />
           <span>{t('pinLock.title')}</span>
         </h4>
         <p className="text-[11px] text-stone-600 dark:text-stone-300 leading-relaxed">
@@ -64,8 +67,9 @@ export function AppPinLockCard({
 
       <div className="p-2.5 rounded-xl bg-stone-100 dark:bg-stone-800/80 text-[11px] text-stone-600 dark:text-stone-300 leading-relaxed space-y-1">
         <p>{t('pinLock.honestNote')}</p>
-        <p className="font-semibold text-amber-900 dark:text-amber-300">
-          ⚠️ {t('pinLock.warningForgotten')}
+        <p className="font-semibold text-amber-900 dark:text-amber-300 flex items-start gap-1.5">
+          <AlertTriangleIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+          <span>{t('pinLock.warningForgotten')}</span>
         </p>
       </div>
 
@@ -94,9 +98,10 @@ export function AppPinLockCard({
           <button
             type="button"
             onClick={onLockNow}
-            className="btn-primary text-xs py-2.5 px-3 flex-1 cursor-pointer min-h-[40px]"
+            className="btn-primary text-xs py-2.5 px-3 flex-1 cursor-pointer min-h-[40px] flex items-center justify-center gap-1.5"
           >
-            {t('pinLock.lockNowBtn')}
+            <LockIcon className="w-3.5 h-3.5 shrink-0" />
+            <span>{t('pinLock.lockNowBtn')}</span>
           </button>
           <button
             type="button"
@@ -109,8 +114,9 @@ export function AppPinLockCard({
       )}
 
       {statusMsg && (
-        <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200 text-xs border border-emerald-200 dark:border-emerald-800">
-          {statusMsg}
+        <div className="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-900 dark:text-emerald-200 text-xs border border-emerald-200 dark:border-emerald-800 flex items-center gap-1.5">
+          <CheckIcon className="w-3.5 h-3.5 shrink-0" />
+          <span>{statusMsg}</span>
         </div>
       )}
       {errorMsg && (
@@ -153,7 +159,7 @@ export function AppPinUnlockOverlay({
       <div className="card max-w-sm w-full p-6 space-y-4 shadow-md border-stone-200 dark:border-stone-800">
         <div className="text-center space-y-1">
           <div className="w-12 h-12 rounded-2xl bg-emerald-800 text-white flex items-center justify-center font-bold text-lg mx-auto shadow-sm">
-            🔒
+            <LockIcon className="w-6 h-6" />
           </div>
           <h1 className="text-lg font-bold pt-2">{t('pinLock.unlockTitle')}</h1>
           <p className="text-xs text-stone-500 dark:text-stone-400">

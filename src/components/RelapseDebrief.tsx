@@ -6,6 +6,7 @@ import { selectImageForRelapse } from '../lib/image-display.ts';
 import type { ImageRecord } from '../schemas/images.ts';
 import type { Profile } from '../schemas/profile.ts';
 import { getRandomFallback, validateModelOutput } from '../security/safety.ts';
+import { LeafIcon, RocketIcon } from './icons/index.ts';
 
 interface RelapseDebriefProps {
   profile: Profile;
@@ -148,7 +149,7 @@ export function RelapseDebrief({ profile, onFinish }: RelapseDebriefProps) {
       {/* Compassionate Header (Anti-alarm, No guilt) */}
       <div className="space-y-2 border-b border-stone-200 dark:border-stone-800 pb-3">
         <div className="flex items-center gap-2.5">
-          <span className="text-2xl">🌱</span>
+          <LeafIcon className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
           <div>
             <h3 className="text-sm font-bold text-stone-900 dark:text-stone-50">
               {t('relapse.title')}
@@ -310,7 +311,8 @@ export function RelapseDebrief({ profile, onFinish }: RelapseDebriefProps) {
           onClick={handleSaveAndRestart}
           className="btn-primary text-xs py-3 w-full cursor-pointer flex justify-center items-center gap-1.5 min-h-[46px]"
         >
-          <span>🚀</span> {t('relapse.saveAndRestart')}
+          <RocketIcon className="w-4 h-4" />
+          <span>{t('relapse.saveAndRestart')}</span>
         </button>
 
         <button

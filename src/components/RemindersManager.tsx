@@ -4,6 +4,7 @@ import { t } from '../i18n/index.ts';
 import { activeConfig } from '../lib/config.ts';
 import { getScheduledReminders, sendLocalNotification } from '../lib/reminders.ts';
 import type { Profile } from '../schemas/profile.ts';
+import { BellIcon, ClockIcon, EyeOffIcon } from './icons/index.ts';
 
 interface RemindersManagerProps {
   profile: Profile;
@@ -65,7 +66,7 @@ export function RemindersManager({ profile, onProfileUpdated }: RemindersManager
       {/* Header */}
       <div className="space-y-1">
         <h3 className="text-sm font-bold text-stone-900 dark:text-stone-50 flex items-center gap-1.5">
-          <span>⏰</span>
+          <ClockIcon className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
           <span>{t('reminders.title')}</span>
         </h3>
         <p className="text-[11px] text-stone-500 dark:text-stone-400 font-medium">
@@ -80,7 +81,7 @@ export function RemindersManager({ profile, onProfileUpdated }: RemindersManager
             htmlFor={discreetToggleId}
             className="text-xs font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1.5 cursor-pointer"
           >
-            <span>🕶️</span>
+            <EyeOffIcon className="w-4 h-4 text-stone-600 dark:text-stone-400" />
             <span>{t('reminders.discreetModeTitle')}</span>
           </label>
           <input
@@ -103,7 +104,7 @@ export function RemindersManager({ profile, onProfileUpdated }: RemindersManager
           onClick={handleTestNotification}
           className="btn-secondary text-xs py-2.5 w-full cursor-pointer flex items-center justify-center gap-2 min-h-[42px]"
         >
-          <span>🔔</span>
+          <BellIcon className="w-4 h-4" />
           <span>{t('reminders.testBtn')}</span>
         </button>
 
@@ -174,7 +175,7 @@ export function RemindersManager({ profile, onProfileUpdated }: RemindersManager
       <div className="p-4 rounded-2xl bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200/80 dark:border-amber-800/60 space-y-3">
         <div className="space-y-1">
           <h4 className="text-xs font-bold text-amber-950 dark:text-amber-200 flex items-center gap-1.5">
-            <span>🕰️</span>
+            <ClockIcon className="w-4 h-4 text-amber-700 dark:text-amber-400" />
             <span>{t('reminders.planBTitle')}</span>
           </h4>
           <p className="text-[11px] text-amber-900/80 dark:text-amber-300/80 leading-relaxed">
