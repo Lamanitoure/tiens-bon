@@ -16,6 +16,7 @@ export default defineConfig(() => {
         registerType: 'autoUpdate',
         injectRegister: 'auto',
         manifest: {
+          id: '/',
           name: 'Tiens Bon',
           short_name: 'Tiens Bon',
           description: 'Compagnon local et bienveillant pour arrêter de fumer à la maison.',
@@ -45,12 +46,36 @@ export default defineConfig(() => {
               src: '/icon.svg',
               sizes: '192x192 512x512',
               type: 'image/svg+xml',
-              purpose: 'any maskable',
+              purpose: 'any',
+            },
+            {
+              src: '/icon.svg',
+              sizes: '192x192 512x512',
+              type: 'image/svg+xml',
+              purpose: 'maskable',
             },
           ],
         },
+        devOptions: {
+          enabled: true,
+          type: 'module',
+        },
       }),
     ],
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('node_modules/react') || id.includes('node_modules/react-dom')) {
+              return 'vendor-react';
+            }
+            if (id.includes('node_modules/zod')) {
+              return 'vendor-zod';
+            }
+          },
+        },
+      },
+    },
     resolve: {
       alias: {
         '@': path.resolve(import.meta.dirname, '.'),

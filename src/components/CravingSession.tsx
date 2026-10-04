@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from 'react';
+import { lazy, Suspense, useEffect, useId, useState } from 'react';
 import { getAllImages, getAllPlans, getAllSelfTalk } from '../db/index.ts';
 import { t } from '../i18n/index.ts';
 import { activeConfig } from '../lib/config.ts';
@@ -10,7 +10,6 @@ import type { Plan } from '../schemas/plans.ts';
 import type { Profile } from '../schemas/profile.ts';
 import type { SelfTalk } from '../schemas/selftalk.ts';
 import { AudioChallengePlayer } from './AudioChallengePlayer.tsx';
-import { BlockPuzzle1010 } from './BlockPuzzle1010.tsx';
 import { BreathingAnchor } from './BreathingAnchor.tsx';
 import {
   AlertTriangleIcon,
@@ -24,6 +23,10 @@ import {
   ShieldIcon,
 } from './icons/index.ts';
 import { RelapseDebrief } from './RelapseDebrief.tsx';
+
+const BlockPuzzle1010 = lazy(() =>
+  import('./BlockPuzzle1010.tsx').then((m) => ({ default: m.BlockPuzzle1010 })),
+);
 
 interface CravingSessionProps {
   profile: Profile;
@@ -412,7 +415,11 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
           <span>{showPuzzle1010 ? t('game1010.toggleClose') : t('game1010.toggleOpen')}</span>
         </button>
 
-        {showPuzzle1010 && <BlockPuzzle1010 forceDiscreet={isDiscreet} compact />}
+        {showPuzzle1010 && (
+          <Suspense fallback={<div className="p-4 text-center text-xs">{t('common.loading')}</div>}>
+            <BlockPuzzle1010 forceDiscreet={isDiscreet} compact />
+          </Suspense>
+        )}
       </div>
 
       {/* Personal Resource Photo & Caption (Step 13) */}
