@@ -36,17 +36,17 @@ export function createInitialUserProfile(
 
   const defaultReasons = isEn
     ? [
-        'Catch my breath when climbing stairs without stopping',
-        'Enjoy my weekend walks fully without coughing',
-        'Treat myself to a train journey through the Alps with the saved money',
-        'No longer have cold cigarette smell on my clothes',
-      ]
+      'Catch my breath when climbing stairs without stopping',
+      'Enjoy my weekend walks fully without coughing',
+      'Treat myself to a train journey through the Alps with the saved money',
+      'No longer have cold cigarette smell on my clothes',
+    ]
     : [
-        "Retrouver mon souffle pour monter les escaliers sans m'arrêter",
-        'Profiter pleinement de mes balades le week-end sans tousser',
-        "M'offrir un voyage en train dans les Alpes grâce à l'argent économisé",
-        'Ne plus avoir cette odeur de tabac froid sur mes vêtements',
-      ];
+      "Retrouver mon souffle pour monter les escaliers sans m'arrêter",
+      'Profiter pleinement de mes balades le week-end sans tousser',
+      "M'offrir un voyage en train dans les Alpes grâce à l'argent économisé",
+      'Ne plus avoir cette odeur de tabac froid sur mes vêtements',
+    ];
 
   const defaultRiskWindows = [
     { label: isEn ? 'Morning coffee' : 'Café du matin', time: '08:15' },
@@ -57,17 +57,17 @@ export function createInitialUserProfile(
 
   const defaultAlternatives = isEn
     ? [
-        'Drink a warm mint tea',
-        'Take 5 minutes of belly breathing',
-        'Take a 3-minute walk outside hands in pockets',
-        'Listen to a soothing music track with headphones',
-      ]
+      'Drink a warm mint tea',
+      'Take 5 minutes of belly breathing',
+      'Take a 3-minute walk outside hands in pockets',
+      'Listen to a soothing music track with headphones',
+    ]
     : [
-        'Boire une infusion chaude à la menthe',
-        'Faire 5 minutes de respiration ventrale',
-        'Faire un tour dehors de 3 minutes les mains dans les poches',
-        'Écouter un morceau de musique apaisant au casque',
-      ];
+      'Boire une infusion chaude à la menthe',
+      'Faire 5 minutes de respiration ventrale',
+      'Faire un tour dehors de 3 minutes les mains dans les poches',
+      'Écouter un morceau de musique apaisant au casque',
+    ];
 
   const defaultInterests = isEn
     ? ['Mountain hiking', 'Balcony gardening', 'Reading novels', 'Home cooking']
@@ -83,31 +83,31 @@ export function createInitialUserProfile(
 
   const otherPhrases = isEn
     ? [
-        "You haven't come this far to give up now.",
-        'Take a deep breath, it is just smoke in your mind.',
-        'Drink a tall glass of cold water, it will settle you down.',
-        'Look at your goal: the Alps by train!',
-        'You are stronger than this old automatic reflex.',
-        'No big deal, let the wave pass without tensing up.',
-        'Remember how proud you will feel tonight when going to bed.',
-        'Every minute won is a definitive victory.',
-        'Do not let one minute ruin all your efforts today.',
-        'Your body is thanking you, be patient with it.',
-        'Hold on, you are on the right track!',
-      ]
+      "You haven't come this far to give up now.",
+      'Take a deep breath, it is just smoke in your mind.',
+      'Drink a tall glass of cold water, it will settle you down.',
+      'Look at your goal: the Alps by train!',
+      'You are stronger than this old automatic reflex.',
+      'No big deal, let the wave pass without tensing up.',
+      'Remember how proud you will feel tonight when going to bed.',
+      'Every minute won is a definitive victory.',
+      'Do not let one minute ruin all your efforts today.',
+      'Your body is thanking you, be patient with it.',
+      'Hold on, you are on the right track!',
+    ]
     : [
-        "T'as pas fait tout ce chemin pour abandonner maintenant.",
-        "Respire un grand coup, ce n'est que de la fumée dans ta tête.",
-        "Bois un grand verre d'eau fraîche, ça va te poser.",
-        "Regarde l'objectif : les Alpes en train !",
-        'Tu es plus forte que ce vieux réflexe automatique.',
-        'Même pas mal, laisse passer la vague sans te crisper.',
-        'Souviens-toi de la fierté ce soir quand tu te coucheras.',
-        'Chaque minute gagnée est une victoire définitive.',
-        'Ne laisse pas une minute gâcher tes efforts de toute la journée.',
-        "C'est ton corps qui te remercie, sois patiente avec lui.",
-        'Tiens bon, tu es sur la bonne voie !',
-      ];
+      "T'as pas fait tout ce chemin pour abandonner maintenant.",
+      "Respire un grand coup, ce n'est que de la fumée dans ta tête.",
+      "Bois un grand verre d'eau fraîche, ça va te poser.",
+      "Regarde l'objectif : les Alpes en train !",
+      'Tu es plus forte que ce vieux réflexe automatique.',
+      'Même pas mal, laisse passer la vague sans te crisper.',
+      'Souviens-toi de la fierté ce soir quand tu te coucheras.',
+      'Chaque minute gagnée est une victoire définitive.',
+      'Ne laisse pas une minute gâcher tes efforts de toute la journée.',
+      "C'est ton corps qui te remercie, sois patiente avec lui.",
+      'Tiens bon, tu es sur la bonne voie !',
+    ];
 
   const candidate: Profile = {
     userName: trimmedName || undefined,
@@ -120,7 +120,7 @@ export function createInitialUserProfile(
     phrases: [firstPhrase, ...otherPhrases],
     supportPerson: {
       label: isEn ? 'Alex (trusted friend)' : 'Alex (ami de confiance)',
-      contact: '+33 6 00 00 00 00',
+      contact: '+225 00 00 00 00',
     },
     helpline: {
       label: 'Tabac Info Service',

@@ -2,7 +2,7 @@
 
 ## 1. Goal of the Spike (Step 5)
 
-Evaluate how reliably a Progressive Web App (PWA) installed on Android (Chrome) can warn the user **10 minutes before her personal risk windows** (`reminderLeadTimeMinutes` in `config/app.config.json`), while preserving **Discreet Mode** on the lock screen.
+Evaluate how reliably a Progressive Web App (PWA) installed on Android (Chrome) can warn the user **10 minutes before his personal risk windows** (`reminderLeadTimeMinutes` in `config/app.config.json`), while preserving **Discreet Mode** on the lock screen.
 
 ---
 
@@ -21,11 +21,11 @@ Evaluate how reliably a Progressive Web App (PWA) installed on Android (Chrome) 
 
 ## 3. Architectural Decision (5c): Dual-Mode Reminders (Service Worker + Plan B Native Clock Alarms)
 
-To guarantee that the user is **never left without her pre-craving reminder**, we implemented a transparent dual approach in `src/lib/reminders.ts` and `src/components/RemindersManager.tsx`:
+To guarantee that the user is **never left without his pre-craving reminder**, we implemented a transparent dual approach in `src/lib/reminders.ts` and `src/components/RemindersManager.tsx`:
 
 1. **Primary Mode — Service Worker Discreet Notifications**:
    - Computes exact reminder times (`riskWindow.time - reminderLeadTimeMinutes`, e.g., `08:15` minus `10 min` = `08:05`).
-   - Pulls a pre-generated message from IndexedDB (`getUnusedPregenerated('risk_window')`) or builds a personalized message from her own phrases and chosen alternative.
+   - Pulls a pre-generated message from IndexedDB (`getUnusedPregenerated('risk_window')`) or builds a personalized message from his own phrases and chosen alternative.
    - Uses `discreetMode: true` by default so lock-screen notifications show neutral text only.
 
 2. **Plan B — One-Tap Copyable Labels for the Native Phone Clock App**:

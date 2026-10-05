@@ -191,7 +191,7 @@ export function buildRecapPrompt(stats: WeeklyStats, profile: Profile): string {
       : 'moments imprévus';
 
   return (
-    'Given numbers computed by code, write a short recap in her tone starting with what worked.\n' +
+    'Given numbers computed by code, write a short recap in his tone starting with what worked.\n' +
     `Resisted: ${stats.resistedCount}\n` +
     `Money saved: ${stats.savingsToDate} ${stats.currency}\n` +
     `Hardest moments: ${hardest}\n` +

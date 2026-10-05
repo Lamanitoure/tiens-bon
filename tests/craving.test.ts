@@ -44,11 +44,11 @@ describe('The craving screen (Step 10)', () => {
     expect(suggestedAfternoon).toBe('Pause de l’après-midi');
   });
 
-  it('provides quick trigger chips including her risk windows and common triggers', () => {
+  it('provides quick trigger chips including his risk windows and common triggers', () => {
     const chips = getAvailableContextChips(profile);
     expect(chips.length).toBeGreaterThanOrEqual(5);
 
-    // Contains her customized risk window labels
+    // Contains his customized risk window labels
     expect(chips).toContain('Café du matin');
     expect(chips).toContain('Fin du déjeuner');
 

@@ -72,12 +72,12 @@ describe('Step 14: Reminders before risk moments & Discreet mode', () => {
       // Neutral lock screen text
       expect(notif.body).toMatch(/pause|instant/i);
 
-      // But inside-app fullMessage contains her personal encouragement
+      // But inside-app fullMessage contains his personal encouragement
       expect(notif.fullMessage).toBeTruthy();
       expect(notif.alternative).toBeTruthy();
     });
 
-    it('in NON-discreet mode, displays the window name and her alternative directly', () => {
+    it('in NON-discreet mode, displays the window name and his alternative directly', () => {
       const notif = buildReminderNotification(profile, riskWindow, 10, false);
 
       expect(notif.body).toContain('Café du matin');

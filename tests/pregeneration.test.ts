@@ -89,27 +89,27 @@ describe('Pre-generation and offline fallback (Step 9)', () => {
     expect(remainingUnused.length).toBe(initialUnused.length - 1);
   });
 
-  it('builds fallback message using her own phrases and alternatives when offline (Section 8 Step 9)', () => {
+  it('builds fallback message using his own phrases and alternatives when offline (Section 8 Step 9)', () => {
     const fallback = buildPersonalizedFallback(profile, 'craving');
 
     expect(fallback.challenge).toBeTruthy();
     expect(fallback.message).toBeTruthy();
 
-    // The message must be one of her own phrases from her profile
+    // The message must be one of his own phrases from his profile
     expect(profile.phrases).toContain(fallback.message);
 
-    // The challenge must be one of her own alternatives
+    // The challenge must be one of his own alternatives
     expect(profile.alternatives).toContain(fallback.challenge);
   });
 
-  it('returns a personalized message in her voice even with network off and airplane mode (cache empty)', async () => {
+  it('returns a personalized message in his voice even with network off and airplane mode (cache empty)', async () => {
     const result = await getNextPregeneratedMessage('craving', profile);
 
     // Cache was empty, so result is not from cache
     expect(result.fromCache).toBe(false);
     expect(result.isFallback).toBe(true);
 
-    // Result is personalized in her voice
+    // Result is personalized in his voice
     expect(profile.phrases).toContain(result.message);
     expect(profile.alternatives).toContain(result.challenge);
   });

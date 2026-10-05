@@ -1,17 +1,17 @@
 # Tiens Bon
 
-**Tiens Bon** (*French for "hold on"*) is a local-first, open-weight AI companion for one person who wants to quit smoking at home. It prepares messages in her own voice ahead of time, warns her before her risk moments, shows her own photos and words, and never judges her. Anyone can fork it and make it theirs.
+**Tiens Bon** (*French for "hold on"*) is a local-first, open-weight AI companion for one person who wants to quit smoking at home. It prepares messages in his own voice ahead of time, warns his before his risk moments, shows his own photos and words, and never judges his. Anyone can fork it and make it theirs.
 
 ---
 
 ## 1. Core Principles & Product Overview
 
-- **Before the craving (main value)**: A reminder arrives `10 minutes` (`reminderLeadTimeMinutes` in `config/app.config.json`) before each personal risk window, written in her voice and pointing to an alternative she chose. **Discreet mode is ON by default** so lock-screen notifications show neutral text only.
-- **During the craving (instant, <100 ms, 100% offline)**: One tap (in-app button, PWA home-screen shortcut `/?craving=1`, or smartwatch webhook) opens an instant screen with a 3-minute grounding challenge, a message in her voice, one of her personal resource photos, a breathing anchor ring, and optional eyes-closed audio narration. Nothing waits for a model call during a craving.
+- **Before the craving (main value)**: A reminder arrives `10 minutes` (`reminderLeadTimeMinutes` in `config/app.config.json`) before each personal risk window, written in his voice and pointing to an alternative she chose. **Discreet mode is ON by default** so lock-screen notifications show neutral text only.
+- **During the craving (instant, <100 ms, 100% offline)**: One tap (in-app button, PWA home-screen shortcut `/?craving=1`, or smartwatch webhook) opens an instant screen with a 3-minute grounding challenge, a message in his voice, one of his personal resource photos, a breathing anchor ring, and optional eyes-closed audio narration. Nothing waits for a model call during a craving.
 - **After a craving or slip (zero guilt)**:
   - **Evening Check-in (2 min)**: Free-text journal entry where Gemma extracts `trigger`, `emotion`, and `outcome` (`resisted` | `smoked` | `unknown`), validated by Zod and editable before saving.
-  - **No-Reproach Relapse Debrief**: If she taps *"I smoked"*, her best streak and total savings are **never erased**. Loving/deterrent photos are never shown after a relapse (only calm/neutral imagery). She is guided through a gentle *"If... Then..."* implementation intention plan in her own words.
-  - **Weekly Recap & Learned Risk Windows**: Deterministic code computes weekly victories and savings, detects recurring craving hours (`minEventsBeforeLearnedWindow`), and asks her permission before adding a new reminder window.
+  - **No-Reproach Relapse Debrief**: If she taps *"I smoked"*, his best streak and total savings are **never erased**. Loving/deterrent photos are never shown after a relapse (only calm/neutral imagery). She is guided through a gentle *"If... Then..."* implementation intention plan in his own words.
+  - **Weekly Recap & Learned Risk Windows**: Deterministic code computes weekly victories and savings, detects recurring craving hours (`minEventsBeforeLearnedWindow`), and asks his permission before adding a new reminder window.
 - **Sourced Health Facts (`config/facts.json`)**: Hand-written facts from official health authorities (WHO / Santé publique France) with explicit source URLs, displayed strictly as written and never generated or altered by the AI model.
 - **Total Data Control**:
   - All personal data lives in **IndexedDB** on the device, validated on every read and write with `.strict()` **Zod** schemas.
@@ -24,10 +24,10 @@
 ## 2. Where the AI Is (and Is Not)
 
 The open-weight **Gemma** model (`gemma2:2b` via **Ollama**) performs four bounded tasks:
-1. **Prepare**: Pre-generates daily batches of 3-minute challenges and encouraging messages in her voice (`src/lib/pregeneration.ts`).
+1. **Prepare**: Pre-generates daily batches of 3-minute challenges and encouraging messages in his voice (`src/lib/pregeneration.ts`).
 2. **Extract**: Turns free-text evening check-ins into structured `{trigger, emotion, outcome}` drafts (`src/lib/checkin.ts`).
 3. **Rephrase**: Wraps code-computed weekly statistics into a warm 2-sentence note starting with what worked (`src/lib/recap-model.ts`).
-4. **Organize**: Helps structure her personal phrases and context prompts.
+4. **Organize**: Helps structure his personal phrases and context prompts.
 
 **What the model never does**:
 - It **never** computes streaks, counters, money saved, dates, or learned risk windows (all computed deterministically in `src/lib/stats.ts` and `src/lib/recap.ts`).

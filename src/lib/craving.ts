@@ -1,7 +1,7 @@
 import type { Profile } from '../schemas/profile.ts';
 
 /**
- * Suggests the most relevant context based on her personalized risk windows or current time of day.
+ * Suggests the most relevant context based on his personalized risk windows or current time of day.
  * Step 10: context choice (or suggested from the time).
  */
 export function suggestContextFromTime(profile: Profile, now: Date = new Date()): string {
@@ -49,7 +49,7 @@ export function suggestContextFromTime(profile: Profile, now: Date = new Date())
 export function getAvailableContextChips(profile: Profile): string[] {
   const list = new Set<string>();
 
-  // Add her risk windows
+  // Add his risk windows
   if (profile.riskWindows) {
     for (const rw of profile.riskWindows) {
       if (rw.label) list.add(rw.label);

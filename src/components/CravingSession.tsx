@@ -55,21 +55,21 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
   useEffect(() => {
     getAllPlans()
       .then(setUserPlans)
-      .catch(() => {});
+      .catch(() => { });
 
     getAllImages()
       .then((imgs) => {
         const chosen = selectImageForCraving(imgs);
         setActiveImage(chosen);
       })
-      .catch(() => {});
+      .catch(() => { });
 
     getAllSelfTalk()
       .then((talks) => {
         const chosen = selectSelfTalkForCraving(talks);
         setActiveSelfTalk(chosen);
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   // Find if an if-then plan matches current context (Step 11)
@@ -207,11 +207,10 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
   // Active Craving Session View (Step 10)
   return (
     <div
-      className={`card transition-colors duration-300 p-5 space-y-4 shadow-lg ${
-        isDiscreet
+      className={`card transition-colors duration-300 p-5 space-y-4 shadow-lg ${isDiscreet
           ? 'bg-stone-950 text-stone-100 border-stone-800'
           : 'bg-white text-stone-900 border-emerald-300'
-      }`}
+        }`}
     >
       {/* Header: Title, Context Chip, and Discreet Mode Toggle */}
       <div className="flex items-center justify-between pb-2 border-b border-stone-200/20">
@@ -227,11 +226,10 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
         <button
           type="button"
           onClick={() => setIsDiscreet(!isDiscreet)}
-          className={`text-[11px] px-3 py-1.5 rounded-full font-medium transition-all cursor-pointer min-h-[36px] flex items-center gap-1.5 ${
-            isDiscreet
+          className={`text-[11px] px-3 py-1.5 rounded-full font-medium transition-all cursor-pointer min-h-[36px] flex items-center gap-1.5 ${isDiscreet
               ? 'bg-stone-800 text-stone-200 border border-stone-700'
               : 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100'
-          }`}
+            }`}
           aria-label="Toggle discreet mode"
         >
           {isDiscreet ? (
@@ -261,15 +259,14 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
                 key={chip}
                 type="button"
                 onClick={() => setSelectedContext(chip)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-all cursor-pointer shrink-0 min-h-[32px] ${
-                  isSelected
+                className={`px-2.5 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-all cursor-pointer shrink-0 min-h-[32px] ${isSelected
                     ? isDiscreet
                       ? 'bg-stone-200 text-stone-950 font-bold'
                       : 'bg-emerald-800 text-white font-bold'
                     : isDiscreet
                       ? 'bg-stone-900 text-stone-400 border border-stone-800 hover:text-stone-200'
                       : 'bg-stone-100 text-stone-700 border border-stone-200 hover:bg-stone-200'
-                }`}
+                  }`}
               >
                 {chip}
               </button>
@@ -303,9 +300,8 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
               cx="60"
               cy="60"
               r={radius}
-              className={`transition-all duration-1000 ease-linear ${
-                isDiscreet ? 'text-stone-300' : 'text-emerald-700'
-              }`}
+              className={`transition-all duration-1000 ease-linear ${isDiscreet ? 'text-stone-300' : 'text-emerald-700'
+                }`}
               strokeWidth="7"
               strokeDasharray={circumference}
               strokeDashoffset={strokeDashoffset}
@@ -318,9 +314,8 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
           {/* Time Display centered inside ring */}
           <div className="absolute flex flex-col items-center justify-center text-center">
             <span
-              className={`text-3xl font-mono font-bold tracking-wider ${
-                isDiscreet ? 'text-stone-100' : 'text-emerald-950'
-              }`}
+              className={`text-3xl font-mono font-bold tracking-wider ${isDiscreet ? 'text-stone-100' : 'text-emerald-950'
+                }`}
             >
               {formatTime(secondsRemaining)}
             </span>
@@ -348,11 +343,10 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
       {/* Surfaced If-Then Plan for this context (Step 11) */}
       {matchingPlan && (
         <div
-          className={`p-3.5 rounded-xl border space-y-1.5 ${
-            isDiscreet
+          className={`p-3.5 rounded-xl border space-y-1.5 ${isDiscreet
               ? 'bg-stone-900 border-stone-700 text-stone-200'
               : 'bg-emerald-100/70 border-emerald-300 text-emerald-950'
-          }`}
+            }`}
         >
           <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider">
             <span className="flex items-center gap-1.5">
@@ -373,11 +367,10 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
 
       {/* Concrete Challenge Section with Audio Player (Step 17) */}
       <div
-        className={`p-3.5 rounded-xl border space-y-2.5 ${
-          isDiscreet
+        className={`p-3.5 rounded-xl border space-y-2.5 ${isDiscreet
             ? 'bg-stone-900 border-stone-800 text-stone-200'
             : 'bg-emerald-50/70 border-emerald-200 text-emerald-950'
-        }`}
+          }`}
       >
         <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider opacity-75">
           <span>{isDiscreet ? 'Activité recommandée' : 'Défi concret (3 min)'}</span>
@@ -405,11 +398,10 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
         <button
           type="button"
           onClick={() => setShowPuzzle1010(!showPuzzle1010)}
-          className={`w-full py-2.5 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer flex items-center justify-center gap-2 min-h-[40px] ${
-            isDiscreet
+          className={`w-full py-2.5 px-3 rounded-xl text-xs font-semibold border transition-all cursor-pointer flex items-center justify-center gap-2 min-h-[40px] ${isDiscreet
               ? 'bg-stone-900 text-stone-200 border-stone-800 hover:bg-stone-800'
               : 'bg-stone-50 text-emerald-950 border-emerald-200 hover:bg-emerald-50'
-          }`}
+            }`}
         >
           <GamepadIcon className="w-4 h-4" />
           <span>{showPuzzle1010 ? t('game1010.toggleClose') : t('game1010.toggleOpen')}</span>
@@ -452,7 +444,7 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
         </div>
       )}
 
-      {/* Her Own Voice Phrase */}
+      {/* His Own Voice Phrase */}
       {activePhrase && !isDiscreet && (
         <blockquote className="text-xs italic text-stone-600 border-l-2 border-emerald-700 pl-3 py-1">
           « {activePhrase} »
@@ -464,11 +456,10 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
         <button
           type="button"
           onClick={handleResisted}
-          className={`w-full py-4 px-4 rounded-xl font-bold text-sm shadow-md transition-all cursor-pointer min-h-[48px] flex items-center justify-center gap-2 ${
-            isDiscreet
+          className={`w-full py-4 px-4 rounded-xl font-bold text-sm shadow-md transition-all cursor-pointer min-h-[48px] flex items-center justify-center gap-2 ${isDiscreet
               ? 'bg-stone-200 text-stone-900 hover:bg-white active:scale-[0.98]'
               : 'bg-emerald-800 text-white hover:bg-emerald-900 active:scale-[0.98]'
-          }`}
+            }`}
         >
           <CheckIcon className="w-4 h-4" />
           <span>{isDiscreet ? t('craving.discreetHeld') : t('craving.resisted')}</span>
@@ -477,11 +468,10 @@ export function CravingSession({ profile, onClose, onLogged }: CravingSessionPro
         <button
           type="button"
           onClick={handleRelapse}
-          className={`w-full py-3 px-4 rounded-xl text-xs font-medium transition-all cursor-pointer min-h-[44px] flex items-center justify-center gap-1.5 ${
-            isDiscreet
+          className={`w-full py-3 px-4 rounded-xl text-xs font-medium transition-all cursor-pointer min-h-[44px] flex items-center justify-center gap-1.5 ${isDiscreet
               ? 'text-stone-400 hover:text-stone-200 bg-stone-900 border border-stone-800'
               : 'text-stone-600 hover:text-stone-900 bg-stone-100 border border-stone-200 hover:bg-stone-200'
-          }`}
+            }`}
         >
           <AlertTriangleIcon className="w-3.5 h-3.5" />
           <span>{isDiscreet ? t('craving.discreetSmoked') : t('craving.smoked')}</span>

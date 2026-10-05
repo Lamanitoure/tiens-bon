@@ -250,7 +250,7 @@ export default function App() {
                 setPregenCount(batch.length);
               }
             })
-            .catch(() => {});
+            .catch(() => { });
         }
       } catch (_err) {
         if (isDemo) {
@@ -397,7 +397,7 @@ export default function App() {
         const reg = await navigator.serviceWorker.getRegistration();
         const sub = await reg?.pushManager?.getSubscription();
         if (sub) {
-          await sub.unsubscribe().catch(() => {});
+          await sub.unsubscribe().catch(() => { });
         }
       }
       const token = getStoredToken();
@@ -405,7 +405,7 @@ export default function App() {
         await fetch('/api/data/clear', {
           method: 'POST',
           headers: { Authorization: `Bearer ${token}` },
-        }).catch(() => {});
+        }).catch(() => { });
       }
     } catch {
       // ignore
@@ -514,7 +514,7 @@ export default function App() {
     setWasSafetyFiltered(false);
 
     const personName = profile?.userName || (isDemo ? 'Camille' : 'the user');
-    const testPrompt = `You help ${personName} resist an urge. Context: ${userInputNote || 'after coffee'}. Write a 3-minute concrete challenge and a warm 2-sentence message in her voice. Return JSON: {"challenge": "...", "message": "..."}`;
+    const testPrompt = `You help ${personName} resist an urge. Context: ${userInputNote || 'after coffee'}. Write a 3-minute concrete challenge and a warm 2-sentence message in his voice. Return JSON: {"challenge": "...", "message": "..."}`;
 
     try {
       const output = await generateMotivation(testPrompt);
@@ -614,12 +614,12 @@ export default function App() {
       setProfile(decrypted.profile);
       if (decrypted.images && decrypted.images.length > 0) {
         for (const img of decrypted.images) {
-          await addImage(img).catch(() => {});
+          await addImage(img).catch(() => { });
         }
       }
       if (decrypted.selftalk && decrypted.selftalk.length > 0) {
         for (const st of decrypted.selftalk) {
-          await addSelfTalk(st).catch(() => {});
+          await addSelfTalk(st).catch(() => { });
         }
       }
       await refreshEventsAndStats(decrypted.profile);
@@ -682,11 +682,10 @@ export default function App() {
         <button
           type="button"
           onClick={() => setActiveTab('home')}
-          className={`py-2 px-1 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer min-h-[48px] ${
-            activeTab === 'home'
+          className={`py-2 px-1 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer min-h-[48px] ${activeTab === 'home'
               ? 'bg-white dark:bg-stone-900 text-emerald-800 dark:text-emerald-400 shadow-xs'
               : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
-          }`}
+            }`}
         >
           <BoltIcon className="w-4 h-4 shrink-0" />
           <span className="leading-none">{t('nav.home')}</span>
@@ -695,11 +694,10 @@ export default function App() {
         <button
           type="button"
           onClick={() => setActiveTab('journal')}
-          className={`py-2 px-1 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer min-h-[48px] ${
-            activeTab === 'journal'
+          className={`py-2 px-1 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer min-h-[48px] ${activeTab === 'journal'
               ? 'bg-white dark:bg-stone-900 text-emerald-800 dark:text-emerald-400 shadow-xs'
               : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
-          }`}
+            }`}
         >
           <BookIcon className="w-4 h-4 shrink-0" />
           <span className="leading-none">{t('nav.journal')}</span>
@@ -708,11 +706,10 @@ export default function App() {
         <button
           type="button"
           onClick={() => setActiveTab('game')}
-          className={`py-2 px-1 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer min-h-[48px] ${
-            activeTab === 'game'
+          className={`py-2 px-1 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer min-h-[48px] ${activeTab === 'game'
               ? 'bg-white dark:bg-stone-900 text-emerald-800 dark:text-emerald-400 shadow-xs'
               : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
-          }`}
+            }`}
         >
           <GamepadIcon className="w-4 h-4 shrink-0" />
           <span className="leading-none">{t('nav.game')}</span>
@@ -721,11 +718,10 @@ export default function App() {
         <button
           type="button"
           onClick={() => setActiveTab('profile')}
-          className={`py-2 px-1 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer min-h-[48px] ${
-            activeTab === 'profile'
+          className={`py-2 px-1 rounded-xl text-[11px] font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer min-h-[48px] ${activeTab === 'profile'
               ? 'bg-white dark:bg-stone-900 text-emerald-800 dark:text-emerald-400 shadow-xs'
               : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
-          }`}
+            }`}
         >
           <UserIcon className="w-4 h-4 shrink-0" />
           <span className="leading-none">{t('nav.profile')}</span>
@@ -917,11 +913,10 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setHomeDrawer(homeDrawer === 'pregen' ? 'none' : 'pregen')}
-                className={`py-2.5 px-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer flex items-center justify-center gap-1.5 min-h-[42px] whitespace-nowrap ${
-                  homeDrawer === 'pregen' || isPregenerating
+                className={`py-2.5 px-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer flex items-center justify-center gap-1.5 min-h-[42px] whitespace-nowrap ${homeDrawer === 'pregen' || isPregenerating
                     ? 'bg-emerald-800 text-white border-emerald-800 shadow-xs'
                     : 'bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-200 border-stone-200 dark:border-stone-800 hover:border-emerald-400'
-                }`}
+                  }`}
               >
                 <SunriseIcon className="w-4 h-4 shrink-0" />
                 <span>
@@ -932,11 +927,10 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setHomeDrawer(homeDrawer === 'note' ? 'none' : 'note')}
-                className={`py-2.5 px-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer flex items-center justify-center gap-1.5 min-h-[42px] whitespace-nowrap ${
-                  homeDrawer === 'note' || userInputNote
+                className={`py-2.5 px-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer flex items-center justify-center gap-1.5 min-h-[42px] whitespace-nowrap ${homeDrawer === 'note' || userInputNote
                     ? 'bg-emerald-800 text-white border-emerald-800 shadow-xs'
                     : 'bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-200 border-stone-200 dark:border-stone-800 hover:border-emerald-400'
-                }`}
+                  }`}
               >
                 <PenIcon className="w-4 h-4 shrink-0" />
                 <span>{lang === 'fr' ? 'Mon ressenti' : 'How I feel'}</span>
@@ -1084,33 +1078,30 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setJournalSubTab('entries')}
-                  className={`flex-1 py-2 px-2.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap truncate min-h-[38px] ${
-                    journalSubTab === 'entries'
+                  className={`flex-1 py-2 px-2.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap truncate min-h-[38px] ${journalSubTab === 'entries'
                       ? 'bg-white dark:bg-stone-900 text-emerald-800 dark:text-emerald-400 shadow-2xs'
                       : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
-                  }`}
+                    }`}
                 >
                   {lang === 'fr' ? 'Carnet & Bilan' : 'Journal & Check-in'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setJournalSubTab('recap')}
-                  className={`flex-1 py-2 px-2.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap truncate min-h-[38px] ${
-                    journalSubTab === 'recap'
+                  className={`flex-1 py-2 px-2.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap truncate min-h-[38px] ${journalSubTab === 'recap'
                       ? 'bg-white dark:bg-stone-900 text-emerald-800 dark:text-emerald-400 shadow-2xs'
                       : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
-                  }`}
+                    }`}
                 >
                   {lang === 'fr' ? 'Semaine' : 'Weekly Recap'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setJournalSubTab('backup')}
-                  className={`flex-1 py-2 px-2.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap truncate min-h-[38px] ${
-                    journalSubTab === 'backup'
+                  className={`flex-1 py-2 px-2.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap truncate min-h-[38px] ${journalSubTab === 'backup'
                       ? 'bg-white dark:bg-stone-900 text-emerald-800 dark:text-emerald-400 shadow-2xs'
                       : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
-                  }`}
+                    }`}
                 >
                   {lang === 'fr' ? 'Sauvegarde' : 'Backup'}
                 </button>
@@ -1236,44 +1227,40 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setProfileSubTab('mantras')}
-                  className={`py-2 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap truncate min-h-[38px] ${
-                    profileSubTab === 'mantras'
+                  className={`py-2 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap truncate min-h-[38px] ${profileSubTab === 'mantras'
                       ? 'bg-white dark:bg-stone-900 text-emerald-800 dark:text-emerald-400 shadow-2xs'
                       : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
-                  }`}
+                    }`}
                 >
                   {lang === 'fr' ? 'Ma Voix & Plans' : 'My Voice & Plans'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setProfileSubTab('photos')}
-                  className={`py-2 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap truncate min-h-[38px] ${
-                    profileSubTab === 'photos'
+                  className={`py-2 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap truncate min-h-[38px] ${profileSubTab === 'photos'
                       ? 'bg-white dark:bg-stone-900 text-emerald-800 dark:text-emerald-400 shadow-2xs'
                       : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
-                  }`}
+                    }`}
                 >
                   {lang === 'fr' ? 'Photos' : 'Photos'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setProfileSubTab('reminders')}
-                  className={`py-2 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap truncate min-h-[38px] ${
-                    profileSubTab === 'reminders'
+                  className={`py-2 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap truncate min-h-[38px] ${profileSubTab === 'reminders'
                       ? 'bg-white dark:bg-stone-900 text-emerald-800 dark:text-emerald-400 shadow-2xs'
                       : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
-                  }`}
+                    }`}
                 >
                   {lang === 'fr' ? 'Rappels & Montre' : 'Reminders & Watch'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setProfileSubTab('settings')}
-                  className={`py-2 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap truncate min-h-[38px] ${
-                    profileSubTab === 'settings'
+                  className={`py-2 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap truncate min-h-[38px] ${profileSubTab === 'settings'
                       ? 'bg-white dark:bg-stone-900 text-emerald-800 dark:text-emerald-400 shadow-2xs'
                       : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
-                  }`}
+                    }`}
                 >
                   {lang === 'fr' ? 'Réglages & PIN' : 'Settings & PIN'}
                 </button>

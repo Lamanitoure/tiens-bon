@@ -20,7 +20,7 @@ export interface BatchItemPlan {
 }
 
 /**
- * Builds personalized fallback messages directly from her own phrases and alternatives (Step 9).
+ * Builds personalized fallback messages directly from his own phrases and alternatives (Step 9).
  * Used when the model/PC is unreachable (e.g. offline, airplane mode).
  */
 export function buildPersonalizedFallback(
@@ -30,7 +30,7 @@ export function buildPersonalizedFallback(
   const lang = profile.language || 'fr';
   const defaultFallback = getRandomFallback(lang);
 
-  // 1. Pick a phrase in her own voice
+  // 1. Pick a phrase in his own voice
   let phrase = defaultFallback.message;
   if (profile.phrases && profile.phrases.length > 0) {
     const randomPhrase = profile.phrases[Math.floor(Math.random() * profile.phrases.length)];
@@ -39,7 +39,7 @@ export function buildPersonalizedFallback(
     }
   }
 
-  // 2. Pick one of her preferred concrete alternatives
+  // 2. Pick one of his preferred concrete alternatives
   let challenge = defaultFallback.challenge;
   if (profile.alternatives && profile.alternatives.length > 0) {
     const randomAlt = profile.alternatives[Math.floor(Math.random() * profile.alternatives.length)];
@@ -103,7 +103,7 @@ export function buildBatchPlans(profile: Profile): BatchItemPlan[] {
   plans.push({
     category: 'morning',
     context: 'morning',
-    prompt: `You are helping ${personName} wake up and start her smoke-free day with calm confidence. Her core reasons: ${reasons}. Tone: ${tone}. Write in ${lang}. Return JSON: {"challenge": "...", "message": "..."}`,
+    prompt: `You are helping ${personName} wake up and start his smoke-free day with calm confidence. His core reasons: ${reasons}. Tone: ${tone}. Write in ${lang}. Return JSON: {"challenge": "...", "message": "..."}`,
     fallbackChallenge: defaultMorningChallenge,
     fallbackMessage:
       profile.phrases.length > 0
@@ -118,7 +118,7 @@ export function buildBatchPlans(profile: Profile): BatchItemPlan[] {
     plans.push({
       category: 'risk_window',
       context: `risk_window:${rw.time}_${rw.label}`,
-      prompt: `${personName} approaches her usual risk window: ${rw.time} (${rw.label}). Suggest an alternative activity like: ${alts.join(', ')}. Tone: ${tone}. Write in ${lang}. Return JSON: {"challenge": "...", "message": "..."}`,
+      prompt: `${personName} approaches his usual risk window: ${rw.time} (${rw.label}). Suggest an alternative activity like: ${alts.join(', ')}. Tone: ${tone}. Write in ${lang}. Return JSON: {"challenge": "...", "message": "..."}`,
       fallbackChallenge: `${randomAlt} (${rw.label})`,
       fallbackMessage:
         lang === 'fr'
@@ -213,7 +213,7 @@ export async function generateDailyBatch(
         message = validated.sanitized.message;
       }
     } catch (_err) {
-      // Offline fallback: Use the personalized fallback in her voice
+      // Offline fallback: Use the personalized fallback in his voice
     }
 
     const pregenMsg: PregeneratedMessage = {
@@ -266,7 +266,7 @@ export async function refillQuietlyIfNeeded(profile: Profile): Promise<boolean> 
           .then(() => {
             localStorage.setItem('tb_last_batch_ts', Date.now().toString());
           })
-          .catch(() => {})
+          .catch(() => { })
           .finally(() => {
             isQuietRefilling = false;
           });
@@ -281,7 +281,7 @@ export async function refillQuietlyIfNeeded(profile: Profile): Promise<boolean> 
 
 /**
  * Serves the next pregenerated message from local storage with zero latency.
- * If offline or cache is exhausted, builds a personalized fallback in her voice.
+ * If offline or cache is exhausted, builds a personalized fallback in his voice.
  */
 export async function getNextPregeneratedMessage(
   category: 'morning' | 'risk_window' | 'craving' | 'evening',
@@ -306,13 +306,13 @@ export async function getNextPregeneratedMessage(
 
       // Check for quiet refill in background if profile is known
       if (profile) {
-        refillQuietlyIfNeeded(profile).catch(() => {});
+        refillQuietlyIfNeeded(profile).catch(() => { });
       } else {
         getStoredProfile()
           .then((stored) => {
-            if (stored) refillQuietlyIfNeeded(stored).catch(() => {});
+            if (stored) refillQuietlyIfNeeded(stored).catch(() => { });
           })
-          .catch(() => {});
+          .catch(() => { });
       }
 
       return {

@@ -65,7 +65,7 @@ export function filterAllowedCaptionsForPrompt(
 }
 
 /**
- * Selects a message to her future self (written in calm moments) to replay during cravings.
+ * Selects a message to his future self (written in calm moments) to replay during cravings.
  */
 export function selectSelfTalkForCraving(selfTalkList: SelfTalk[]): SelfTalk | null {
   if (!selfTalkList || selfTalkList.length === 0) return null;

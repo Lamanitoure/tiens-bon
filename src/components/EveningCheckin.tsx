@@ -183,7 +183,7 @@ export function EveningCheckin({ profile, onSaved, onCancel }: EveningCheckinPro
     );
   }
 
-  // 3. Review & Edit Screen after AI extraction (Step 15: show result and let her correct it)
+  // 3. Review & Edit Screen after AI extraction (Step 15: show result and let his correct it)
   if (hasExtracted) {
     return (
       <div className="card space-y-4 p-5 bg-white dark:bg-stone-900 border-stone-200 dark:border-stone-800 animate-fade-in text-xs">
@@ -206,33 +206,30 @@ export function EveningCheckin({ profile, onSaved, onCancel }: EveningCheckinPro
             <button
               type="button"
               onClick={() => setEditableOutcome('resisted')}
-              className={`p-2 rounded-xl text-center font-bold transition-all cursor-pointer border min-h-[38px] ${
-                editableOutcome === 'resisted'
+              className={`p-2 rounded-xl text-center font-bold transition-all cursor-pointer border min-h-[38px] ${editableOutcome === 'resisted'
                   ? 'bg-emerald-800 text-white border-emerald-800 shadow-xs'
                   : 'bg-stone-50 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-700'
-              }`}
+                }`}
             >
               {t('checkin.outcomeResisted')}
             </button>
             <button
               type="button"
               onClick={() => setEditableOutcome('smoked')}
-              className={`p-2 rounded-xl text-center font-bold transition-all cursor-pointer border min-h-[38px] ${
-                editableOutcome === 'smoked'
+              className={`p-2 rounded-xl text-center font-bold transition-all cursor-pointer border min-h-[38px] ${editableOutcome === 'smoked'
                   ? 'bg-stone-800 text-white border-stone-800 shadow-xs'
                   : 'bg-stone-50 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-700'
-              }`}
+                }`}
             >
               {t('checkin.outcomeSmoked')}
             </button>
             <button
               type="button"
               onClick={() => setEditableOutcome('unknown')}
-              className={`p-2 rounded-xl text-center font-bold transition-all cursor-pointer border min-h-[38px] ${
-                editableOutcome === 'unknown'
+              className={`p-2 rounded-xl text-center font-bold transition-all cursor-pointer border min-h-[38px] ${editableOutcome === 'unknown'
                   ? 'bg-amber-700 text-white border-amber-700 shadow-xs'
                   : 'bg-stone-50 dark:bg-stone-800 text-stone-700 dark:text-stone-300 border-stone-200 dark:border-stone-700'
-              }`}
+                }`}
             >
               {t('checkin.outcomeUnknown')}
             </button>

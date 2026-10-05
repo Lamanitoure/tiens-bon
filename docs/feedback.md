@@ -33,6 +33,6 @@ We installed **Tiens Bon** as a standalone PWA on Android, pre-generated a daily
 1. **Stricter Prompt & Safety Filtering Against Future Predictions**:
    - Updated `config/safety.defaults.json` and `config/prompts/craving.txt` to block predictive promises (`"tu vas"`, `"you will"`, `"promis"`, `"guaranteed"`) and anchor every message strictly in the present 3-minute window.
 2. **Eyes-Closed Audio Narration (`AudioChallengePlayer.tsx`)**:
-   - During a stressful craving, staring at a screen for 3 minutes felt tiring. We added local Web Speech API narration with a calm `0.8x` speed toggle so she can close her eyes and listen to her challenge.
+   - During a stressful craving, staring at a screen for 3 minutes felt tiring. We added local Web Speech API narration with a calm `0.8x` speed toggle so she can close his eyes and listen to his challenge.
 3. **One-Tap Discreet Mode Inside the Craving Screen**:
    - Added an in-session discreet toggle inside `CravingSession.tsx` so even if someone walks by while the 3-minute timer is running, the screen looks like a generic breathing pause.

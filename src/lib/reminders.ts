@@ -39,7 +39,7 @@ export function calculateReminderTime(riskTime: string, leadTimeMinutes = 10): s
 
 /**
  * Builds reminder notification payload respecting Discreet Mode (Section 5 Item 19 & Step 14).
- * INVARIANT: In discreet mode, lock-screen text is neutral so that anyone seeing her
+ * INVARIANT: In discreet mode, lock-screen text is neutral so that anyone seeing his
  * screen learns nothing about cravings or smoking. The full message appears inside the app.
  */
 export function buildReminderNotification(
@@ -64,7 +64,7 @@ export function buildReminderNotification(
         ? 'Drink a glass of cold water and breathe'
         : "Boire un grand verre d'eau fraîche et respirer";
 
-  // Full message in her voice for display inside the app
+  // Full message in his voice for display inside the app
   let fullMessage: string;
   if (pregenMsg?.message) {
     fullMessage = pregenMsg.message;
@@ -85,7 +85,7 @@ export function buildReminderNotification(
     };
   }
 
-  // Non-discreet mode: personalized notification mentioning the window and alternative in her voice
+  // Non-discreet mode: personalized notification mentioning the window and alternative in his voice
   const bodyText = isEn
     ? `In ${leadTimeMinutes} min (${window.label}): remember your alternative: ${alt}.`
     : `Dans ${leadTimeMinutes} min (${window.label}) : pense à ton alternative : ${alt}.`;
@@ -99,7 +99,7 @@ export function buildReminderNotification(
 }
 
 /**
- * Computes all scheduled reminders from her profile's risk windows.
+ * Computes all scheduled reminders from his profile's risk windows.
  */
 export function getScheduledReminders(
   profile: Profile,
