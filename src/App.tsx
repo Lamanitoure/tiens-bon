@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { type ChangeEvent, lazy, Suspense, useCallback, useEffect, useState } from 'react';
+import { type ChangeEvent, lazy, Suspense, useCallback, useEffect, useId, useState } from 'react';
 import { AppPinLockCard, AppPinUnlockOverlay } from './components/AppPinLock.tsx';
 import { CravingSession } from './components/CravingSession.tsx';
 import { ExpandableText } from './components/ExpandableText.tsx';
@@ -75,7 +75,14 @@ import {
   setStoredProfile,
 } from './db/index.ts';
 import { getLanguage, initLanguage, setLanguage, subscribeLanguage, t } from './i18n/index.ts';
-import { checkModelStatus, generateMotivation, getStoredToken, setStoredToken } from './lib/api.ts';
+import {
+  checkModelStatus,
+  generateMotivation,
+  getStoredOllamaUrl,
+  getStoredToken,
+  setStoredOllamaUrl,
+  setStoredToken,
+} from './lib/api.ts';
 import { activeConfig } from './lib/config.ts';
 import { ensureDemoPregeneratedSeeded, isStaticDemoMode } from './lib/demo-mode.ts';
 import { generateDailyBatch, shouldTriggerAutomaticBatch } from './lib/pregeneration.ts';
@@ -120,7 +127,12 @@ export default function App() {
   const [activeReminderBanner, setActiveReminderBanner] = useState<ScheduledReminder | null>(null);
 
   // Model connection & testing state
+  const ollamaUrlInputId = useId();
+  const tokenInputId = useId();
   const [tokenInput, setTokenInput] = useState(getStoredToken());
+  const [ollamaUrlInput, setOllamaUrlInput] = useState(
+    getStoredOllamaUrl() || 'http://127.0.0.1:11434',
+  );
   const [modelStatus, setModelStatus] = useState<string | null>(null);
   const [isCheckingStatus, setIsCheckingStatus] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -322,6 +334,18 @@ export default function App() {
     return () => clearInterval(timer);
   }, [profile]);
 
+  // Real-time ticker so streak minutes and hours advance without manual page reload
+  useEffect(() => {
+    if (!profile) return;
+    const ticker = setInterval(() => {
+      setStats((prev) => {
+        if (!prev) return prev;
+        return computeUserStats(profile, events);
+      });
+    }, 30000);
+    return () => clearInterval(ticker);
+  }, [profile, events]);
+
   const handlePrepareDay = async () => {
     if (!profile || isPregenerating) return;
     setIsPregenerating(true);
@@ -448,7 +472,9 @@ export default function App() {
 
   const handleSaveToken = () => {
     setStoredToken(tokenInput);
-    setModelStatus(null);
+    setStoredOllamaUrl(ollamaUrlInput);
+    setModelStatus('✓ Paramètres enregistrés');
+    setTimeout(() => setModelStatus(null), 2500);
   };
 
   const handleCheckModelStatus = async () => {
@@ -809,9 +835,13 @@ export default function App() {
                       <span>
                         {stats.streakDays} {t('counters.days')}
                       </span>
-                    ) : (
+                    ) : stats.streakHours > 0 ? (
                       <span>
                         {stats.streakHours} {t('counters.hours')}
+                      </span>
+                    ) : (
+                      <span>
+                        {stats.streakMinutes > 0 ? `${stats.streakMinutes} min` : '< 1 min'}
                       </span>
                     )}
                   </div>
@@ -1428,21 +1458,49 @@ export default function App() {
                         </span>
                       </div>
 
-                      <div className="flex gap-2">
-                        <input
-                          type="password"
-                          value={tokenInput}
-                          onChange={(e) => setTokenInput(e.target.value)}
-                          placeholder={t('model.tokenPlaceholder')}
-                          className="flex-1 px-3 py-2 text-xs rounded-lg border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-900"
-                        />
-                        <button
-                          type="button"
-                          onClick={handleSaveToken}
-                          className="btn-secondary !w-auto text-xs py-2 px-3 shrink-0 min-h-[38px]"
-                        >
-                          {t('model.saveToken')}
-                        </button>
+                      <div className="space-y-2">
+                        <div className="space-y-1">
+                          <label
+                            htmlFor={ollamaUrlInputId}
+                            className="text-[11px] font-semibold text-stone-600 dark:text-stone-400 block"
+                          >
+                            URL Ollama locale
+                          </label>
+                          <input
+                            id={ollamaUrlInputId}
+                            type="text"
+                            value={ollamaUrlInput}
+                            onChange={(e) => setOllamaUrlInput(e.target.value)}
+                            placeholder="http://127.0.0.1:11434"
+                            className="w-full px-3 py-2 text-xs rounded-lg border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-900 font-mono"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label
+                            htmlFor={tokenInputId}
+                            className="text-[11px] font-semibold text-stone-600 dark:text-stone-400 block"
+                          >
+                            Jeton d'accès (ACCESS_TOKEN)
+                          </label>
+                          <div className="flex gap-2">
+                            <input
+                              id={tokenInputId}
+                              type="password"
+                              value={tokenInput}
+                              onChange={(e) => setTokenInput(e.target.value)}
+                              placeholder={t('model.tokenPlaceholder')}
+                              className="flex-1 px-3 py-2 text-xs rounded-lg border border-stone-300 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-900 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-900"
+                            />
+                            <button
+                              type="button"
+                              onClick={handleSaveToken}
+                              className="btn-secondary !w-auto text-xs py-2 px-3 shrink-0 min-h-[38px]"
+                            >
+                              {t('model.saveToken')}
+                            </button>
+                          </div>
+                        </div>
                       </div>
 
                       <button

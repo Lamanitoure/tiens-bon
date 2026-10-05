@@ -6,6 +6,7 @@ export interface UserStats {
   relapseCount: number;
   streakDays: number;
   streakHours: number;
+  streakMinutes: number;
   bestStreakDays: number;
   avoidedCigarettes: number;
   moneySaved: number;
@@ -23,6 +24,7 @@ export function computeUserStats(
       relapseCount: 0,
       streakDays: 0,
       streakHours: 0,
+      streakMinutes: 0,
       bestStreakDays: 0,
       avoidedCigarettes: 0,
       moneySaved: 0,
@@ -41,6 +43,13 @@ export function computeUserStats(
     } else if (ev.type === 'relapse') {
       relapseCount++;
       lastRelapseTs = ev.ts;
+    } else if (ev.type === 'checkin') {
+      if (ev.debrief?.outcome === 'resisted') {
+        resistedCount++;
+      } else if (ev.debrief?.outcome === 'smoked') {
+        relapseCount++;
+        lastRelapseTs = ev.ts;
+      }
     }
   }
 
@@ -48,15 +57,19 @@ export function computeUserStats(
   const streakStartTs = lastRelapseTs ? Math.max(lastRelapseTs, quitDateTs) : quitDateTs;
   const streakMs = Math.max(0, nowTs - streakStartTs);
 
-  const streakHours = Math.floor(streakMs / (1000 * 60 * 60));
+  const totalMinutes = Math.floor(streakMs / (1000 * 60));
+  const streakHours = Math.floor(totalMinutes / 60);
   const streakDays = Math.floor(streakHours / 24);
+  const streakMinutes = totalMinutes % 60;
 
   // Best streak calculation
   let bestStreakMs = streakMs;
   let currentRunStart = quitDateTs;
 
   for (const ev of sortedEvents) {
-    if (ev.type === 'relapse') {
+    const isSlip =
+      ev.type === 'relapse' || (ev.type === 'checkin' && ev.debrief?.outcome === 'smoked');
+    if (isSlip) {
       const runDuration = Math.max(0, ev.ts - currentRunStart);
       if (runDuration > bestStreakMs) {
         bestStreakMs = runDuration;
@@ -88,6 +101,7 @@ export function computeUserStats(
     relapseCount,
     streakDays,
     streakHours,
+    streakMinutes,
     bestStreakDays,
     avoidedCigarettes,
     moneySaved,

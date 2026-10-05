@@ -1,5 +1,5 @@
 import { type CheckinExtraction, CheckinExtractionSchema } from '../schemas/model.ts';
-import { getStoredToken } from './api.ts';
+import { getStoredOllamaUrl, getStoredToken } from './api.ts';
 
 /**
  * Builds prompt for Gemma model extraction (Section 11 & Step 15).
@@ -18,48 +18,89 @@ export function buildCheckinPrompt(userText: string): string {
  * Local offline heuristic extraction when PC / network is unreachable (Step 15).
  */
 export function localFallbackExtraction(text: string): CheckinExtraction {
-  const lower = text.toLowerCase();
+  const norm = text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
 
   // 1. Outcome heuristic
+  const resistedPatterns = [
+    'pas fume',
+    'sans fumer',
+    'sans clope',
+    'pas craque',
+    'tenu bon',
+    'tenu',
+    'resiste',
+    'resisted',
+    'zero cigarette',
+    'zero clope',
+    'pas touche',
+    'reussi a tenir',
+    'evite de fumer',
+    'surmonte',
+    'rien fume',
+    'aucune cigarette',
+    'aucune clope',
+  ];
+  const smokedPatterns = [
+    'ai fume',
+    'ai craque',
+    'ai pris une clope',
+    'ai allume',
+    'fume une',
+    'pris une cigarette',
+    'fume 1',
+    'fume 2',
+    'fume 3',
+    'fume 4',
+    'fume 5',
+    'fume plusieurs',
+    'fume quelques',
+    'rechute',
+    'craquage',
+    'craque',
+    'allume',
+    'smoked',
+  ];
+
+  const hasResistedPhrase = resistedPatterns.some((p) => norm.includes(p));
+  const hasSmokedPhrase =
+    smokedPatterns.some((p) => norm.includes(p)) ||
+    (norm.includes('fume') && !norm.includes('pas fume') && !norm.includes('sans fumer'));
+
   let outcome: 'resisted' | 'smoked' | 'unknown' = 'resisted';
-  if (
-    lower.includes('fumé') ||
-    lower.includes('smoked') ||
-    lower.includes('craqué') ||
-    (lower.includes('cigarette') && (lower.includes('une') || lower.includes('pris')))
-  ) {
+  if (hasSmokedPhrase && !hasResistedPhrase) {
     outcome = 'smoked';
-  } else if (
-    lower.includes('tenu') ||
-    lower.includes('résisté') ||
-    lower.includes('resisted') ||
-    lower.includes('pas fumé') ||
-    lower.includes('zero')
-  ) {
+  } else if (hasResistedPhrase && !hasSmokedPhrase) {
     outcome = 'resisted';
+  } else if (hasResistedPhrase && hasSmokedPhrase) {
+    const rIdx = Math.max(...resistedPatterns.map((p) => norm.lastIndexOf(p)));
+    const sIdx = Math.max(...smokedPatterns.map((p) => norm.lastIndexOf(p)));
+    outcome = sIdx > rIdx ? 'smoked' : 'resisted';
   }
 
   // 2. Trigger heuristic
   let trigger = 'Bilan de journée';
-  if (lower.includes('café') || lower.includes('coffee')) {
+  if (norm.includes('cafe') || norm.includes('coffee')) {
     trigger = 'Café';
-  } else if (lower.includes('stress') || lower.includes('boulot') || lower.includes('travail')) {
+  } else if (norm.includes('stress') || norm.includes('boulot') || norm.includes('travail')) {
     trigger = 'Stress / Travail';
-  } else if (lower.includes('soir') || lower.includes('apéro') || lower.includes('amis')) {
+  } else if (norm.includes('soir') || norm.includes('apero') || norm.includes('amis')) {
     trigger = 'Soirée / Convivialité';
-  } else if (lower.includes('repas') || lower.includes('manger')) {
+  } else if (norm.includes('repas') || norm.includes('manger')) {
     trigger = 'Après repas';
   }
 
   // 3. Emotion heuristic
   let emotion = 'Calme';
-  if (lower.includes('fier') || lower.includes('fière') || lower.includes('proud')) {
+  if (norm.includes('fier') || norm.includes('fière') || norm.includes('proud')) {
     emotion = 'Fierté';
-  } else if (lower.includes('stress') || lower.includes('angoisse') || lower.includes('anxieu')) {
+  } else if (norm.includes('stress') || norm.includes('angoisse') || norm.includes('anxieu')) {
     emotion = 'Stress';
-  } else if (lower.includes('fatig') || lower.includes('tired') || lower.includes('épuisé')) {
+  } else if (norm.includes('fatig') || norm.includes('tired') || norm.includes('epuise')) {
     emotion = 'Fatigue';
-  } else if (lower.includes('calme') || lower.includes('serein') || lower.includes('paisible')) {
+  } else if (norm.includes('calme') || norm.includes('serein') || norm.includes('paisible')) {
     emotion = 'Sérénité';
   }
 
@@ -75,6 +116,7 @@ export function localFallbackExtraction(text: string): CheckinExtraction {
  */
 export async function extractCheckin(text: string): Promise<CheckinExtraction> {
   const token = getStoredToken();
+  const customOllama = getStoredOllamaUrl();
   const prompt = buildCheckinPrompt(text);
 
   if (!token) {
@@ -82,31 +124,67 @@ export async function extractCheckin(text: string): Promise<CheckinExtraction> {
     return localFallbackExtraction(text);
   }
 
+  // 1. First attempt: via the app backend (/api/generate)
   try {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    };
+    if (customOllama) {
+      headers['X-Ollama-Url'] = customOllama;
+    }
+
     const res = await fetch('/api/generate', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
+      headers,
       body: JSON.stringify({
         prompt,
         expected_format: 'checkin',
       }),
     });
 
-    if (!res.ok) {
-      return localFallbackExtraction(text);
+    if (res.ok) {
+      const data = await res.json();
+      const parsed = CheckinExtractionSchema.safeParse(data);
+      if (parsed.success) {
+        return parsed.data;
+      }
     }
-
-    const data = await res.json();
-    const parsed = CheckinExtractionSchema.safeParse(data);
-    if (parsed.success) {
-      return parsed.data;
-    }
-
-    return localFallbackExtraction(text);
   } catch {
-    return localFallbackExtraction(text);
+    // Backend unreachable, try direct local Ollama below
   }
+
+  // 2. Second attempt: direct local Ollama on user machine (if server is hosted in cloud)
+  try {
+    const localOllamaUrl = customOllama || 'http://127.0.0.1:11434';
+    const directCtrl = new AbortController();
+    const directTimer = setTimeout(() => directCtrl.abort(), 3500);
+    const directRes = await fetch(`${localOllamaUrl}/api/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'gemma2:2b',
+        prompt,
+        format: 'json',
+        stream: false,
+      }),
+      signal: directCtrl.signal,
+    });
+    clearTimeout(directTimer);
+
+    if (directRes.ok) {
+      const directData = (await directRes.json()) as { response?: string };
+      const cleaned = (directData.response || '').trim();
+      const parsedDirect = JSON.parse(cleaned);
+      const validated = CheckinExtractionSchema.safeParse(parsedDirect);
+      if (validated.success) {
+        return validated.data;
+      }
+    }
+  } catch {
+    // Direct Ollama not reachable, fall back to smart local heuristic
+  }
+
+  // 3. Fallback: robust local heuristic
+  return localFallbackExtraction(text);
 }

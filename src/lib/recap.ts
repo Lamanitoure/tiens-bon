@@ -2,6 +2,7 @@ import type { EventRecord } from '../schemas/events.ts';
 import type { Profile } from '../schemas/profile.ts';
 import { activeConfig } from './config.ts';
 import { calculateReminderTime } from './reminders.ts';
+import { computeUserStats } from './stats.ts';
 
 export interface WeeklyStats {
   totalEvents: number;
@@ -67,24 +68,11 @@ export function computeWeeklyStats(
     .sort((a, b) => b.count - a.count)
     .slice(0, 3);
 
-  // Savings calculation
-  const quitTs = new Date(profile.quitDate).getTime();
-  const msDiff = Math.max(0, now - quitTs);
-  const daysSinceQuit = Math.max(1, Math.floor(msDiff / (1000 * 60 * 60 * 24)));
-
-  const dailyCost = profile.unitsPerDay * profile.unitPrice;
-  const rawSavings = daysSinceQuit * dailyCost;
-  // Deduct relapses if recorded
-  const allRelapses = events.filter(
-    (e) => e.type === 'relapse' || (e.type === 'checkin' && e.debrief?.outcome === 'smoked'),
-  ).length;
-  const estimatedSavings = Math.max(
-    0,
-    Math.round((rawSavings - allRelapses * profile.unitPrice) * 100) / 100,
-  );
-
-  const goalAmount = profile.savingsGoal?.amount || 100;
-  const goalProgress = Math.min(100, Math.round((estimatedSavings / goalAmount) * 100));
+  // Savings and goal progress calculation: fully harmonized with stats.ts
+  const userStats = computeUserStats(profile, events, now);
+  const estimatedSavings = userStats.moneySaved;
+  const goalProgress = userStats.savingsGoalProgress;
+  const daysSinceQuit = userStats.streakDays;
 
   return {
     totalEvents,

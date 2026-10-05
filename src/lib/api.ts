@@ -22,6 +22,22 @@ export function setStoredToken(token: string): void {
   }
 }
 
+export function getStoredOllamaUrl(): string {
+  try {
+    return localStorage.getItem('tb_ollama_url') || '';
+  } catch {
+    return '';
+  }
+}
+
+export function setStoredOllamaUrl(url: string): void {
+  try {
+    localStorage.setItem('tb_ollama_url', url.trim());
+  } catch {
+    // ignore
+  }
+}
+
 export async function checkModelStatus(): Promise<ModelStatus> {
   const token = getStoredToken();
   if (!token) {
@@ -32,11 +48,17 @@ export async function checkModelStatus(): Promise<ModelStatus> {
     };
   }
 
+  const customUrl = getStoredOllamaUrl();
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${token}`,
+  };
+  if (customUrl) {
+    headers['X-Ollama-Url'] = customUrl;
+  }
+
   try {
     const res = await fetch('/api/status', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers,
     });
 
     if (res.status === 401) {
@@ -75,12 +97,18 @@ export async function generateMotivation(prompt: string): Promise<CravingOutput>
     throw new Error('Missing access token. Please enter your ACCESS_TOKEN in settings.');
   }
 
+  const customUrl = getStoredOllamaUrl();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+  };
+  if (customUrl) {
+    headers['X-Ollama-Url'] = customUrl;
+  }
+
   const res = await fetch('/api/generate', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
+    headers,
     body: JSON.stringify({
       prompt,
       expected_format: 'craving',

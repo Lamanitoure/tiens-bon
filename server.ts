@@ -128,13 +128,17 @@ app.get('/api/health', verifyToken, (_req: Request, res: Response) => {
   res.json({ status: 'ok', service: 'tiens-bon' });
 });
 
-app.get('/api/status', verifyToken, async (_req: Request, res: Response) => {
-  const ollamaUrl = process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
+app.get('/api/status', verifyToken, async (req: Request, res: Response) => {
+  const customUrl = req.headers['x-ollama-url'];
+  const ollamaUrl =
+    typeof customUrl === 'string' && customUrl.trim()
+      ? customUrl.trim()
+      : process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
   const preferredModel = process.env.OLLAMA_MODEL || 'gemma2:2b';
 
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 2000);
+    const timeout = setTimeout(() => controller.abort(), 2500);
     const resp = await fetch(`${ollamaUrl}/api/tags`, { signal: controller.signal });
     clearTimeout(timeout);
 
@@ -146,13 +150,21 @@ app.get('/api/status', verifyToken, async (_req: Request, res: Response) => {
         models.find((m) => m.startsWith('gemma2') || m.startsWith('gemma3') || m.startsWith('gemma'));
 
       if (!matchedModel) {
-        return res.json({ ollama: 'model_missing', model: preferredModel });
+        return res.json({
+          ollama: 'model_missing',
+          model: preferredModel,
+          url: ollamaUrl,
+        });
       }
-      return res.json({ ollama: 'ok', model: matchedModel });
+      return res.json({
+        ollama: 'ok',
+        model: matchedModel,
+        url: ollamaUrl,
+      });
     }
-    return res.json({ ollama: 'unreachable', model: preferredModel });
+    return res.json({ ollama: 'unreachable', model: preferredModel, url: ollamaUrl });
   } catch {
-    return res.json({ ollama: 'unreachable', model: preferredModel });
+    return res.json({ ollama: 'unreachable', model: preferredModel, url: ollamaUrl });
   }
 });
 
@@ -215,9 +227,14 @@ app.post('/api/generate', verifyToken, checkRateLimit, async (req: Request, res:
   const isCheckin = body.expected_format === 'checkin';
   const isRecap = body.expected_format === 'recap';
 
-  // 1. Try local Ollama (open-weight model on user's machine)
-  const ollamaUrl = process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
+  // 1. Local open-source Ollama model (Gemma)
+  const customUrl = req.headers['x-ollama-url'];
+  const ollamaUrl =
+    typeof customUrl === 'string' && customUrl.trim()
+      ? customUrl.trim()
+      : process.env.OLLAMA_URL || 'http://127.0.0.1:11434';
   const ollamaModel = process.env.OLLAMA_MODEL || 'gemma2:2b';
+
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 15000);
@@ -237,7 +254,10 @@ app.post('/api/generate', verifyToken, checkRateLimit, async (req: Request, res:
     if (ollamaResp.ok) {
       const data = (await ollamaResp.json()) as { response?: string };
       const cleaned = stripMarkdownFences(data.response || '');
-      const parsed = JSON.parse(cleaned);
+      let parsed = JSON.parse(cleaned);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        parsed = parsed[0];
+      }
       res.setHeader('X-Model-Source', `ollama-${ollamaModel}`);
       console.log(`[Tiens Bon] ✓ Réponse générée en direct par Ollama (${ollamaModel})`);
 
@@ -269,25 +289,88 @@ app.post('/api/generate', verifyToken, checkRateLimit, async (req: Request, res:
   }
 
   res.setHeader('X-Model-Source', 'local-fallback');
-  console.log('[Tiens Bon] ℹ Ollama non disponible -> réponse de secours locale utilisée');
+  console.log('[Tiens Bon] ℹ IA externe non disponible -> réponse de secours locale utilisée');
 
-  // 3. Fallback generator
+  // 3. Robust fallback generator
   if (isCheckin) {
-    const lower = prompt.toLowerCase();
-    const outcome =
-      lower.includes('fumé') || lower.includes('smoked') || lower.includes('rechute')
-        ? 'smoked'
-        : 'resisted';
-    const emotion = lower.includes('stress')
-      ? 'stressé'
-      : lower.includes('fatig')
-        ? 'fatigué'
-        : 'calme';
-    const trigger = lower.includes('café')
-      ? 'Café'
-      : lower.includes('soir')
-        ? 'Soirée'
-        : 'Fin de journée';
+    const norm = prompt
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+
+    const resistedPatterns = [
+      'pas fume',
+      'sans fumer',
+      'sans clope',
+      'pas craque',
+      'tenu bon',
+      'tenu',
+      'resiste',
+      'zero cigarette',
+      'zero clope',
+      'pas touche',
+      'reussi a tenir',
+      'evite de fumer',
+      'surmonte',
+      'rien fume',
+      'aucune cigarette',
+      'aucune clope',
+    ];
+    const smokedPatterns = [
+      'ai fume',
+      'ai craque',
+      'ai pris une clope',
+      'ai allume',
+      'fume une',
+      'pris une cigarette',
+      'fume 1',
+      'fume 2',
+      'fume 3',
+      'fume 4',
+      'fume 5',
+      'fume plusieurs',
+      'fume quelques',
+      'rechute',
+      'craquage',
+      'craque',
+      'clope',
+      'allume',
+      'smoked',
+    ];
+    const hasResistedPhrase = resistedPatterns.some((p) => norm.includes(p));
+    const hasSmokedPhrase =
+      smokedPatterns.some((p) => norm.includes(p)) ||
+      (norm.includes('fume') && !norm.includes('pas fume') && !norm.includes('sans fumer'));
+
+    let outcome: 'resisted' | 'smoked' | 'unknown' = 'resisted';
+    if (hasSmokedPhrase && !hasResistedPhrase) {
+      outcome = 'smoked';
+    } else if (hasResistedPhrase && !hasSmokedPhrase) {
+      outcome = 'resisted';
+    } else if (hasResistedPhrase && hasSmokedPhrase) {
+      const rIdx = Math.max(...resistedPatterns.map((p) => norm.lastIndexOf(p)));
+      const sIdx = Math.max(...smokedPatterns.map((p) => norm.lastIndexOf(p)));
+      outcome = sIdx > rIdx ? 'smoked' : 'resisted';
+    }
+
+    const emotion =
+      norm.includes('stress') || norm.includes('angoisse')
+        ? 'Stress'
+        : norm.includes('fatig') || norm.includes('epuise')
+          ? 'Fatigue'
+          : norm.includes('fier') || norm.includes('victoire')
+            ? 'Fierté'
+            : 'Calme';
+
+    const trigger = norm.includes('cafe')
+      ? 'Café du matin'
+      : norm.includes('soir') || norm.includes('apero') || norm.includes('amis')
+        ? 'Soirée entre amis'
+        : norm.includes('repas') || norm.includes('dejeuner')
+          ? 'Après le repas'
+          : norm.includes('travail') || norm.includes('boulot') || norm.includes('reunion')
+            ? 'Journée de travail'
+            : 'Bilan de journée';
 
     return res.json({
       trigger,

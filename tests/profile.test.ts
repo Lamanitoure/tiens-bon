@@ -1,19 +1,14 @@
 import 'fake-indexeddb/auto';
 import { beforeEach, describe, expect, it } from 'vitest';
-import demoProfile from '../demo/profile.demo.json';
 import {
-  clearAllEvents,
   getAllEvents,
   getStoredProfile,
   resetDatabase,
   setStoredProfile,
 } from '../src/db/index.ts';
-import {
-  createInitialUserProfile,
-  getDemoProfile,
-  isDemoProfile,
-} from '../src/lib/profile.ts';
+import { createInitialUserProfile, getDemoProfile, isDemoProfile } from '../src/lib/profile.ts';
 import { computeUserStats } from '../src/lib/stats.ts';
+import type { EventRecord } from '../src/schemas/events.ts';
 import { ProfileSchema } from '../src/schemas/profile.ts';
 
 describe('Profile Initialization System (Normal vs Demo vs Reset)', () => {
@@ -122,6 +117,61 @@ describe('Profile Initialization System (Normal vs Demo vs Reset)', () => {
       expect(stats.streakDays).toBe(0);
       expect(stats.avoidedCigarettes).toBe(0);
       expect(stats.moneySaved).toBe(0);
+    });
+  });
+
+  describe('Harmonized Stats (Home Screen & Checkin Events)', () => {
+    it('counts evening checkin with resisted outcome on home stats and computes savings', () => {
+      const now = Date.now();
+      const user = createInitialUserProfile(
+        'Jean',
+        'fr',
+        new Date(now - 15 * 60 * 1000).toISOString(),
+      ); // 15 mins ago
+      const events: EventRecord[] = [
+        {
+          id: 'checkin-1',
+          ts: now - 5000,
+          type: 'checkin',
+          trigger: 'held back',
+          debrief: {
+            outcome: 'resisted',
+            rawInput: 'Une envie surmontee ce soir',
+          },
+        },
+      ];
+
+      const stats = computeUserStats(user, events, now);
+      expect(stats.resistedCount).toBe(1);
+      expect(stats.avoidedCigarettes).toBe(1);
+      expect(stats.moneySaved).toBe(0.6); // 1 * 0.6 unitPrice
+      expect(stats.streakMinutes).toBe(15);
+      expect(stats.streakHours).toBe(0);
+      expect(stats.streakDays).toBe(0);
+    });
+
+    it('counts checkin with smoked outcome as relapse and resets streak', () => {
+      const now = Date.now();
+      const user = createInitialUserProfile(
+        'Jean',
+        'fr',
+        new Date(now - 2 * 3600 * 1000).toISOString(),
+      ); // 2 hours ago
+      const events: EventRecord[] = [
+        {
+          id: 'checkin-smoked',
+          ts: now - 10 * 60 * 1000, // slip 10 mins ago
+          type: 'checkin',
+          debrief: {
+            outcome: 'smoked',
+          },
+        },
+      ];
+
+      const stats = computeUserStats(user, events, now);
+      expect(stats.relapseCount).toBe(1);
+      expect(stats.streakMinutes).toBe(10);
+      expect(stats.streakHours).toBe(0);
     });
   });
 });
