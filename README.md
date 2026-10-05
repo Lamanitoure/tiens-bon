@@ -47,7 +47,7 @@ The open-weight **Gemma** model (`gemma2:2b` via **Ollama**) performs four bound
 
 1. **Clone the repository and install dependencies**:
    ```bash
-   git clone https://github.com/Lamanirevegrand/tiens-bon.git
+   git clone https://github.com/Lamanitoure/tiens-bon.git
    cd tiens-bon
    pnpm install --frozen-lockfile
    ```
